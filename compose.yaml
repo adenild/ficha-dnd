@@ -58,6 +58,5 @@ services:
         condition: service_healthy
 
 volumes:
-  # o nome vem de quando o projeto se chamava ficha-dnd: mantido para não perder as fichas já salvas
+  # vira suite-dnd_dados; quem vem da versão ficha-dnd copia os dados antigos (veja o README)
   dados:
-    name: ficha-dnd_dados
