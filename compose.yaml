@@ -1,0 +1,32 @@
+name: ficha-dnd
+
+services:
+  app:
+    build: .
+    image: ficha-dnd
+    init: true
+    restart: unless-stopped
+    ports:
+      - "${FICHA_PORTA:-3000}:3000"
+    environment:
+      PUBLIC_PORT: ${FICHA_PORTA:-3000}
+    volumes:
+      - dados:/data
+
+  # servidor MCP para o Claude, por stdio; sobe o app sozinho se ele estiver parado
+  mcp:
+    image: ficha-dnd
+    init: true
+    profiles: ["mcp"]
+    stdin_open: true
+    command: ["node", "mcp.js"]
+    environment:
+      FICHA_URL: http://app:3000
+      FICHA_USUARIO: ${FICHA_USUARIO:-}
+      FICHA_SENHA: ${FICHA_SENHA:-}
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  dados:

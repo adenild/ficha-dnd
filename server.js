@@ -360,8 +360,11 @@ if (require.main === module) {
   const port = +process.env.PORT || 3000;
   app.server.listen(port, process.env.HOST || '0.0.0.0', () => {
     console.log(`Fichas D&D rodando na porta ${port}.`);
-    console.log(`Neste computador: http://localhost:${port}`);
-    for (const ip of lanAddresses()) console.log(`No celular (mesma Wi-Fi): http://${ip}:${port}`);
+    // no Docker a porta publicada pode ser outra e os IPs do container não servem para o celular
+    const shown = +process.env.PUBLIC_PORT || port;
+    console.log(`Neste computador: http://localhost:${shown}`);
+    if (process.env.IN_DOCKER) console.log(`No celular (mesma Wi-Fi): http://<IP deste computador na rede>:${shown}`);
+    else for (const ip of lanAddresses()) console.log(`No celular (mesma Wi-Fi): http://${ip}:${shown}`);
   });
   const stop = () => { app.flush(); process.exit(0); };
   process.on('SIGINT', stop);

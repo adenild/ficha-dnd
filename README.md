@@ -41,6 +41,30 @@ Se o celular não conseguir abrir, quase sempre é o firewall do computador bloq
 
 Exemplo: `PORT=8080 npm start`.
 
+### Com Docker
+
+Dá para rodar tudo em container, sem instalar Node e sem tocar na pasta `data/` local. Os dados ficam no volume `ficha-dnd_dados`.
+
+```bash
+docker compose up -d --build   # liga (o --build só é preciso depois de mudar o código)
+docker compose logs -f app     # acompanha o servidor
+docker compose stop            # desliga, guardando os dados
+```
+
+O app abre em http://localhost:3000. No celular, use o IP deste computador na rede, na mesma porta. Para usar outra porta, defina `FICHA_PORTA` (por exemplo, `FICHA_PORTA=8080 docker compose up -d`) ou coloque `FICHA_PORTA=8080` num arquivo `.env` ao lado do `compose.yaml`.
+
+Para levar as fichas que você já tem em `data/db.json` para o volume, com o container criado e parado:
+
+```bash
+docker compose stop app
+docker compose cp data/db.json app:/data/db.json
+docker compose start app
+```
+
+Para redefinir uma senha: `docker compose stop app`, depois `docker compose run --rm app node server.js --reset-senha "Nome do jogador" novaSenha`, e por fim `docker compose start app`.
+
+`docker compose down` remove o container e mantém os dados. `docker compose down -v` apaga o volume e **todas as fichas** junto.
+
 ## Primeira sessão
 
 1. O mestre cria a conta, abre o menu ☰ e cria a mesa em **Criar mesa**. O código de convite aparece logo abaixo do nome da mesa.
@@ -68,6 +92,12 @@ claude mcp add ficha-dnd --scope local -e FICHA_URL=http://localhost:3000 -e FIC
 ```
 
 O escopo `local` guarda a senha só na configuração do seu usuário, fora do repositório.
+
+Com Docker, o MCP também roda em container e liga o app sozinho se ele estiver parado:
+
+```bash
+claude mcp add ficha-dnd --scope local -e FICHA_USUARIO="Nome da conta" -e FICHA_SENHA="senha" -- docker compose -f /caminho/para/ficha-dnd/compose.yaml run --rm -T mcp
+```
 
 | Ferramenta | O que faz |
 |---|---|
@@ -110,4 +140,6 @@ public/index.html página do app
 public/app.js     ficha, rolagens, mesas e conversa com a API
 public/style.css  visual
 test/             testes da API (node:test)
+Dockerfile        imagem do app e do MCP
+compose.yaml      serviço do app (porta e volume) e do MCP
 ```
