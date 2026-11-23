@@ -1,9 +1,10 @@
-name: ficha-dnd
+name: suite-dnd
 
 services:
-  app:
+  # contas, mesas e fichas
+  fichas:
     build: .
-    image: ficha-dnd
+    image: suite-dnd
     init: true
     restart: unless-stopped
     ports:
@@ -15,16 +16,16 @@ services:
     volumes:
       - dados:/data
 
-  # editor e visualizador de mapas; usa as contas, mesas e fichas do app
+  # editor e visualizador de mapas; usa as contas, mesas e fichas do app de fichas
   mapas:
-    image: ficha-dnd
+    image: suite-dnd
     init: true
     restart: unless-stopped
-    command: ["node", "mapas/server.js"]
+    command: ["node", "apps/mapas/server.js"]
     ports:
       - "${MAPAS_PORTA:-3001}:3001"
     environment:
-      FICHA_URL: http://app:3000
+      FICHA_URL: http://fichas:3000
       FICHA_PORTA: ${FICHA_PORTA:-3000}
       MAPAS_DATA: /data/mapas.json
       PUBLIC_PORT: ${MAPAS_PORTA:-3001}
@@ -36,25 +37,27 @@ services:
       timeout: 3s
       start_period: 5s
     depends_on:
-      app:
+      fichas:
         condition: service_healthy
 
-  # servidor MCP para o Claude, por stdio; sobe o app e os mapas sozinho se estiverem parados
+  # servidor MCP para o Claude, por stdio; sobe as fichas e os mapas sozinho se estiverem parados
   mcp:
-    image: ficha-dnd
+    image: suite-dnd
     init: true
     profiles: ["mcp"]
     stdin_open: true
-    command: ["node", "mcp.js"]
+    command: ["node", "apps/mcp/server.js"]
     environment:
-      FICHA_URL: http://app:3000
+      FICHA_URL: http://fichas:3000
       MAPAS_URL: http://mapas:3001
       FICHA_TOKEN: ${FICHA_TOKEN:-}
     depends_on:
-      app:
+      fichas:
         condition: service_healthy
       mapas:
         condition: service_healthy
 
 volumes:
+  # o nome vem de quando o projeto se chamava ficha-dnd: mantido para não perder as fichas já salvas
   dados:
+    name: ficha-dnd_dados

@@ -404,6 +404,16 @@ function createMapas({ dataFile, fichaUrl, fichaPublica = null, fichaPorta = 300
     });
   }
 
+  // quem pode embutir os mapas num iframe: o mesmo endereço em qualquer porta (a aba de mapas do app de fichas)
+  // e o endereço público das fichas, se configurado; outros sites não
+  function ancestrais(req) {
+    const host = String(req.headers.host || '').replace(/:\d+$/, '');
+    const list = ["'self'"];
+    if (/^[\w.-]+$|^\[[\da-f:]+\]$/i.test(host)) list.push(`http://${host}:*`, `https://${host}:*`);
+    if (fichaPublica) { try { list.push(new URL(fichaPublica).origin); } catch { /* endereço inválido: ignora */ } }
+    return list.join(' ');
+  }
+
   function serveStatic(req, res, url) {
     let rel = decodeURIComponent(url.pathname);
     if (rel.endsWith('/')) rel += 'index.html';
@@ -411,7 +421,9 @@ function createMapas({ dataFile, fichaUrl, fichaPublica = null, fichaPorta = 300
     if (!file.startsWith(PUBLIC_DIR + path.sep)) { res.writeHead(403); return res.end(); }
     fs.readFile(file, (err, buf) => {
       if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('Não encontrado'); }
-      res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
+      const h = { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' };
+      if (path.extname(file) === '.html') h['Content-Security-Policy'] = 'frame-ancestors ' + ancestrais(req);
+      res.writeHead(200, h);
       res.end(buf);
     });
   }
@@ -440,10 +452,11 @@ function lanAddresses() {
   return Object.values(os.networkInterfaces()).flat().filter((a) => a && a.family === 'IPv4' && !a.internal).map((a) => a.address);
 }
 
-if (require.main === module) {
+// liga o serviço; a suíte inteira (suite.js) chama com sinais: false e cuida do desligamento
+function main({ sinais = true } = {}) {
   const fichaUrl = (process.env.FICHA_URL || 'http://localhost:3000').replace(/\/+$/, '');
   const app = createMapas({
-    dataFile: process.env.MAPAS_DATA || path.join(__dirname, '..', 'data', 'mapas.json'),
+    dataFile: process.env.MAPAS_DATA || path.join(__dirname, '..', '..', 'data', 'mapas.json'),
     fichaUrl,
     fichaPublica: process.env.FICHA_PUBLICA || null,
     fichaPorta: +process.env.FICHA_PORTA || +new URL(fichaUrl).port || 3000,
@@ -456,9 +469,14 @@ if (require.main === module) {
     if (process.env.IN_DOCKER) console.log(`No celular (mesma Wi-Fi): http://<IP deste computador na rede>:${shown}`);
     else for (const ip of lanAddresses()) console.log(`No celular (mesma Wi-Fi): http://${ip}:${shown}`);
   });
-  const stop = () => { app.flush(); process.exit(0); };
-  process.on('SIGINT', stop);
-  process.on('SIGTERM', stop);
+  if (sinais) {
+    const stop = () => { app.flush(); process.exit(0); };
+    process.on('SIGINT', stop);
+    process.on('SIGTERM', stop);
+  }
+  return app;
 }
 
-module.exports = { createMapas, TERRENOS };
+if (require.main === module) main();
+
+module.exports = { createMapas, TERRENOS, main };

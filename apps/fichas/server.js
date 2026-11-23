@@ -1,6 +1,6 @@
 'use strict';
-// Servidor das fichas de D&D 5e. Sem dependências: só Node.js 18+.
-// Guarda tudo em data/db.json e serve o app de public/.
+// App de fichas da suite-dnd. Sem dependências: só Node.js 18+.
+// Guarda tudo em data/db.json (na raiz do projeto) e serve o app de public/.
 
 const http = require('node:http');
 const fs = require('node:fs');
@@ -9,6 +9,7 @@ const crypto = require('node:crypto');
 const os = require('node:os');
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
+const RAIZ = path.join(__dirname, '..', '..'); // raiz da suíte: data/, compose.yaml, apps/
 const MAX_BODY = 512 * 1024;
 const SESSION_DAYS = 90;
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -260,7 +261,7 @@ function createApp({ dataFile, mapasUrl = null }) {
         return j && Array.isArray(j.localizacoes) ? { localizacoes: j.localizacoes, mapas: true } : { localizacoes: [], mapas: false };
       } catch { return { localizacoes: [], mapas: false }; }
     }
-    if (p === '/api/info' && m === 'GET') return { docker: !!process.env.IN_DOCKER, pasta: process.env.IN_DOCKER ? null : __dirname, mapas: { url: process.env.MAPAS_PUBLICA || null, porta: +process.env.MAPAS_PORTA || 3001 } };
+    if (p === '/api/info' && m === 'GET') return { docker: !!process.env.IN_DOCKER, pasta: process.env.IN_DOCKER ? null : RAIZ, mapas: { url: process.env.MAPAS_PUBLICA || null, porta: +process.env.MAPAS_PORTA || 3001 } };
 
     // conta: nome e preferências
     if (p === '/api/me' && m === 'PATCH') {
@@ -499,12 +500,13 @@ function lanAddresses() {
   return Object.values(os.networkInterfaces()).flat().filter((a) => a && a.family === 'IPv4' && !a.internal).map((a) => a.address);
 }
 
-if (require.main === module) {
-  const dataFile = process.env.DATA_FILE || path.join(__dirname, 'data', 'db.json');
+// liga o app; a suíte inteira (suite.js) chama com sinais: false e cuida do desligamento
+function main({ sinais = true } = {}) {
+  const dataFile = process.env.DATA_FILE || path.join(RAIZ, 'data', 'db.json');
   const app = createApp({ dataFile, mapasUrl: process.env.MAPAS_URL || `http://127.0.0.1:${+process.env.MAPAS_PORT || 3001}` });
   const args = process.argv.slice(2);
-  if (args[0] === '--reset-senha') {
-    if (args.length < 3) { console.log('Uso: node server.js --reset-senha "Nome do jogador" novaSenha'); process.exit(1); }
+  if (sinais && args[0] === '--reset-senha') {
+    if (args.length < 3) { console.log('Uso: node apps/fichas/server.js --reset-senha "Nome do jogador" novaSenha'); process.exit(1); }
     console.log(app.resetPassword(args[1], args[2]) ? 'Senha redefinida.' : 'Jogador não encontrado.');
     process.exit(0);
   }
@@ -517,9 +519,14 @@ if (require.main === module) {
     if (process.env.IN_DOCKER) console.log(`No celular (mesma Wi-Fi): http://<IP deste computador na rede>:${shown}`);
     else for (const ip of lanAddresses()) console.log(`No celular (mesma Wi-Fi): http://${ip}:${shown}`);
   });
-  const stop = () => { app.flush(); process.exit(0); };
-  process.on('SIGINT', stop);
-  process.on('SIGTERM', stop);
+  if (sinais) {
+    const stop = () => { app.flush(); process.exit(0); };
+    process.on('SIGINT', stop);
+    process.on('SIGTERM', stop);
+  }
+  return app;
 }
 
-module.exports = { createApp };
+if (require.main === module) main();
+
+module.exports = { createApp, main };

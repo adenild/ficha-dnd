@@ -6,8 +6,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawn } = require('node:child_process');
-const { createApp } = require('../server.js');
-const { createMapas } = require('../mapas/server.js');
+const { createApp } = require('../apps/fichas/server.js');
+const { createMapas } = require('../apps/mapas/server.js');
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ficha-mcp-'));
 const app = createApp({ dataFile: path.join(dir, 'db.json') });
@@ -41,7 +41,7 @@ test.before(async () => {
   mapas = createMapas({ dataFile: path.join(dir, 'mapas.json'), fichaUrl: base });
   await new Promise((ok) => mapas.server.listen(0, '127.0.0.1', ok));
   const mapasUrl = `http://127.0.0.1:${mapas.server.address().port}`;
-  proc = spawn(process.execPath, [path.join(__dirname, '..', 'mcp.js')], { env: { ...process.env, FICHA_URL: base, FICHA_TOKEN: token, MAPAS_URL: mapasUrl } });
+  proc = spawn(process.execPath, [path.join(__dirname, '..', 'apps', 'mcp', 'server.js')], { env: { ...process.env, FICHA_URL: base, FICHA_TOKEN: token, MAPAS_URL: mapasUrl } });
   proc.stdout.setEncoding('utf8');
   proc.stdout.on('data', (ch) => {
     buf += ch; let i;
