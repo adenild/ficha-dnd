@@ -31,11 +31,12 @@ async function post(url, body, cookie = '') {
 test.before(async () => {
   await new Promise((ok) => app.server.listen(0, '127.0.0.1', ok));
   base = `http://127.0.0.1:${app.server.address().port}`;
-  await post('/api/register', { name: 'Mestre', pass: 'segredo1' });
+  const mestre = await post('/api/register', { name: 'Mestre', pass: 'segredo1' });
   ana = await post('/api/register', { name: 'Ana', pass: 'segredo2' });
   const ficha = await post('/api/chars', { data: { name: 'Thorin', level: 3, ab: { con: 14 }, hp: { max: 20, cur: 20, tmp: 0 } } }, ana.cookie);
   ana.fichaId = ficha.body.id;
-  proc = spawn(process.execPath, [path.join(__dirname, '..', 'mcp.js')], { env: { ...process.env, FICHA_URL: base, FICHA_USUARIO: 'Mestre', FICHA_SENHA: 'segredo1' } });
+  const token = (await post('/api/tokens', { nome: 'MCP de teste' }, mestre.cookie)).body.token;
+  proc = spawn(process.execPath, [path.join(__dirname, '..', 'mcp.js')], { env: { ...process.env, FICHA_URL: base, FICHA_TOKEN: token } });
   proc.stdout.setEncoding('utf8');
   proc.stdout.on('data', (ch) => {
     buf += ch; let i;

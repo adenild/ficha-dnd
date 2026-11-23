@@ -11,7 +11,7 @@ const COINS=[['pc','PC'],['pp','PP'],['pe','PE'],['po','PO'],['pl','PL']];
 
 /* ---------- estado ---------- */
 const MUT=new Set(['sv','sk','insp','cond','ds','slot','prep','add','rm','dmg','heal','hd','long']);
-const S={me:null,mesas:[],chars:new Map(),view:null,locked:true,mode:0,tab:'principal',online:true,authMode:'login',pending:new Set(),busy:new Set()};
+const S={me:null,mesas:[],chars:new Map(),view:null,locked:true,mode:0,tab:'principal',page:'ficha',cfgTab:'conta',cfgMesa:null,online:true,authMode:'login',pending:new Set(),busy:new Set()};
 let hist=[],lastPush=0,toastT,pendR=false,arm=null,refreshT=null,es=null;
 const saveT={};
 const $=id=>document.getElementById(id);
@@ -32,7 +32,7 @@ function applyState(st){
     S.chars.set(x.id,fromServer(x))}
   for(const [id,c] of S.chars)if(!seen.has(id)&&!c._new)S.chars.delete(id);
   if(!C())S.view=(myChars()[0]||[...S.chars.values()][0]||{}).id||null;
-  prefs()}
+  applyTheme();prefs()}
 async function refresh(){try{applyState(await api('GET','/api/state'));setConn(true);softRender()}catch(e){if(e.status===401)return showAuth();setConn(false)}}
 function refreshSoon(){clearTimeout(refreshT);refreshT=setTimeout(refresh,250)}
 function listen(){if(es)es.close();if(!window.EventSource)return setInterval(refresh,8000);
@@ -167,6 +167,8 @@ function hpbar(){const c=C();if(!c)return;const p=Math.max(0,Math.min(100,(+c.hp
 function render(){
   if(!S.me)return showAuth();
   document.body.classList.remove('auth');
+  if(S.page==='config')return renderConfig();
+  document.body.classList.remove('cfg');
   const c=C();document.body.classList.toggle('nochar',!c);
   if(!c){$('nm').textContent='Fichas';$('sub').textContent=S.me.name;$('who2').textContent=S.online?'':'Sem conexão com o servidor.';$('vit').innerHTML='';$('seg').innerHTML='';$('nav').innerHTML='';
     $('main').innerHTML=`<section class="card empty"><h2>Nenhuma ficha ainda</h2><p class="note">Crie sua primeira ficha, comece pelo exemplo ou entre na mesa do seu mestre com o código de convite.</p><div class="btns" style="justify-content:center"><button class="btn pri" data-a="new">Nova ficha</button><button class="btn" data-a="sample">Começar com exemplo</button><button class="btn" data-a="drawer">Mesas</button></div></section><p class="status" id="st">${esc(statusText())}</p>`;side();return}
@@ -217,7 +219,7 @@ function showAuth(){S.me=null;if(es){es.close();es=null}document.body.classList.
   <button class="btn pri" type="submit">${reg?'Criar conta':'Entrar'}</button><p class="err" id="aerr" role="alert"></p></form>
   ${reg?'<p class="note">O nome é como os outros jogadores vão te ver.</p>':'<p class="note">Esqueceu a senha? Quem roda o servidor pode redefinir.</p>'}</div>`}
 document.addEventListener('submit',async e=>{if(e.target.id!=='authf')return;e.preventDefault();const fd=new FormData(e.target);const btn=e.target.querySelector('button[type=submit]');btn.disabled=true;
-  try{const st=await api('POST',S.authMode==='register'?'/api/register':'/api/login',{name:fd.get('name'),pass:fd.get('pass')});S.chars=new Map();applyState(st);setConn(true);render();listen()}
+  try{const st=await api('POST',S.authMode==='register'?'/api/register':'/api/login',{name:fd.get('name'),pass:fd.get('pass')});S.chars=new Map();applyState(st);const pf=S.me.prefs||{};if(typeof pf.abrirTravada==='boolean')S.locked=pf.abrirTravada;if(pf.abaInicial&&S.page==='ficha')S.tab=pf.abaInicial;setConn(true);render();listen()}
   catch(err){$('aerr').textContent=err.status?err.message:'Não foi possível falar com o servidor.'}btn.disabled=false});
 
 /* ---------- histórico ---------- */
@@ -232,26 +234,23 @@ function row(c,lib){const on=c===C();const m=mesaOf(c.mesa);
   return `<div class="prow"><button class="pick ${on?'on':''}" data-a="open" data-v="${esc(c.id)}"><div><b>${esc(c.name||'Sem nome')}</b><span>${esc(info)}</span></div></button>${lib?`<button class="tog ${isLib(c)?'on':''}" data-a="lib" data-v="${esc(c.id)}" aria-pressed="${isLib(c)}">${isLib(c)?'Liberada':'Oculta'}</button>`:''}</div>`}
 const armBtn=(key,label,confirm,cls='warn')=>`<button class="btn sm ${cls}" data-a="${key.split(':')[0]}" data-v="${esc(key.split(':').slice(1).join(':'))}">${arm===key?confirm:label}</button>`;
 function drawer(){const p=$('panel');const mine=myChars();const all=[...S.chars.values()];let b='';
-  b+=`<p class="role">Conectado como <b>${esc(S.me.name)}</b>. ${S.online?'':'Sem conexão com o servidor agora.'}</p>`;
+  b+=`<div class="role" style="display:flex;align-items:center;gap:8px"><span style="flex:1">Conectado como <b>${esc(S.me.name)}</b>.${S.online?'':' Sem conexão com o servidor agora.'}</span><button class="btn sm" data-a="cfg" data-v="conta">Configurações</button></div>`;
   b+=`<div class="grp" style="border:0;margin:0;padding:0"><h3>Minhas fichas</h3>${mine.length?mine.map(c=>row(c)).join(''):'<p class="note">Você ainda não tem fichas.</p>'}
     <div class="btns"><button class="btn pri" data-a="new">Nova ficha</button><button class="btn" data-a="sample">Ficha de exemplo</button></div></div>`;
   for(const m of S.mesas){const mestre=isMestre(m);const list=all.filter(c=>c.mesa===m.id&&(mestre||!isOwn(c)));
-    b+=`<div class="grp"><h3>${mestre?`<input data-mesa="${esc(m.id)}" value="${esc(m.nome)}" aria-label="Nome da mesa">`:esc(m.nome)}</h3>`;
-    if(mestre){b+=`<p class="note" style="margin:0 0 8px">Você é o mestre. Fichas ocultas só aparecem para o dono e para você.</p>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="code">${esc(m.code)}</span><button class="btn sm" data-a="newcode" data-v="${esc(m.id)}">Novo código</button></div>
-      <p class="foot">Passe esse código aos jogadores para entrarem na mesa.</p>
-      <div class="members">${m.membros.map(x=>`<span class="member">${esc(x.name)}${x.id===m.mestre?' (mestre)':`<button class="x" data-a="kick" data-v="${esc(m.id)}|${esc(x.id)}" aria-label="Remover ${esc(x.name)} da mesa">${arm==='kick:'+m.id+'|'+x.id?'✓':'×'}</button>`}</span>`).join('')}</div>`}
-    else b+=`<p class="note" style="margin:0 0 8px">Mestre: ${esc((m.membros.find(x=>x.id===m.mestre)||{}).name||'?')}. Abaixo, as fichas que ele liberou.</p>`;
+    const n=m.membros.length-1;
+    b+=`<div class="grp"><h3><span style="flex:1">${esc(m.nome)}</span><button class="btn sm" data-a="cfg" data-v="mesa|${esc(m.id)}">${mestre?'Configurar':'Detalhes'}</button></h3>`;
+    b+=mestre?`<p class="note" style="margin:0 0 8px">Você é o mestre · código <b>${esc(m.code)}</b> · ${n} ${n===1?'jogador':'jogadores'}${m.convites?'':' · convites fechados'}</p>`
+      :`<p class="note" style="margin:0 0 8px">Mestre: ${esc((m.membros.find(x=>x.id===m.mestre)||{}).name||'?')}. Abaixo, as fichas que ele liberou.</p>`;
     b+=list.length?list.map(c=>row(c,mestre)).join(''):`<p class="note">${mestre?'Nenhuma ficha nesta mesa ainda. Os jogadores escolhem a mesa na aba Principal da ficha.':'Nenhuma ficha liberada ainda.'}</p>`;
-    b+=`<div class="btns" style="margin-top:6px">${mestre?armBtn('dmesa:'+m.id,'Apagar mesa','Toque de novo para apagar'):armBtn('leave:'+m.id,'Sair da mesa','Toque de novo para sair')}</div></div>`}
+    b+=`</div>`}
   b+=`<div class="grp"><h3>Entrar numa mesa</h3><div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><input id="jcode" placeholder="Código de convite" autocapitalize="characters" aria-label="Código de convite"><button class="btn pri" data-a="join">Entrar</button></div></div>
   <div class="grp"><h3>Criar mesa</h3><div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><input id="nmesa" placeholder="Ex.: A Mina Perdida" aria-label="Nome da nova mesa"><button class="btn" data-a="nmesa">Criar</button></div><p class="foot">Quem cria a mesa é o mestre dela.</p></div>`;
   const c=C();
   if(c)b+=`<div class="btns" style="margin:14px 0"><button class="btn" data-a="dup">Duplicar ficha aberta</button>${isOwn(c)?armBtn('del:'+c.id,'Apagar ficha aberta','Toque de novo para apagar'):''}</div>`;
   b+=`<details class="grp"><summary>Exportar e importar</summary><p class="note">Copie o texto para guardar um backup. Ao importar, as fichas viram suas.</p>
   <textarea id="io" style="min-height:120px;font-size:13px" placeholder="Cole aqui o texto de uma ficha exportada"></textarea>
-  <div class="btns" style="margin-top:8px"><button class="btn sm" data-a="exp">Mostrar ficha aberta</button><button class="btn sm" data-a="expall">Mostrar minhas fichas</button><button class="btn sm" data-a="copy">Copiar</button><button class="btn sm pri" data-a="imp">Importar texto</button><label class="btn sm" style="display:inline-flex;align-items:center;color:var(--ink);font-size:14px">Arquivo<input type="file" id="file" accept=".json,application/json" style="display:none"></label></div><p class="foot" id="iomsg"></p></details>
-  <details class="grp"><summary>Conta</summary><div class="g2"><div><label for="pold">Senha atual</label><input id="pold" type="password" autocomplete="current-password"></div><div><label for="pnew">Nova senha</label><input id="pnew" type="password" autocomplete="new-password"></div></div><div class="btns" style="margin-top:8px"><button class="btn sm" data-a="pass">Trocar senha</button><button class="btn sm warn" data-a="logout">Sair da conta</button></div></details>`;
+  <div class="btns" style="margin-top:8px"><button class="btn sm" data-a="exp">Mostrar ficha aberta</button><button class="btn sm" data-a="expall">Mostrar minhas fichas</button><button class="btn sm" data-a="copy">Copiar</button><button class="btn sm pri" data-a="imp">Importar texto</button><label class="btn sm" style="display:inline-flex;align-items:center;color:var(--ink);font-size:14px">Arquivo<input type="file" id="file" accept=".json,application/json" style="display:none"></label></div><p class="foot" id="iomsg"></p></details>`;
   p.innerHTML=`<h2>Fichas e mesas<small><button class="btn sm" data-a="close">Fechar</button></small></h2>${b}`;$('sheet').classList.add('on')}
 function addOwn(c,open=true){c._owner=meId();c._ownerName=S.me.name;c._lib=false;c._new=true;delete c.demo;S.chars.set(c.id,c);if(open){S.view=c.id;hist=[];prefs()}save(c);return c}
 function importTxt(txt){let o;try{o=JSON.parse(txt)}catch(e){$('iomsg').textContent='Texto inválido: não parece uma ficha exportada.';return}
@@ -259,10 +258,92 @@ function importTxt(txt){let o;try{o=JSON.parse(txt)}catch(e){$('iomsg').textCont
   for(const x of arr){const c=fix(x);for(const k of Object.keys(c))if(k.startsWith('_'))delete c[k];c.id='c'+uidGen();c.mesa='';addOwn(c)}
   render();drawer();$('iomsg').textContent=arr.length+(arr.length>1?' fichas importadas.':' ficha importada.')}
 
+/* ---------- configurações ---------- */
+const CFG=[['conta','Conta'],['mesa','Mesa']];
+const K={tokens:null,audit:null,info:null,novo:null,filtro:'',modo:'node',pasta:'',url:location.origin,loading:null};
+try{const x=JSON.parse(localStorage.getItem('fichas5e-mcp')||'{}');for(const k of['modo','pasta','url'])if(x[k])K[k]=x[k]}catch(e){}
+function saveK(){try{localStorage.setItem('fichas5e-mcp',JSON.stringify({modo:K.modo,pasta:K.pasta,url:K.url}))}catch(e){}}
+const cfgHash=()=>'#config/'+S.cfgTab+(S.cfgTab==='mesa'&&S.cfgMesa?'/'+S.cfgMesa:'');
+const when=t=>t?new Date(t).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'nunca';
+function redraw(){if($('sheet').classList.contains('on')&&!wide.matches)drawer();render()}
+function applyTheme(){const t=S.me&&S.me.prefs&&S.me.prefs.tema;const r=document.documentElement;
+  if(t==='claro')r.dataset.theme='light';else if(t==='escuro')r.dataset.theme='dark';else delete r.dataset.theme}
+function setPref(k,v){const old=S.me.prefs[k];S.me.prefs={...S.me.prefs,[k]:v};applyTheme();render();
+  api('PATCH','/api/me',{prefs:{[k]:v}}).then(st=>{applyState(st);softRender()}).catch(err=>{S.me.prefs={...S.me.prefs,[k]:old};applyTheme();render();toast(`<div><b>${esc(err.message)}</b></div>`)})}
+function loadConta(){if(K.loading)return K.loading;
+  K.loading=Promise.all([api('GET','/api/tokens'),api('GET','/api/audit?limite=200'+(K.filtro?'&token='+encodeURIComponent(K.filtro):'')),K.info||api('GET','/api/info')])
+    .then(([t,a,i])=>{K.tokens=t.tokens;K.audit=a.registros;K.info=i;if(!K.pasta&&i.pasta)K.pasta=i.pasta})
+    .catch(err=>{if(err.status===401)return showAuth();toast(`<div><b>Não deu para carregar a conta</b><small>${esc(err.message)}</small></div>`)})
+    .finally(()=>{K.loading=null;if(S.me&&S.page==='config'&&S.cfgTab==='conta')softRender()});
+  return K.loading}
+function mcpLine(tok){const t=tok||'COLE_O_TOKEN_AQUI';const q=x=>/[\s"]/.test(x)?'"'+x.replace(/"/g,'\\"')+'"':x;
+  const dir=(K.pasta||'/caminho/para/ficha-dnd').replace(/[\\/]+$/,'');const sep=dir.includes('\\')?'\\':'/';
+  if(K.modo==='docker')return `claude mcp add ficha-dnd --scope local -e FICHA_TOKEN=${t} -- docker compose -f ${q(dir+sep+'compose.yaml')} run --rm -T mcp`;
+  return `claude mcp add ficha-dnd --scope local -e FICHA_URL=${K.url||location.origin} -e FICHA_TOKEN=${t} -- node ${q(dir+sep+'mcp.js')}`}
+const sw=(title,desc,on,a,v)=>`<div class="sw"><div><b>${title}</b><span>${desc}</span></div><button class="tog ${on?'on':''}" data-a="${a}" data-v="${esc(v)}" aria-pressed="${!!on}">${on?'Ligado':'Desligado'}</button></div>`;
+const segl=(opts,cur,a,pre='')=>`<div class="segl">${opts.map(([k,t])=>`<button class="${cur===k?'on':''}" data-a="${a}" data-v="${esc(pre+k)}" aria-pressed="${cur===k}">${t}</button>`).join('')}</div>`;
+function tConta(){const me=S.me,p=me.prefs||{},nv=K.novo;
+  const perfil=card('Perfil',`<label for="cfnome">Nome (aparece para a mesa e é usado para entrar)</label><div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><input id="cfnome" value="${esc(me.name)}" maxlength="30" autocomplete="username"><button class="btn" data-a="cfnome">Salvar</button></div>
+    <label style="margin-top:14px">Tema</label>${segl([['auto','Do aparelho'],['claro','Claro'],['escuro','Escuro']],p.tema,'pref','tema|')}
+    ${sw('Abrir fichas em modo leitura','Evita mudar a ficha sem querer. Toque no lápis para editar.',p.abrirTravada,'pref','abrirTravada|'+(p.abrirTravada?0:1))}
+    <label style="margin-top:12px" for="cfaba">Aba ao abrir o app</label><select id="cfaba" data-pref="abaInicial">${TABS.map(([k,t])=>`<option value="${k}"${p.abaInicial===k?' selected':''}>${t}</option>`).join('')}</select>
+    <p class="foot">Valem em todos os aparelhos em que você entrar.</p>`);
+  const mcp=card('Assistente (MCP)',`<p class="note">O Claude e outros assistentes entram no app com um token desta conta, sem a sua senha. Você pode pausar ou remover o token quando quiser, e tudo o que ele faz fica no registro de auditoria.</p>
+    <div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><input id="tknome" placeholder="Nome, ex.: Claude no notebook" maxlength="40" aria-label="Nome do novo token"><button class="btn pri" data-a="tknovo">Gerar token</button></div>
+    ${nv?`<div class="fresh"><p class="note" style="margin:0 0 6px"><b>Token “${esc(nv.nome)}” criado.</b> Copie agora: ele não aparece de novo.</p><div class="copyrow"><code id="tkval">${esc(nv.token)}</code><button class="btn sm" data-a="cp" data-v="tkval">Copiar</button></div></div>`:''}
+    <label style="margin-top:14px">Linha de configuração do Claude Code</label>${segl([['node','Node neste computador'],['docker','Docker']],K.modo,'mcpmodo')}
+    <div class="g2" style="margin-top:8px"><div class="${K.modo==='docker'?'span2':''}"><label for="mcppasta">Pasta do projeto ficha-dnd</label><input id="mcppasta" data-k2="pasta" value="${esc(K.pasta)}" placeholder="F:\\Dev\\ficha-dnd" spellcheck="false"></div>${K.modo==='node'?`<div><label for="mcpurl">Endereço do app</label><input id="mcpurl" data-k2="url" value="${esc(K.url)}" spellcheck="false"></div>`:''}</div>
+    <pre class="cmd" id="mcpcmd">${esc(mcpLine(nv&&nv.token))}</pre>
+    <div class="btns"><button class="btn sm" data-a="cp" data-v="mcpcmd">Copiar linha</button></div>
+    <p class="foot">${nv?'A linha já leva o token novo.':'Gere um token para a linha já sair com ele, ou troque COLE_O_TOKEN_AQUI por um token seu.'} Rode no terminal. O escopo local guarda o token só na sua configuração, fora do repositório.${K.modo==='docker'?' No Docker, o MCP fala com o app pela rede interna e liga o app se ele estiver parado.':''}${K.info&&K.info.docker&&!K.pasta?' Este app roda em Docker: informe a pasta do projeto no seu computador.':''}</p>`);
+  const tks=card('Tokens',K.tokens===null?'<p class="note">Carregando…</p>':K.tokens.length?K.tokens.map(t=>`<div class="tk${t.pausado?' off':''}"><div class="tkh"><b>${esc(t.nome)}</b><span class="badge${t.pausado?'':' ok'}">${t.pausado?'Pausado':'Ativo'}</span></div>
+    <span class="foot" style="display:block;margin:2px 0 0"><code>${esc(t.inicio)}…</code> · criado ${when(t.criado)} · último uso ${when(t.usado)}</span>
+    <div class="btns" style="margin-top:8px"><button class="btn sm" data-a="tkpausa" data-v="${esc(t.id)}">${t.pausado?'Retomar':'Pausar'}</button><button class="btn sm" data-a="tklog" data-v="${esc(t.id)}">Ver registro</button>${armBtn('tkrm:'+t.id,'Remover','Toque de novo para remover')}</div></div>`).join(''):'<p class="note">Nenhum token ainda.</p>');
+  const fopts=[['','Todos os registros'],...(K.tokens||[]).map(t=>[t.id,'Token '+t.nome])];if(K.filtro&&!fopts.some(o=>o[0]===K.filtro))fopts.push([K.filtro,'Token removido']);
+  const aud=card('Registro de auditoria',`<div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><select id="audf" aria-label="Filtrar registros">${fopts.map(([k,t])=>`<option value="${esc(k)}"${K.filtro===k?' selected':''}>${esc(t)}</option>`).join('')}</select><button class="btn" data-a="audit">Atualizar</button></div>
+    ${K.audit===null?'<p class="note" style="margin-top:10px">Carregando…</p>':K.audit.length?`<ol class="log">${K.audit.map(e=>`<li class="${e.status>=400?'bad':''}"><time>${when(e.t)}</time><span>${esc(e.acao)}</span><em>${e.via==='conta'?'pela conta':'token '+esc(e.token||'removido')}${e.status>=400?' · recusado ('+e.status+')':''}</em></li>`).join('')}</ol>`:'<p class="note" style="margin-top:10px">Nada registrado ainda.</p>'}
+    <p class="foot">Guarda cada chamada feita com um token, inclusive as recusadas, e as mudanças nos tokens. As rolagens do assistente não passam pelo servidor e não aparecem aqui.</p>`);
+  const seg=card('Senha e sessões',`<div class="g2"><div><label for="pold">Senha atual</label><input id="pold" type="password" autocomplete="current-password"></div><div><label for="pnew">Nova senha</label><input id="pnew" type="password" autocomplete="new-password"></div></div>
+    <div class="btns" style="margin-top:8px"><button class="btn sm" data-a="pass">Trocar senha</button></div>
+    <div class="btns" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><button class="btn sm" data-a="sairoutras">Sair dos outros aparelhos</button><button class="btn sm warn" data-a="logout">Sair da conta</button></div>`);
+  return `<div class="cols"><div class="stackc">${perfil}${seg}</div><div class="stackc">${mcp}${tks}</div><div class="stackc">${aud}</div></div>`}
+function tMesa(){
+  if(!S.mesas.length)return `<div class="cols"><div class="stackc">${card('Nenhuma mesa ainda',`<p class="note">Entre numa mesa com o código do mestre ou crie a sua no painel de fichas e mesas. Quem cria a mesa é o mestre dela.</p><div class="btns"><button class="btn pri" data-a="drawer">Abrir fichas e mesas</button></div>`)}</div></div>`;
+  const m=mesaOf(S.cfgMesa)||S.mesas[0];S.cfgMesa=m.id;
+  const pick=S.mesas.length>1?`<div class="chips" style="margin-bottom:14px" role="group" aria-label="Escolher mesa">${S.mesas.map(x=>`<button class="chip ${x.id===m.id?'on':''}" data-a="cfgmesa" data-v="${esc(x.id)}" aria-pressed="${x.id===m.id}">${esc(x.nome)}</button>`).join('')}</div>`:'';
+  const fichas=[...S.chars.values()].filter(c=>c.mesa===m.id);
+  const mestreNome=(m.membros.find(x=>x.id===m.mestre)||{}).name||'?';
+  if(!isMestre(m)){
+    const info=card(esc(m.nome),`<p class="note">Mestre: <b>${esc(mestreNome)}</b></p>${m.descricao?`<p style="white-space:pre-wrap;margin:0 0 10px">${esc(m.descricao)}</p>`:'<p class="note">O mestre ainda não escreveu uma descrição.</p>'}<label>Na mesa</label><div class="members">${m.membros.map(x=>`<span class="member" style="padding-right:12px">${esc(x.name)}${x.id===m.mestre?' (mestre)':''}</span>`).join('')}</div>`);
+    const fs=card('Fichas na mesa',`${fichas.length?fichas.map(c=>row(c)).join(''):'<p class="note">Nenhuma ficha sua ou liberada nesta mesa.</p>'}<p class="foot">Para levar uma ficha sua para esta mesa, escolha a mesa na aba Principal da ficha.</p>`);
+    const sair=card('Sair da mesa',`<p class="note">Suas fichas saem da mesa e voltam a ser só suas.</p>${armBtn('leave:'+m.id,'Sair da mesa','Toque de novo para sair')}`);
+    return pick+`<div class="cols"><div class="stackc">${info}</div><div class="stackc">${fs}</div><div class="stackc">${sair}</div></div>`}
+  const geral=card('Mesa',`<label for="mnome">Nome</label><input id="mnome" data-mesa="${esc(m.id)}" data-campo="nome" value="${esc(m.nome)}" maxlength="60">
+    <label for="mdesc" style="margin-top:10px">Descrição para os jogadores</label><textarea id="mdesc" data-mesa="${esc(m.id)}" data-campo="descricao" maxlength="2000" placeholder="Cenário, dia e horário das sessões, regras da casa">${esc(m.descricao)}</textarea>
+    <p class="foot">Salva ao sair do campo. Todos da mesa veem a descrição.</p>`);
+  const conv=card('Convite',`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="code" id="mcode">${esc(m.code)}</span><button class="btn sm" data-a="cp" data-v="mcode">Copiar</button><button class="btn sm" data-a="newcode" data-v="${esc(m.id)}">Novo código</button></div>
+    <p class="foot">Trocar o código invalida o antigo. Quem já está na mesa continua nela.</p>
+    ${sw('Aceitar jogadores novos','Desligado, o código não deixa ninguém novo entrar.',m.convites,'mtog',m.id+'|convites')}`);
+  const fch=card('Fichas',`${sw('Fichas novas entram liberadas','Quando um jogador põe a ficha nesta mesa, os outros já podem vê-la.',m.libAuto,'mtog',m.id+'|libAuto').replace('class="sw"','class="sw" style="border:0;margin:0;padding-top:0"')}
+    <div class="btns" style="margin:4px 0 12px"><button class="btn sm" data-a="mlib" data-v="${esc(m.id)}|1">Liberar todas</button><button class="btn sm" data-a="mlib" data-v="${esc(m.id)}|0">Ocultar todas</button></div>
+    ${fichas.length?fichas.map(c=>row(c,true)).join(''):'<p class="note">Nenhuma ficha nesta mesa ainda. Os jogadores escolhem a mesa na aba Principal da ficha.</p>'}`);
+  const jog=card('Jogadores',`<div class="members">${m.membros.map(x=>`<span class="member">${esc(x.name)}${x.id===m.mestre?' (mestre)':`<button class="x" data-a="kick" data-v="${esc(m.id)}|${esc(x.id)}" aria-label="Remover ${esc(x.name)} da mesa">${arm==='kick:'+m.id+'|'+x.id?'✓':'×'}</button>`}</span>`).join('')}</div>
+    <p class="foot">${m.membros.length<2?'Passe o código do convite para os jogadores entrarem.':'Remover um jogador tira as fichas dele da mesa. Toque duas vezes no × para confirmar.'}</p>`);
+  const perigo=card('Apagar mesa',`<p class="note">As fichas saem da mesa e voltam para os donos. Não dá para desfazer.</p>${armBtn('dmesa:'+m.id,'Apagar mesa','Toque de novo para apagar')}`);
+  return pick+`<div class="cols"><div class="stackc">${geral}${conv}</div><div class="stackc">${fch}</div><div class="stackc">${jog}${perigo}</div></div>`}
+function renderConfig(){
+  document.body.classList.add('cfg');document.body.classList.remove('locked','ro','nochar');
+  $('nm').textContent='Configurações';$('sub').textContent=S.me.name;$('who2').textContent=S.online?'':'Sem conexão com o servidor.';
+  $('nav').innerHTML=CFG.map(([k,t])=>`<button class="${S.cfgTab===k?'on':''}" data-a="cfgtab" data-v="${k}">${t}</button>`).join('')+'<button data-a="ficha">Fichas</button>';
+  $('main').innerHTML=(S.cfgTab==='mesa'?tMesa():tConta())+`<p class="status" id="st">${esc(statusText())}</p>`;
+  side();if(S.cfgTab==='conta'&&K.tokens===null&&!K.loading)loadConta()}
+
 /* ---------- eventos ---------- */
-document.addEventListener('input',e=>{const el=e.target;if(!el.dataset||!el.dataset.k||el.tagName==='SELECT'||RO())return;const c=C();touch();let v=el.value;if('n' in el.dataset){v=v===''?0:+v;if(isNaN(v))return}setP(c,el.dataset.k,v);save();derive()});
+document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.k2){K[el.dataset.k2]=el.value.trim();saveK();const x=$('mcpcmd');if(x)x.textContent=mcpLine(K.novo&&K.novo.token);return}if(!el.dataset||!el.dataset.k||el.tagName==='SELECT'||RO())return;const c=C();touch();let v=el.value;if('n' in el.dataset){v=v===''?0:+v;if(isNaN(v))return}setP(c,el.dataset.k,v);save();derive()});
 document.addEventListener('change',e=>{const el=e.target;if(el.id==='file'&&el.files[0]){el.files[0].text().then(importTxt);return}
-  if(el.dataset&&el.dataset.mesa!==undefined){const m=mesaOf(el.dataset.mesa);if(m&&el.value.trim())act('PATCH','/api/mesas/'+m.id,{nome:el.value.trim()});return}
+  if(el.dataset&&el.dataset.mesa!==undefined){const m=mesaOf(el.dataset.mesa);const k=el.dataset.campo||'nome';if(m&&(k!=='nome'||el.value.trim())&&el.value!==m[k])act('PATCH','/api/mesas/'+m.id,{[k]:k==='nome'?el.value.trim():el.value},k==='nome'?'Nome da mesa salvo.':'Descrição salva.');return}
+  if(el.dataset&&el.dataset.pref){setPref(el.dataset.pref,el.value);return}
+  if(el.id==='audf'){K.filtro=el.value;K.audit=null;render();loadConta();return}
   if(el.tagName==='SELECT'&&el.dataset.k&&!RO()){const c=C();touch();let v=el.value;if(/^\d+$/.test(v)&&el.dataset.k!=='hd.die')v=+v;setP(c,el.dataset.k,v);if(el.dataset.k==='mesa')c._lib=false;save();render()}});
 document.addEventListener('keydown',e=>{if(!S.me||!C()||e.altKey||/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName))return;
   if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'){e.preventDefault();undo();return}
@@ -274,7 +355,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
   if(a==='close'&&b.id==='sheet'&&e.target!==b)return;
   if(MUT.has(a)&&RO())return toast('<div><b>Somente leitura</b><small>Esta ficha é de outro jogador.</small></div>');
   const edit=fn=>{touch();fn();save();render()};
-  const twoTap=key=>{if(arm!==key){arm=key;drawer();return false}arm=null;return true};
+  const twoTap=key=>{if(arm!==key){arm=key;redraw();return false}arm=null;return true};
   switch(a){
   case'authmode':S.authMode=v;showAuth();break;
   case'tab':S.tab=v;prefs();history.replaceState(null,'','#'+v);render();scrollTo(0,0);break;
@@ -298,8 +379,24 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
   case'long':edit(()=>{c.hp.cur=+c.hp.max||0;c.hp.tmp=0;c.death={s:0,f:0};c.slots.forEach(s=>s.used=0);c.hd.used=Math.max(0,(+c.hd.used||0)-Math.max(1,Math.floor((+c.level||1)/2)))});toast('<div><b>Descanso longo</b><small>PV, espaços de magia e metade dos dados de vida recuperados.</small></div>');break;
   case'drawer':arm=null;drawer();break;
   case'close':$('sheet').classList.remove('on');break;
-  case'open':S.view=v;hist=[];prefs();$('sheet').classList.remove('on');render();scrollTo(0,0);break;
-  case'lib':{const ch=S.chars.get(v);if(!ch)return;const want=!ch._lib;ch._lib=want;drawer();api('POST','/api/chars/'+v+'/lib',{lib:want}).then(()=>{render()}).catch(err=>{ch._lib=!want;drawer();toast(`<div><b>${esc(err.message)}</b></div>`)});break}
+  case'open':S.view=v;S.page='ficha';S.locked=S.me.prefs?S.me.prefs.abrirTravada!==false:S.locked;hist=[];prefs();history.replaceState(null,'','#'+S.tab);$('sheet').classList.remove('on');render();scrollTo(0,0);break;
+  case'lib':{const ch=S.chars.get(v);if(!ch)return;const want=!ch._lib;ch._lib=want;redraw();api('POST','/api/chars/'+v+'/lib',{lib:want}).then(()=>{render()}).catch(err=>{ch._lib=!want;redraw();toast(`<div><b>${esc(err.message)}</b></div>`)});break}
+  case'cfg':{const [t,id]=String(v).split('|');S.page='config';S.cfgTab=t==='mesa'?'mesa':'conta';if(id)S.cfgMesa=id;arm=null;history.pushState(null,'',cfgHash());if(!wide.matches)$('sheet').classList.remove('on');render();scrollTo(0,0);break}
+  case'cfgtab':S.cfgTab=v;arm=null;history.replaceState(null,'',cfgHash());render();scrollTo(0,0);break;
+  case'cfgmesa':S.cfgMesa=v;arm=null;history.replaceState(null,'',cfgHash());render();break;
+  case'ficha':S.page='ficha';K.novo=null;history.replaceState(null,'','#'+S.tab);render();scrollTo(0,0);break;
+  case'pref':{const [k,x]=v.split('|');setPref(k,k==='abrirTravada'?x==='1':x);break}
+  case'cfnome':{const n=$('cfnome').value.trim();if(n&&n!==S.me.name)act('PATCH','/api/me',{name:n},'Nome atualizado.');break}
+  case'sairoutras':api('POST','/api/sessions/sair-outras').then(r=>toast(`<div><b>${r.encerradas?r.encerradas+(r.encerradas===1?' sessão encerrada':' sessões encerradas'):'Nenhuma outra sessão aberta'}</b><small>Este aparelho continua conectado.</small></div>`)).catch(err=>toast(`<div><b>${esc(err.message)}</b></div>`));break;
+  case'tknovo':{const n=$('tknome').value.trim();api('POST','/api/tokens',{nome:n||'Assistente'}).then(t=>{K.novo=t;K.tokens=null;render();loadConta();toast('<div><b>Token criado</b><small>Copie agora: ele não aparece de novo.</small></div>')}).catch(err=>toast(`<div><b>${esc(err.message)}</b></div>`));break}
+  case'tkpausa':{const t=(K.tokens||[]).find(x=>x.id===v);if(!t)return;api('PATCH','/api/tokens/'+v,{pausado:!t.pausado}).then(()=>{toast(`<div><b>Token ${t.pausado?'retomado':'pausado'}</b><small>${t.pausado?'Ele volta a funcionar na hora.':'Chamadas com ele são recusadas até você retomar.'}</small></div>`);loadConta()}).catch(err=>toast(`<div><b>${esc(err.message)}</b></div>`));break}
+  case'tkrm':if(twoTap('tkrm:'+v))api('DELETE','/api/tokens/'+v).then(()=>{if(K.filtro===v)K.filtro='';if(K.novo&&K.novo.id===v)K.novo=null;toast('<div><b>Token removido</b><small>Quem usava este token perdeu o acesso.</small></div>');loadConta()}).catch(err=>toast(`<div><b>${esc(err.message)}</b></div>`));break;
+  case'tklog':K.filtro=v;K.audit=null;render();loadConta().then(()=>{const a=$('audf');a&&a.scrollIntoView({block:'center'})});break;
+  case'audit':K.audit=null;render();loadConta();break;
+  case'mcpmodo':K.modo=v;saveK();render();break;
+  case'cp':{const x=$(v);if(!x)return;const t=x.textContent;Promise.resolve(navigator.clipboard&&navigator.clipboard.writeText(t)).then(()=>toast('<div><b>Copiado</b></div>')).catch(()=>{const r=document.createRange();r.selectNodeContents(x);const sl=getSelection();sl.removeAllRanges();sl.addRange(r);toast('<div><b>Texto selecionado</b><small>Copie com Ctrl+C.</small></div>')});break}
+  case'mtog':{const [id,k]=v.split('|');const m=mesaOf(id);if(m)act('PATCH','/api/mesas/'+id,{[k]:!m[k]});break}
+  case'mlib':{const [id,x]=v.split('|');act('POST','/api/mesas/'+id+'/lib',{lib:x==='1'},x==='1'?'Todas as fichas da mesa liberadas.':'Todas as fichas da mesa ocultas.');break}
   case'nmesa':{const n=$('nmesa').value.trim();if(!n){$('nmesa').focus();return}act('POST','/api/mesas',{nome:n},'Mesa criada. Passe o código aos jogadores.');break}
   case'join':{const code=$('jcode').value.trim();if(!code){$('jcode').focus();return}act('POST','/api/mesas/join',{code},'Você entrou na mesa. Escolha ela na aba Principal da sua ficha.');break}
   case'newcode':act('POST','/api/mesas/'+v+'/code',{},'Código trocado: o antigo não funciona mais.');break;
@@ -308,7 +405,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
   case'leave':if(twoTap('leave:'+v))act('POST','/api/mesas/'+v+'/leave',{},'Você saiu da mesa.');break;
   case'new':{const n=addOwn(blank());S.locked=false;S.tab='principal';$('sheet').classList.remove('on');render();setTimeout(()=>{const x=document.querySelector('[data-k="name"]');x&&x.select()},30);break}
   case'sample':{addOwn(sample());S.locked=true;S.tab='principal';$('sheet').classList.remove('on');render();break}
-  case'dup':{if(!c)return;const n=fix(JSON.parse(JSON.stringify(pack(c))));n.id='c'+uidGen();n.mesa='';n.name=(c.name||'Personagem')+' (cópia)';addOwn(n);render();drawer();break}
+  case'dup':{if(!c)return;const n=fix(JSON.parse(JSON.stringify(pack(c))));n.id='c'+uidGen();n.mesa='';n.name=(c.name||'Personagem')+' (cópia)';addOwn(n);S.page='ficha';render();drawer();break}
   case'del':{if(!c||!isOwn(c)||!twoTap('del:'+v))return;const id=c.id;clearTimeout(saveT[id]);S.pending.delete(id);S.chars.delete(id);S.view=(myChars()[0]||{}).id||null;hist=[];prefs();
     if(!c._new)api('DELETE','/api/chars/'+id).catch(err=>{toast(`<div><b>Não foi possível apagar</b><small>${esc(err.message)}</small></div>`);refreshSoon()});render();drawer();break}
   case'exp':if(c){$('io').value=JSON.stringify(pack(c),null,1);$('iomsg').textContent='Ficha aberta pronta para copiar.'}break;
@@ -316,13 +413,17 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
   case'copy':{const t=$('io');if(!t.value&&c)t.value=JSON.stringify(pack(c),null,1);Promise.resolve(navigator.clipboard&&navigator.clipboard.writeText(t.value)).then(()=>{$('iomsg').textContent='Copiado.'}).catch(()=>{t.select();$('iomsg').textContent='Não deu para copiar sozinho: o texto está selecionado, copie manualmente.'});break}
   case'imp':importTxt($('io').value);break;
   case'pass':act('POST','/api/password',{old:$('pold').value,pass:$('pnew').value},'Senha trocada.');break;
-  case'logout':api('POST','/api/logout').catch(()=>{}).then(()=>{S.chars=new Map();S.authMode='login';showAuth()});break;
+  case'logout':api('POST','/api/logout').catch(()=>{}).then(()=>{S.chars=new Map();S.authMode='login';S.page='ficha';Object.assign(K,{tokens:null,audit:null,novo:null,filtro:''});history.replaceState(null,'','#'+S.tab);showAuth()});break;
   }});
-window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(TABS.some(t=>t[0]===h)&&h!==S.tab){S.tab=h;render()}});
+function route(){const h=decodeURIComponent(location.hash.slice(1));
+  if(h.startsWith('config')){const [,t,id]=h.split('/');S.page='config';S.cfgTab=t==='mesa'?'mesa':'conta';if(id)S.cfgMesa=id;return}
+  S.page='ficha';if(TABS.some(t=>t[0]===h))S.tab=h}
+window.addEventListener('hashchange',()=>{route();if(S.me)render()});
+window.addEventListener('popstate',()=>{route();if(S.me)render()});
 
 /* ---------- início ---------- */
 loadPrefs();
-const h0=location.hash.slice(1);if(TABS.some(t=>t[0]===h0))S.tab=h0;
-(async()=>{try{applyState(await api('GET','/api/state'));render();listen()}catch(e){if(e.status===401)showAuth();else{showAuth();$('aerr').textContent='Não foi possível falar com o servidor. Ele está ligado?'}}})();
+const h0=location.hash.slice(1);route();
+(async()=>{try{applyState(await api('GET','/api/state'));const pf=S.me.prefs||{};if(typeof pf.abrirTravada==='boolean')S.locked=pf.abrirTravada;if(!h0&&pf.abaInicial)S.tab=pf.abaInicial;render();listen()}catch(e){if(e.status===401)showAuth();else{showAuth();$('aerr').textContent='Não foi possível falar com o servidor. Ele está ligado?'}}})();
 
 }

@@ -22,8 +22,7 @@ services:
     command: ["node", "mcp.js"]
     environment:
       FICHA_URL: http://app:3000
-      FICHA_USUARIO: ${FICHA_USUARIO:-}
-      FICHA_SENHA: ${FICHA_SENHA:-}
+      FICHA_TOKEN: ${FICHA_TOKEN:-}
     depends_on:
       app:
         condition: service_healthy

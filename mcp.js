@@ -6,8 +6,8 @@
 //
 // Configuração (variáveis de ambiente):
 //   FICHA_URL      endereço do servidor (padrão http://localhost:3000)
-//   FICHA_USUARIO  nome da conta usada pelo assistente
-//   FICHA_SENHA    senha dessa conta
+//   FICHA_TOKEN    token de conta, gerado no app em Configurações › Conta. Pode ser pausado ou
+//                  removido lá, e cada chamada feita com ele fica no registro de auditoria.
 
 const PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 
@@ -85,31 +85,18 @@ function test20(label, bonus, modo) {
 class ToolError extends Error {}
 const fail = (msg) => { throw new ToolError(msg); };
 
-function createClient({ url, user, pass }) {
-  let cookie = '';
-  async function raw(method, path, body) {
+function createClient({ url, token }) {
+  return async function call(method, path, body) {
+    if (!token) fail('Configure FICHA_TOKEN no servidor MCP: gere um token no app, em Configurações › Conta.');
     let res;
     try {
-      res = await fetch(url + path, { method, headers: { 'Content-Type': 'application/json', cookie }, body: body ? JSON.stringify(body) : undefined });
+      res = await fetch(url + path, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: body ? JSON.stringify(body) : undefined });
     } catch (e) {
       fail(`Não consegui falar com o servidor das fichas em ${url}. Ele está rodando (npm start)?`);
     }
-    const set = res.headers.get('set-cookie');
-    if (set) cookie = set.split(';')[0];
     const out = await res.json().catch(() => null);
-    return { status: res.status, body: out };
-  }
-  async function login() {
-    if (!user || !pass) fail('Configure FICHA_USUARIO e FICHA_SENHA no servidor MCP.');
-    const x = await raw('POST', '/api/login', { name: user, pass });
-    if (x.status !== 200) fail(`Login de "${user}" falhou: ${x.body?.error || x.status}`);
-  }
-  return async function call(method, path, body) {
-    if (!cookie) await login();
-    let x = await raw(method, path, body);
-    if (x.status === 401) { await login(); x = await raw(method, path, body); }
-    if (x.status !== 200) fail(x.body?.error || `Erro ${x.status}`);
-    return x.body;
+    if (res.status !== 200) fail(out?.error || `Erro ${res.status}`);
+    return out;
   };
 }
 
@@ -436,7 +423,7 @@ function serveStdio(handle) {
 }
 
 if (require.main === module) {
-  const call = createClient({ url: (process.env.FICHA_URL || 'http://localhost:3000').replace(/\/$/, ''), user: process.env.FICHA_USUARIO, pass: process.env.FICHA_SENHA });
+  const call = createClient({ url: (process.env.FICHA_URL || 'http://localhost:3000').replace(/\/$/, ''), token: process.env.FICHA_TOKEN });
   serveStdio(createMcp(createTools(call)));
 }
 

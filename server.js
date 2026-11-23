@@ -14,13 +14,21 @@ const SESSION_DAYS = 90;
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json' };
 
+const TOKEN_PREFIX = 'fdnd_';
+const AUDIT_MAX = 5000; // registros de auditoria guardados no total (os mais antigos saem)
+const TEMAS = ['auto', 'claro', 'escuro'];
+const ABAS = ['principal', 'combate', 'magias', 'itens', 'notas'];
+
 function createApp({ dataFile }) {
-  let db = { users: {}, sessions: {}, mesas: {}, chars: {} };
+  let db = { users: {}, sessions: {}, mesas: {}, chars: {}, tokens: {}, audit: [] };
   try {
     db = Object.assign(db, JSON.parse(fs.readFileSync(dataFile, 'utf8')));
   } catch (e) {
     if (e.code !== 'ENOENT') throw new Error(`Não foi possível ler ${dataFile}: ${e.message}`);
   }
+  // bancos antigos não têm tokens nem auditoria
+  db.tokens = db.tokens || {};
+  db.audit = Array.isArray(db.audit) ? db.audit : [];
 
   // ---------- persistência ----------
   let saveTimer = null;
@@ -78,13 +86,59 @@ function createApp({ dataFile }) {
   const userName = (u) => (db.users[u] ? db.users[u].name : 'Alguém');
   function stateFor(u) {
     const mesas = Object.values(db.mesas).filter((m) => isMember(m, u)).sort((a, b) => a.created - b.created).map((m) => ({
-      id: m.id, nome: m.nome, mestre: m.mestre, code: isMestre(m, u) ? m.code : undefined,
+      id: m.id, nome: m.nome, mestre: m.mestre, descricao: m.descricao || '',
+      ...(isMestre(m, u) ? { code: m.code, convites: m.convites !== false, libAuto: !!m.libAuto } : {}),
       membros: mesaPeople(m).map((x) => ({ id: x, name: userName(x) })),
     }));
     const chars = Object.values(db.chars).filter((c) => canRead(c, u)).map((c) => ({
       id: c.id, owner: c.owner, ownerName: userName(c.owner), mesa: c.mesa, lib: !!c.lib, upd: c.upd, data: c.data,
     }));
-    return { me: { id: u, name: userName(u) }, mesas, chars };
+    return { me: { id: u, name: userName(u), prefs: prefsOf(u) }, mesas, chars };
+  }
+  function prefsOf(u) {
+    const p = (db.users[u] && db.users[u].prefs) || {};
+    return { tema: TEMAS.includes(p.tema) ? p.tema : 'auto', abrirTravada: p.abrirTravada !== false, abaInicial: ABAS.includes(p.abaInicial) ? p.abaInicial : 'principal' };
+  }
+
+  // ---------- tokens de conta e auditoria ----------
+  const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
+  const tokenView = (t) => ({ id: t.id, nome: t.nome, inicio: t.inicio, criado: t.criado, usado: t.usado || null, pausado: !!t.pausado });
+  function tokenUser(req) {
+    const h = String(req.headers.authorization || '');
+    if (!/^Bearer\s+/i.test(h)) return null;
+    throttle(req);
+    const raw = h.replace(/^Bearer\s+/i, '').trim();
+    const hash = sha(raw);
+    const t = raw.startsWith(TOKEN_PREFIX) && Object.values(db.tokens).find((x) => x.hash === hash);
+    if (!t || !db.users[t.uid]) { failedAttempt(req); fail(401, 'Token inválido ou removido.'); }
+    if (!t.pausado) t.usado = now(); // pausado: a rota recusa depois de registrar a tentativa
+    return t;
+  }
+  function audit(entry) {
+    db.audit.push({ t: now(), ...entry });
+    if (db.audit.length > AUDIT_MAX) db.audit.splice(0, db.audit.length - AUDIT_MAX);
+    persist();
+  }
+  // descreve uma chamada em português para o registro de auditoria, com o nome do alvo quando der
+  function describe(m, p, body) {
+    const ch = (cid) => (db.chars[cid] && db.chars[cid].data && db.chars[cid].data.name) || cid;
+    const me = (mid) => (db.mesas[mid] && db.mesas[mid].nome) || mid;
+    let x;
+    if (p === '/api/state') return 'Consultou fichas e mesas';
+    if (p === '/api/events') return 'Acompanhou mudanças ao vivo';
+    if (p === '/api/chars' && m === 'POST') return `Criou a ficha ${(body.data && body.data.name) || ''}`.trim();
+    if ((x = p.match(/^\/api\/chars\/([\w-]+)(\/lib)?$/))) {
+      if (x[2]) return `${body.lib ? 'Liberou' : 'Ocultou'} a ficha ${ch(x[1])}`;
+      return m === 'DELETE' ? `Apagou a ficha ${ch(x[1])}` : `Alterou a ficha ${ch(x[1])}`;
+    }
+    if (p === '/api/mesas' && m === 'POST') return `Criou a mesa ${body.nome || ''}`.trim();
+    if (p === '/api/mesas/join') return 'Entrou numa mesa com código';
+    if ((x = p.match(/^\/api\/mesas\/([\w-]+)(?:\/(\w+))?$/))) {
+      const verb = { leave: 'Saiu da mesa', kick: 'Removeu um jogador da mesa', code: 'Trocou o código da mesa', lib: 'Mudou a visibilidade das fichas da mesa' }[x[2]]
+        || (m === 'DELETE' ? 'Apagou a mesa' : 'Alterou a mesa');
+      return `${verb} ${me(x[1])}`;
+    }
+    return `${m} ${p}`;
   }
 
   // ---------- sessão ----------
@@ -146,6 +200,7 @@ function createApp({ dataFile }) {
     if (!isMember(db.mesas[mesa], owner)) fail(403, 'O dono da ficha não participa dessa mesa.');
     return mesa;
   }
+  const libAuto = (mid) => !!(mid && db.mesas[mid] && db.mesas[mid].libAuto);
   function detachFromMesa(mid, uid) {
     for (const c of Object.values(db.chars)) if (c.mesa === mid && (!uid || c.owner === uid)) { c.mesa = ''; c.lib = false; c.upd = now(); }
   }
@@ -180,10 +235,82 @@ function createApp({ dataFile }) {
       return { ok: true };
     }
 
-    const u = sessionUser(req);
+    // um token de conta (assistentes, scripts) ou a sessão do navegador
+    const tok = tokenUser(req);
+    const u = tok ? tok.uid : sessionUser(req);
     if (!u) fail(401, 'Entre na sua conta.');
+    if (tok) {
+      req.audit = { uid: u, token: tok.id, tokenNome: tok.nome, acao: describe(m, p, body) };
+      if (tok.pausado) fail(403, `O token "${tok.nome}" está pausado. Retome-o em Configurações › Conta.`);
+      if (/^\/api\/(password|tokens|audit|me|sessions)(\/|$)/.test(p)) fail(403, 'Um token não mexe nas configurações da conta: entre com nome e senha no app.');
+    }
+    const gestao = (acao) => audit({ uid: u, acao, status: 200, via: 'conta' });
 
     if (p === '/api/state' && m === 'GET') return stateFor(u);
+    if (p === '/api/info' && m === 'GET') return { docker: !!process.env.IN_DOCKER, pasta: process.env.IN_DOCKER ? null : __dirname };
+
+    // conta: nome e preferências
+    if (p === '/api/me' && m === 'PATCH') {
+      const user = db.users[u];
+      if (body.name !== undefined) {
+        const name = cleanName(body.name);
+        if (Object.values(db.users).some((x) => x.id !== u && x.key === nameKey(name))) fail(409, 'Esse nome já está em uso.');
+        user.name = name; user.key = nameKey(name);
+      }
+      if (body.prefs && typeof body.prefs === 'object') {
+        const cur = prefsOf(u), np = body.prefs;
+        user.prefs = {
+          tema: TEMAS.includes(np.tema) ? np.tema : cur.tema,
+          abrirTravada: np.abrirTravada === undefined ? cur.abrirTravada : !!np.abrirTravada,
+          abaInicial: ABAS.includes(np.abaInicial) ? np.abaInicial : cur.abaInicial,
+        };
+      }
+      persist();
+      notify(Object.values(db.mesas).filter((x) => isMember(x, u)).flatMap(mesaPeople).concat(u));
+      return stateFor(u);
+    }
+    if (p === '/api/sessions/sair-outras' && m === 'POST') {
+      const cur = parseCookies(req).sid; let n = 0;
+      for (const [t, s] of Object.entries(db.sessions)) if (s.uid === u && t !== cur) { delete db.sessions[t]; n++; }
+      gestao(`Encerrou ${n} ${n === 1 ? 'sessão' : 'sessões'} em outros aparelhos`);
+      return { encerradas: n };
+    }
+
+    // tokens de conta
+    if (p === '/api/tokens' && m === 'GET') {
+      return { tokens: Object.values(db.tokens).filter((t) => t.uid === u).sort((a, b) => b.criado - a.criado).map(tokenView) };
+    }
+    if (p === '/api/tokens' && m === 'POST') {
+      const nome = String(body.nome || '').trim().replace(/\s+/g, ' ').slice(0, 40) || 'Token sem nome';
+      if (Object.values(db.tokens).filter((t) => t.uid === u).length >= 20) fail(400, 'Limite de 20 tokens por conta: remova algum antes.');
+      const raw = TOKEN_PREFIX + crypto.randomBytes(24).toString('base64url');
+      const tid = id('t');
+      db.tokens[tid] = { id: tid, uid: u, nome, hash: sha(raw), inicio: raw.slice(0, TOKEN_PREFIX.length + 4), criado: now(), usado: null, pausado: false };
+      gestao(`Criou o token ${nome}`);
+      return { ...tokenView(db.tokens[tid]), token: raw };
+    }
+    let mt = p.match(/^\/api\/tokens\/([\w-]+)$/);
+    if (mt) {
+      const t = db.tokens[mt[1]];
+      if (!t || t.uid !== u) fail(404, 'Token não encontrado.');
+      if (m === 'PATCH') {
+        t.pausado = !!body.pausado;
+        gestao(`${t.pausado ? 'Pausou' : 'Retomou'} o token ${t.nome}`);
+        return tokenView(t);
+      }
+      if (m === 'DELETE') {
+        delete db.tokens[t.id];
+        gestao(`Removeu o token ${t.nome}`);
+        return { ok: true };
+      }
+      fail(405, 'Método não permitido.');
+    }
+    if (p === '/api/audit' && m === 'GET') {
+      const only = url.searchParams.get('token');
+      const lim = Math.min(Math.max(1, +url.searchParams.get('limite') || 200), 1000);
+      const list = db.audit.filter((e) => e.uid === u && (!only || e.token === only)).slice(-lim).reverse();
+      return { registros: list.map((e) => ({ t: e.t, acao: e.acao, status: e.status, via: e.via || 'token', token: e.tokenNome || null, tokenId: e.token || null })) };
+    }
 
     if (p === '/api/events' && m === 'GET') {
       res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
@@ -215,17 +342,25 @@ function createApp({ dataFile }) {
       const code = String(body.code || '').trim().toUpperCase();
       const mesa = Object.values(db.mesas).find((x) => x.code === code);
       if (!mesa) { failedAttempt(req); fail(404, 'Código de mesa não encontrado.'); }
+      if (!isMember(mesa, u) && mesa.convites === false) fail(403, 'Esta mesa não está aceitando jogadores novos agora.');
       if (!isMember(mesa, u)) { mesa.membros.push(u); persist(); notify(mesaPeople(mesa)); }
       return stateFor(u);
     }
-    let mm = p.match(/^\/api\/mesas\/([\w-]+)(?:\/(leave|kick|code))?$/);
+    let mm = p.match(/^\/api\/mesas\/([\w-]+)(?:\/(leave|kick|code|lib))?$/);
     if (mm) {
       const mesa = getMesa(mm[1]);
+      if (!isMember(mesa, u)) fail(404, 'Mesa não encontrada.');
       const act = mm[2];
       const before = mesaPeople(mesa);
       if (!act && m === 'PATCH') {
         if (!isMestre(mesa, u)) fail(403, 'Só o mestre muda a mesa.');
-        mesa.nome = String(body.nome || '').trim().slice(0, 60) || mesa.nome;
+        if (body.nome !== undefined) mesa.nome = String(body.nome || '').trim().slice(0, 60) || mesa.nome;
+        if (body.descricao !== undefined) mesa.descricao = String(body.descricao || '').slice(0, 2000);
+        if (body.convites !== undefined) mesa.convites = !!body.convites;
+        if (body.libAuto !== undefined) mesa.libAuto = !!body.libAuto;
+      } else if (act === 'lib' && m === 'POST') {
+        if (!isMestre(mesa, u)) fail(403, 'Só o mestre libera fichas.');
+        for (const c of Object.values(db.chars)) if (c.mesa === mesa.id) { c.lib = !!body.lib; c.upd = now(); }
       } else if (!act && m === 'DELETE') {
         if (!isMestre(mesa, u)) fail(403, 'Só o mestre apaga a mesa.');
         detachFromMesa(mesa.id);
@@ -252,7 +387,8 @@ function createApp({ dataFile }) {
       const data = cleanData(body.data);
       let cid = String(body.id || '');
       if (!/^c[a-z0-9]{6,32}$/.test(cid) || db.chars[cid]) cid = id('c');
-      const c = { id: cid, owner: u, mesa: checkMesaFor(u, body.mesa), lib: false, upd: now(), data };
+      const mesaId = checkMesaFor(u, body.mesa);
+      const c = { id: cid, owner: u, mesa: mesaId, lib: libAuto(mesaId), upd: now(), data };
       db.chars[cid] = c;
       persist();
       notify(charPeople(c));
@@ -269,7 +405,7 @@ function createApp({ dataFile }) {
         if (body.mesa !== undefined && body.mesa !== c.mesa) {
           if (c.owner !== u) fail(403, 'Só o dono da ficha muda a mesa.');
           c.mesa = checkMesaFor(u, body.mesa);
-          c.lib = false;
+          c.lib = libAuto(c.mesa);
         }
         c.upd = now();
       } else if (!mm[2] && m === 'DELETE') {
@@ -321,12 +457,14 @@ function createApp({ dataFile }) {
     if (!url.pathname.startsWith('/api/')) return serveStatic(req, res, url);
     try {
       const out = await api(req, res, url);
+      if (req.audit) audit({ ...req.audit, status: 200 });
       if (out === undefined) return; // stream SSE
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
       res.end(JSON.stringify(out));
     } catch (e) {
       const status = e.status || 500;
       if (status === 500) console.error(e);
+      if (req.audit) audit({ ...req.audit, status });
       if (!res.headersSent) res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ error: status === 500 ? 'Erro no servidor.' : e.message }));
     }

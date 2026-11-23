@@ -85,3 +85,76 @@ test('estado persiste em disco', async () => {
   assert.ok(Object.keys(again.db().chars).length >= 2);
   assert.ok(again.resetPassword('Ana', 'novaSenha'));
 });
+
+test('token de conta: usar, pausar, remover e auditar', async () => {
+  const novo = await mestre('POST', '/api/tokens', { nome: 'Claude' });
+  assert.equal(novo.status, 200);
+  const raw = novo.body.token;
+  assert.match(raw, /^fdnd_/);
+  const bearer = (method, url, body) => fetch(base + url, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + raw }, body: body ? JSON.stringify(body) : undefined })
+    .then(async (r) => ({ status: r.status, body: await r.json().catch(() => null) }));
+
+  const st = await bearer('GET', '/api/state');
+  assert.equal(st.status, 200);
+  assert.equal(st.body.me.name, 'Mestre', 'o token age como o dono');
+  assert.equal((await bearer('PUT', `/api/chars/${fichaAna}`, { data: { name: 'Lyra', hp: { cur: 5 } } })).status, 200, 'mestre edita ficha da mesa pelo token');
+  assert.equal((await bearer('POST', '/api/tokens', { nome: 'outro' })).status, 403, 'token não cria tokens');
+  assert.equal((await bearer('POST', '/api/password', { old: 'segredo1', pass: 'qualquer1' })).status, 403, 'token não troca senha');
+
+  const lista = (await mestre('GET', '/api/tokens')).body.tokens;
+  assert.equal(lista.length, 1);
+  assert.equal(lista[0].hash, undefined, 'o hash não sai da API');
+  assert.equal(lista[0].token, undefined, 'o token não aparece de novo');
+  assert.ok(lista[0].usado, 'registra o último uso');
+
+  assert.equal((await mestre('PATCH', `/api/tokens/${novo.body.id}`, { pausado: true })).status, 200);
+  assert.equal((await bearer('GET', '/api/state')).status, 403, 'token pausado é recusado');
+  await mestre('PATCH', `/api/tokens/${novo.body.id}`, { pausado: false });
+  assert.equal((await bearer('GET', '/api/state')).status, 200, 'retomado volta a funcionar');
+  assert.equal((await ana('GET', '/api/tokens')).body.tokens.length, 0, 'cada um vê só os próprios tokens');
+  assert.equal((await ana('DELETE', `/api/tokens/${novo.body.id}`)).status, 404);
+
+  const reg = (await mestre('GET', `/api/audit?token=${novo.body.id}`)).body.registros;
+  assert.ok(reg.some((e) => e.acao.startsWith('Alterou a ficha ') && e.acao.length > 16 && e.status === 200), 'auditoria nomeia a ficha');
+  assert.ok(reg.some((e) => e.status === 403 && e.acao === 'Consultou fichas e mesas'), 'tentativa com token pausado fica registrada');
+  const todos = (await mestre('GET', '/api/audit')).body.registros;
+  assert.ok(todos.some((e) => e.via === 'conta' && e.acao === 'Pausou o token Claude'));
+  assert.equal((await ana('GET', '/api/audit')).body.registros.length, 0, 'auditoria é só do dono');
+
+  assert.equal((await mestre('DELETE', `/api/tokens/${novo.body.id}`)).status, 200);
+  assert.equal((await bearer('GET', '/api/state')).status, 401, 'token removido para de funcionar');
+});
+
+test('preferências e nome da conta', async () => {
+  const st = (await bruno('PATCH', '/api/me', { prefs: { tema: 'escuro', abrirTravada: false, abaInicial: 'combate' } })).body;
+  assert.deepEqual(st.me.prefs, { tema: 'escuro', abrirTravada: false, abaInicial: 'combate' });
+  assert.equal((await bruno('PATCH', '/api/me', { prefs: { tema: 'roxo' } })).body.me.prefs.tema, 'escuro', 'valor inválido é ignorado');
+  assert.equal((await bruno('PATCH', '/api/me', { name: 'ana' })).status, 409, 'nome de outra conta');
+  assert.equal((await bruno('PATCH', '/api/me', { name: 'Bruno Silva' })).body.me.name, 'Bruno Silva');
+  const outro = client();
+  assert.equal((await outro('POST', '/api/login', { name: 'bruno silva', pass: 'segredo3' })).status, 200, 'entra com o nome novo');
+  assert.equal((await bruno('POST', '/api/sessions/sair-outras')).body.encerradas, 1);
+  assert.equal((await outro('GET', '/api/state')).status, 401, 'a outra sessão caiu');
+  assert.equal((await bruno('GET', '/api/state')).status, 200, 'a sessão atual continua');
+});
+
+test('configurações da mesa', async () => {
+  const st = (await mestre('POST', '/api/mesas', { nome: 'Mesa de sábado' })).body;
+  const nova = st.mesas.find((m) => m.nome === 'Mesa de sábado');
+  assert.equal(nova.convites, true);
+  assert.equal(nova.libAuto, false);
+  await mestre('PATCH', `/api/mesas/${nova.id}`, { descricao: 'Sábados às 20h', convites: false, libAuto: true });
+  assert.equal((await bruno('POST', '/api/mesas/join', { code: nova.code })).status, 403, 'convites fechados');
+  await mestre('PATCH', `/api/mesas/${nova.id}`, { convites: true });
+  const sb = (await bruno('POST', '/api/mesas/join', { code: nova.code })).body;
+  const vista = sb.mesas.find((m) => m.id === nova.id);
+  assert.equal(vista.descricao, 'Sábados às 20h', 'jogador vê a descrição');
+  assert.equal(vista.convites, undefined, 'jogador não vê as opções do mestre');
+  assert.equal((await bruno('PATCH', `/api/mesas/${nova.id}`, { libAuto: false })).status, 403);
+
+  const f = (await bruno('POST', '/api/chars', { data: { name: 'Kael' }, mesa: nova.id })).body;
+  assert.ok((await mestre('GET', '/api/state')).body.chars.find((c) => c.id === f.id).lib, 'ficha nova entra liberada');
+  await mestre('POST', `/api/mesas/${nova.id}/lib`, { lib: false });
+  assert.equal((await mestre('GET', '/api/state')).body.chars.find((c) => c.id === f.id).lib, false, 'ocultar todas');
+  assert.equal((await intruso('POST', `/api/mesas/${nova.id}/lib`, { lib: true })).status, 401);
+});

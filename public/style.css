@@ -184,3 +184,27 @@ body.nochar .vit,body.nochar .hpb,body.nochar .seg,body.nochar nav,body.nochar #
   .panel .pick{min-height:48px;padding:8px 10px}
   body.nochar main{align-self:start}
 }
+/* configurações: conta e mesa */
+body.cfg .vit,body.cfg .hpb,body.cfg .seg,body.cfg .acts{display:none}
+.sw{display:flex;align-items:center;gap:12px;padding:12px 0 0;border-top:1px solid var(--line);margin-top:14px}
+.sw>div{flex:1}.sw b{display:block;font-weight:600;font-size:15px}.sw span{display:block;font-size:13px;color:var(--mut)}
+.sw .tog{min-height:40px}
+.segl{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:4px}
+.segl button{flex:1;border:0;background:var(--field);font-size:14px;font-weight:600;min-height:40px;color:var(--mut);padding:0 6px}
+.segl button+button{border-left:1px solid var(--line)}
+.segl button.on{background:var(--red);color:#fff}
+.cmd{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all;margin:10px 0 8px}
+.fresh{border:1px solid var(--gold);border-radius:12px;padding:10px 12px;margin-top:10px;background:light-dark(#fdf6e7,#2a2417)}
+.copyrow{display:flex;gap:8px;align-items:center}.copyrow code{flex:1;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+.tk{border-top:1px solid var(--line);padding:12px 0}.tk:first-child{border-top:0;padding-top:0}.tk:last-child{padding-bottom:0}
+.tkh{display:flex;align-items:center;gap:8px}.tkh b{flex:1}
+.tk.off b{color:var(--mut)}
+.tk code{font:12px ui-monospace,Menlo,Consolas,monospace}
+.badge{font-size:12px;font-weight:700;border-radius:10px;padding:2px 8px;color:var(--mut);border:1px solid var(--line)}
+.badge.ok{color:light-dark(#2f7d4a,#7fd49b);border-color:currentColor}
+.log{list-style:none;margin:10px 0 0;padding:0;max-height:620px;overflow:auto}
+.log li{display:grid;grid-template-columns:88px minmax(0,1fr);gap:0 10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.log li:first-child{border-top:0}
+.log time{font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums;grid-row:span 2;padding-top:2px}
+.log em{font-style:normal;font-size:12px;color:var(--mut)}
+.log li.bad span,.log li.bad em{color:var(--redt)}

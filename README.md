@@ -67,9 +67,16 @@ Para redefinir uma senha: `docker compose stop app`, depois `docker compose run 
 
 ## Primeira sessão
 
-1. O mestre cria a conta, abre o menu ☰ e cria a mesa em **Criar mesa**. O código de convite aparece logo abaixo do nome da mesa.
+1. O mestre cria a conta, abre o menu ☰ e cria a mesa em **Criar mesa**. O código de convite aparece no menu, junto da mesa.
 2. Cada jogador cria a conta, cria a ficha (ou começa pelo exemplo), entra na mesa pelo menu ☰ com o código e escolhe a mesa na aba **Principal** da ficha.
 3. No menu ☰, o mestre vê as fichas da mesa e toca em **Oculta/Liberada** para decidir o que os outros jogadores podem ver.
+
+## Configurações
+
+O botão **Configurações** do menu ☰ abre duas abas:
+
+- **Conta:** nome, tema, se as fichas abrem em modo leitura e qual aba aparece primeiro (valem em todos os aparelhos), troca de senha, sair dos outros aparelhos, os tokens para assistentes e o registro de auditoria.
+- **Mesa:** escolha a mesa. O mestre muda o nome e a descrição, copia ou troca o código, fecha a mesa para jogadores novos, decide se as fichas novas já entram liberadas, libera ou oculta todas de uma vez, remove jogadores e apaga a mesa. Os jogadores veem a descrição, quem está na mesa e podem sair dela.
 
 ## Backup e senhas
 
@@ -83,21 +90,26 @@ Para redefinir uma senha: `docker compose stop app`, depois `docker compose run 
 
 ## Assistente (MCP)
 
-`mcp.js` é um servidor [MCP](https://modelcontextprotocol.io) que deixa um assistente como o Claude ler e mexer nas fichas e mesas. Ele entra no app como uma conta normal e usa a mesma API dos celulares, então segue as mesmas regras de acesso e quem estiver com a ficha aberta vê as mudanças na hora. Use a conta do mestre para o assistente enxergar todas as fichas da mesa.
+`mcp.js` é um servidor [MCP](https://modelcontextprotocol.io) que deixa um assistente como o Claude ler e mexer nas fichas e mesas. Ele entra no app com um **token de conta**, nunca com a senha, e usa a mesma API dos celulares: segue as mesmas regras de acesso, e quem estiver com a ficha aberta vê as mudanças na hora. Use um token da conta do mestre para o assistente enxergar todas as fichas da mesa.
 
-O servidor do app precisa estar rodando (`npm start`). Para ligar no Claude Code, rode isto na pasta do projeto:
+Para ligar no Claude Code:
 
-```bash
-claude mcp add ficha-dnd --scope local -e FICHA_URL=http://localhost:3000 -e FICHA_USUARIO="Nome da conta" -e FICHA_SENHA="senha" -- node /caminho/para/ficha-dnd/mcp.js
-```
+1. Com o app rodando, abra **Configurações › Conta** e gere um token em **Assistente (MCP)**. Ele aparece uma vez só.
+2. Escolha **Node neste computador** ou **Docker**, confira a pasta do projeto e copie a linha pronta. Ela fica assim:
 
-O escopo `local` guarda a senha só na configuração do seu usuário, fora do repositório.
+   ```bash
+   claude mcp add ficha-dnd --scope local -e FICHA_URL=http://localhost:3000 -e FICHA_TOKEN=fdnd_... -- node /caminho/para/ficha-dnd/mcp.js
+   ```
 
-Com Docker, o MCP também roda em container e liga o app sozinho se ele estiver parado:
+   No Docker, o MCP roda em container e liga o app sozinho se ele estiver parado:
 
-```bash
-claude mcp add ficha-dnd --scope local -e FICHA_USUARIO="Nome da conta" -e FICHA_SENHA="senha" -- docker compose -f /caminho/para/ficha-dnd/compose.yaml run --rm -T mcp
-```
+   ```bash
+   claude mcp add ficha-dnd --scope local -e FICHA_TOKEN=fdnd_... -- docker compose -f /caminho/para/ficha-dnd/compose.yaml run --rm -T mcp
+   ```
+
+3. Rode a linha no terminal. O escopo `local` guarda o token só na configuração do seu usuário, fora do repositório.
+
+Na mesma tela você pausa um token (as chamadas passam a ser recusadas até retomar), remove (perde o acesso de vez) e vê o registro de auditoria: cada chamada feita com cada token, com data, ação, ficha ou mesa afetada e se foi recusada, além de quando os tokens foram criados, pausados ou removidos. Um token não troca senha, não mexe em tokens nem lê a auditoria: isso só com nome e senha no app. O servidor guarda só o hash do token.
 
 | Ferramenta | O que faz |
 |---|---|
@@ -115,7 +127,7 @@ Fichas e mesas podem ser indicadas pelo nome. As rolagens feitas pelo assistente
 
 A skill [`mestre-dnd`](.claude/skills/mestre-dnd/SKILL.md) faz o Claude conduzir a sessão no chat: narra, interpreta NPCs, pede testes, roda o combate com iniciativa e aplica dano, cura e condições nas fichas, que mudam ao vivo nos celulares. Ela já vem com o repositório: abra o Claude Code nesta pasta, com o MCP ligado, e peça algo como "vamos jogar, mestra pra gente na mesa A Mina Perdida".
 
-A conta usada pelo MCP precisa ser a **mestre da mesa**, porque só o mestre pode mudar as fichas dos jogadores. Os monstros viram fichas ocultas dessa conta, e o resumo da campanha fica numa ficha "Diário: nome da mesa", para a próxima sessão continuar de onde parou.
+O token usado pelo MCP precisa ser de uma conta **mestre da mesa**, porque só o mestre pode mudar as fichas dos jogadores. Os monstros viram fichas ocultas dessa conta, e o resumo da campanha fica numa ficha "Diário: nome da mesa", para a próxima sessão continuar de onde parou.
 
 ## Limites
 
@@ -129,7 +141,7 @@ A conta usada pelo MCP precisa ser a **mestre da mesa**, porque só o mestre pod
 npm test
 ```
 
-Os testes cobrem as regras de acesso: cadastro, mesas, código de convite, fichas ocultas e liberadas, edição pelo mestre e persistência. Também cobrem o servidor MCP de ponta a ponta.
+Os testes cobrem as regras de acesso: cadastro, mesas, código de convite, fichas ocultas e liberadas, edição pelo mestre, tokens de conta (pausar, remover e auditoria), preferências da conta, configurações da mesa e persistência. Também cobrem o servidor MCP de ponta a ponta.
 
 ## Estrutura
 
