@@ -247,7 +247,7 @@ function createApp({ dataFile }) {
     const gestao = (acao) => audit({ uid: u, acao, status: 200, via: 'conta' });
 
     if (p === '/api/state' && m === 'GET') return stateFor(u);
-    if (p === '/api/info' && m === 'GET') return { docker: !!process.env.IN_DOCKER, pasta: process.env.IN_DOCKER ? null : __dirname };
+    if (p === '/api/info' && m === 'GET') return { docker: !!process.env.IN_DOCKER, pasta: process.env.IN_DOCKER ? null : __dirname, mapas: { url: process.env.MAPAS_PUBLICA || null, porta: +process.env.MAPAS_PORTA || 3001 } };
 
     // conta: nome e preferências
     if (p === '/api/me' && m === 'PATCH') {

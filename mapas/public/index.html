@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#9e1b22">
+<title>Mapas D&amp;D 5e</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <button class="ib" data-a="drawer" aria-label="Mapas e mesas" title="Mapas e mesas"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <div class="who"><h1 id="nm">Mapas</h1><p id="sub"></p></div>
+  <a class="ib" id="fichas" target="fichas" aria-label="Abrir as fichas" title="Abrir as fichas"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></svg></a>
+</header>
+<div class="wrap">
+  <main id="stage">
+    <canvas id="cv" tabindex="0" aria-label="Mapa"></canvas>
+    <div id="empty"></div>
+    <div class="tools" id="tools" role="toolbar" aria-label="Ferramentas"></div>
+    <div class="zoom" id="zoom">
+      <button data-a="zin" aria-label="Aproximar" title="Aproximar (+)"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button data-a="zout" aria-label="Afastar" title="Afastar (−)"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+      <button data-a="fit" aria-label="Ver o mapa inteiro" title="Ver o mapa inteiro (0)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    </div>
+    <p class="conn" id="conn" hidden>Sem conexão com o servidor. Tentando de novo…</p>
+  </main>
+  <aside class="side" id="side" aria-live="polite"></aside>
+</div>
+<div class="sheet" id="sheet" data-a="close"><div class="panel" id="panel"></div></div>
+<div id="toast" role="status"></div>
+<script src="app.js"></script>
+</body>
+</html>

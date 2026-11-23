@@ -233,13 +233,14 @@ function row(c,lib){const on=c===C();const m=mesaOf(c.mesa);
   const info=[isOwn(c)?'Você':c._ownerName,subline(c),lib===undefined&&m?m.nome:'',lib===undefined&&isLib(c)?'liberada':''].filter(Boolean).join(' · ');
   return `<div class="prow"><button class="pick ${on?'on':''}" data-a="open" data-v="${esc(c.id)}"><div><b>${esc(c.name||'Sem nome')}</b><span>${esc(info)}</span></div></button>${lib?`<button class="tog ${isLib(c)?'on':''}" data-a="lib" data-v="${esc(c.id)}" aria-pressed="${isLib(c)}">${isLib(c)?'Liberada':'Oculta'}</button>`:''}</div>`}
 const armBtn=(key,label,confirm,cls='warn')=>`<button class="btn sm ${cls}" data-a="${key.split(':')[0]}" data-v="${esc(key.split(':').slice(1).join(':'))}">${arm===key?confirm:label}</button>`;
+function mapasUrl(){const x=K.info&&K.info.mapas;return x&&x.url?x.url.replace(/\/+$/,''):`${location.protocol}//${location.hostname}:${x?x.porta:3001}`}
 function drawer(){const p=$('panel');const mine=myChars();const all=[...S.chars.values()];let b='';
   b+=`<div class="role" style="display:flex;align-items:center;gap:8px"><span style="flex:1">Conectado como <b>${esc(S.me.name)}</b>.${S.online?'':' Sem conexão com o servidor agora.'}</span><button class="btn sm" data-a="cfg" data-v="conta">Configurações</button></div>`;
   b+=`<div class="grp" style="border:0;margin:0;padding:0"><h3>Minhas fichas</h3>${mine.length?mine.map(c=>row(c)).join(''):'<p class="note">Você ainda não tem fichas.</p>'}
     <div class="btns"><button class="btn pri" data-a="new">Nova ficha</button><button class="btn" data-a="sample">Ficha de exemplo</button></div></div>`;
   for(const m of S.mesas){const mestre=isMestre(m);const list=all.filter(c=>c.mesa===m.id&&(mestre||!isOwn(c)));
     const n=m.membros.length-1;
-    b+=`<div class="grp"><h3><span style="flex:1">${esc(m.nome)}</span><button class="btn sm" data-a="cfg" data-v="mesa|${esc(m.id)}">${mestre?'Configurar':'Detalhes'}</button></h3>`;
+    b+=`<div class="grp"><h3><span style="flex:1">${esc(m.nome)}</span><a class="btn sm" href="${esc(mapasUrl())}/#mesa/${esc(m.id)}" target="mapas">Mapa</a><button class="btn sm" data-a="cfg" data-v="mesa|${esc(m.id)}">${mestre?'Configurar':'Detalhes'}</button></h3>`;
     b+=mestre?`<p class="note" style="margin:0 0 8px">Você é o mestre · código <b>${esc(m.code)}</b> · ${n} ${n===1?'jogador':'jogadores'}${m.convites?'':' · convites fechados'}</p>`
       :`<p class="note" style="margin:0 0 8px">Mestre: ${esc((m.membros.find(x=>x.id===m.mestre)||{}).name||'?')}. Abaixo, as fichas que ele liberou.</p>`;
     b+=list.length?list.map(c=>row(c,mestre)).join(''):`<p class="note">${mestre?'Nenhuma ficha nesta mesa ainda. Os jogadores escolhem a mesa na aba Principal da ficha.':'Nenhuma ficha liberada ainda.'}</p>`;
@@ -417,13 +418,13 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
   }});
 function route(){const h=decodeURIComponent(location.hash.slice(1));
   if(h.startsWith('config')){const [,t,id]=h.split('/');S.page='config';S.cfgTab=t==='mesa'?'mesa':'conta';if(id)S.cfgMesa=id;return}
-  S.page='ficha';if(TABS.some(t=>t[0]===h))S.tab=h}
+  S.page='ficha';if(h.startsWith('ficha/')){S.view=h.slice(6);return}if(TABS.some(t=>t[0]===h))S.tab=h}
 window.addEventListener('hashchange',()=>{route();if(S.me)render()});
 window.addEventListener('popstate',()=>{route();if(S.me)render()});
 
 /* ---------- início ---------- */
 loadPrefs();
 const h0=location.hash.slice(1);route();
-(async()=>{try{applyState(await api('GET','/api/state'));const pf=S.me.prefs||{};if(typeof pf.abrirTravada==='boolean')S.locked=pf.abrirTravada;if(!h0&&pf.abaInicial)S.tab=pf.abaInicial;render();listen()}catch(e){if(e.status===401)showAuth();else{showAuth();$('aerr').textContent='Não foi possível falar com o servidor. Ele está ligado?'}}})();
+(async()=>{try{applyState(await api('GET','/api/state'));const pf=S.me.prefs||{};if(typeof pf.abrirTravada==='boolean')S.locked=pf.abrirTravada;if(!h0&&pf.abaInicial)S.tab=pf.abaInicial;render();listen();api('GET','/api/info').then(i=>{K.info=i}).catch(()=>{})}catch(e){if(e.status===401)showAuth();else{showAuth();$('aerr').textContent='Não foi possível falar com o servidor. Ele está ligado?'}}})();
 
 }
