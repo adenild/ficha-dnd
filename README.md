@@ -81,6 +81,12 @@ O escopo `local` guarda a senha só na configuração do seu usuário, fora do r
 
 Fichas e mesas podem ser indicadas pelo nome. As rolagens feitas pelo assistente não aparecem nos celulares, só as mudanças na ficha.
 
+### Jogar com o Claude como mestre
+
+A skill [`mestre-dnd`](.claude/skills/mestre-dnd/SKILL.md) faz o Claude conduzir a sessão no chat: narra, interpreta NPCs, pede testes, roda o combate com iniciativa e aplica dano, cura e condições nas fichas, que mudam ao vivo nos celulares. Ela já vem com o repositório: abra o Claude Code nesta pasta, com o MCP ligado, e peça algo como "vamos jogar, mestra pra gente na mesa A Mina Perdida".
+
+A conta usada pelo MCP precisa ser a **mestre da mesa**, porque só o mestre pode mudar as fichas dos jogadores. Os monstros viram fichas ocultas dessa conta, e o resumo da campanha fica numa ficha "Diário: nome da mesa", para a próxima sessão continuar de onde parou.
+
 ## Limites
 
 - O servidor usa HTTP sem criptografia, pensado só para a rede de casa. Não o exponha na internet sem colocar HTTPS na frente (por exemplo com Caddy ou um túnel).
