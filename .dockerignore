@@ -1,6 +1,4 @@
 *
 !package.json
-!server.js
-!mcp.js
-!public/
-!mapas/
+!suite.js
+!apps/

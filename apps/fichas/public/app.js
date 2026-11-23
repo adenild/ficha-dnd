@@ -11,7 +11,7 @@ const COINS=[['pc','PC'],['pp','PP'],['pe','PE'],['po','PO'],['pl','PL']];
 
 /* ---------- estado ---------- */
 const MUT=new Set(['sv','sk','insp','cond','ds','slot','prep','add','rm','dmg','heal','hd','long']);
-const S={me:null,mesas:[],chars:new Map(),view:null,locked:true,mode:0,tab:'principal',page:'inicio',mesaAtual:null,loc:new Map(),locOk:false,cfgTab:'conta',cfgMesa:null,online:true,authMode:'login',pending:new Set(),busy:new Set()};
+const S={me:null,mesas:[],chars:new Map(),view:null,locked:true,mode:0,tab:'principal',page:'inicio',mesaAtual:null,mesaTab:'mesa',alvo:null,loc:new Map(),locOk:false,cfgTab:'conta',cfgMesa:null,online:true,authMode:'login',pending:new Set(),busy:new Set()};
 let hist=[],lastPush=0,toastT,pendR=false,arm=null,refreshT=null,es=null;
 const saveT={};
 const $=id=>document.getElementById(id);
@@ -160,7 +160,7 @@ function head(){const c=C();$('nm').textContent=c.name||'Sem nome';$('sub').text
   else{if(m)w.push(`Mesa <button class="crumb" data-a="gomesa" data-v="${esc(m.id)}">${esc(m.nome)}</button>`);
     if(!isOwn(c))w.push(esc('Ficha de '+(c._ownerName||'outro jogador')+(canWrite(c)?' · você está editando como mestre':' · liberada pelo mestre, somente leitura')));
     else if(m&&isLib(c))w.push('liberada para a mesa');
-    if(l)w.push(`<a class="crumb" href="${esc(tokHref(l))}" target="mapas">${ico('pin')}${esc(l.mapaNome)}</a>`)}
+    if(l)w.push(`<a class="crumb" href="${esc(tokHref(l))}">${ico('pin')}${esc(l.mapaNome)}</a>`)}
   $('who2').innerHTML=w.join(' · ');
   $('vit').innerHTML=`<div class="shield">${shield()}<b data-d="ac">${esc(c.ac)}</b><span>CA</span></div><div><b data-d="hpt">${calc('hpt',c)}</b><span>PV</span></div><div><b data-d="init">${calc('init',c)}</b><span>Inic.</span></div><div><b data-d="prof">${calc('prof',c)}</b><span>Prof.</span></div><div><b data-d="spd">${calc('spd',c)}</b><span>Desl.</span></div>`;
   $('seg').innerHTML=['Normal','Vantagem','Desvantagem'].map((t,i)=>`<button class="${S.mode===i?'on':''}" data-a="mode" data-v="${i}">${t}</button>`).join('');
@@ -169,6 +169,7 @@ function hpbar(){const c=C();if(!c)return;const p=Math.max(0,Math.min(100,(+c.hp
 function render(){
   if(!S.me)return showAuth();
   document.body.classList.remove('auth');document.body.dataset.page=S.page;rail();
+  if(S.page!=='mesa'){$('mapview').hidden=true;document.body.classList.remove('mapon')}
   if(S.page==='config')return renderConfig();
   document.body.classList.remove('cfg');
   if(S.page!=='ficha')return renderMenu();
@@ -236,7 +237,7 @@ function row(c,lib){const on=c===C();const m=mesaOf(c.mesa);
   return `<div class="prow"><button class="pick ${on?'on':''}" data-a="open" data-v="${esc(c.id)}"><div><b>${esc(c.name||'Sem nome')}</b><span>${esc(info)}</span></div></button>${lib?`<button class="tog ${isLib(c)?'on':''}" data-a="lib" data-v="${esc(c.id)}" aria-pressed="${isLib(c)}">${isLib(c)?'Liberada':'Oculta'}</button>`:''}</div>`}
 const armBtn=(key,label,confirm,cls='warn')=>`<button class="btn sm ${cls}" data-a="${key.split(':')[0]}" data-v="${esc(key.split(':').slice(1).join(':'))}">${arm===key?confirm:label}</button>`;
 function mapasUrl(){const x=K.info&&K.info.mapas;return x&&x.url?x.url.replace(/\/+$/,''):`${location.protocol}//${location.hostname}:${x?x.porta:3001}`}
-const tokHref=l=>`${mapasUrl()}/#mapa/${l.mapa}/token/${l.token}`;
+const tokHref=l=>`#mesa/${l.mesa}/mapas/${l.mapa}/${l.token}`;
 const locOf=id=>S.loc.get(id)||[];
 const mestreNome=m=>(m.membros.find(x=>x.id===m.mestre)||{}).name||'?';
 const ini=n=>{const w=String(n||'?').trim().split(/\s+/);const l=w[w.length-1];return((w.length>1&&/^\d+$/.test(l))?w[0][0]+l:w.length>1?w[0][0]+l[0]:w[0].slice(0,2)).toUpperCase()};
@@ -245,12 +246,15 @@ const IC={home:'<path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>',pe
   plus:'<path d="M12 5v14M5 12h14"/>',cfg:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>'};
 const ico=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
 const fichaHash=c=>c.mesa?`#mesa/${c.mesa}/ficha/${c.id}`:`#ficha/${c.id}`;
+const mesaHash=()=>'#mesa/'+S.mesaAtual+(S.mesaTab==='mapas'?'/mapas'+(S.alvo?`/${S.alvo.mapa}${S.alvo.tok?'/'+S.alvo.tok:''}`:''):'');
 // troca de página; ao abrir uma ficha, o endereço já diz em que mesa ela está
 function go(page,arg,push=true){
   if(page==='ficha'){const c=S.chars.get(arg||S.view);if(!c)return go('personagens',null,push);if(S.view!==c.id){S.view=c.id;hist=[];S.locked=S.me.prefs?S.me.prefs.abrirTravada!==false:S.locked}prefs()}
-  if(page==='mesa')S.mesaAtual=arg;
+  if(page==='mapas'){const [mid,mapa,tok]=String(arg||'').split('|');const m=mesaOf(mid)||mesaOf(S.mesaAtual)||S.mesas[0];if(!m)return go('inicio',null,push);
+    S.mesaAtual=m.id;S.mesaTab='mapas';S.alvo=mapa?{mapa,tok:tok||''}:null;page='mesa'}
+  else if(page==='mesa'){S.mesaAtual=arg;S.mesaTab='mesa'}
   S.page=page;arm=null;
-  const h=page==='ficha'?fichaHash(C()):page==='mesa'?'#mesa/'+arg:page==='config'?cfgHash():'#'+page;
+  const h=page==='ficha'?fichaHash(C()):page==='mesa'?mesaHash():page==='config'?cfgHash():'#'+page;
   if(location.hash!==h)history[push?'pushState':'replaceState'](null,'',h);
   render();scrollTo(0,0);if(page!=='config')loadLoc()}
 // onde os personagens estão nos mapas (o servidor pergunta ao serviço de mapas, com as regras dele)
@@ -266,10 +270,11 @@ function rail(){const r=$('rail'),c=C(),pg=S.page,ficha=pg==='ficha'&&c;
   let h=it('go','inicio',ico('home'),'Início',pg==='inicio')+it('go','personagens',ico('pers'),'Personagens',pg==='personagens');
   if(c)h+=it('go','ficha',`<i class="rav pc">${esc(ini(c.name))}</i>`,'Ficha: '+(c.name||'sem nome'),pg==='ficha',nome1(c.name));
   h+='<hr>';
-  for(const m of S.mesas)h+=it('gomesa',m.id,`<i class="rav${isMestre(m)?' gm':''}">${esc(ini(m.nome))}</i>`,m.nome,(pg==='mesa'&&S.mesaAtual===m.id)||(ficha&&c.mesa===m.id));
+  const naMapas=pg==='mesa'&&S.mesaTab==='mapas';
+  for(const m of S.mesas)h+=it('gomesa',m.id,`<i class="rav${isMestre(m)?' gm':''}">${esc(ini(m.nome))}</i>`,m.nome,(pg==='mesa'&&!naMapas&&S.mesaAtual===m.id)||(ficha&&c.mesa===m.id));
   h+=it('novamesa','',`<i class="rav add">${ico('plus')}</i>`,'Entrar ou criar mesa',false,'Nova mesa')+'<hr>';
-  const mm=mesaOf(S.mesaAtual);
-  h+=`<a class="ri" href="${esc(mapasUrl())}/${mm?'#mesa/'+esc(mm.id):''}" target="mapas" title="Mapas" aria-label="Mapas">${ico('mapa')}<span>Mapas</span></a><div class="rsp"></div>`;
+  h+=S.mesas.length?it('gomapas','',ico('mapa'),'Mapas da mesa',naMapas,'Mapas'):`<a class="ri" href="${esc(mapasUrl())}/" target="mapas" title="Mapas" aria-label="Mapas">${ico('mapa')}<span>Mapas</span></a>`;
+  h+='<div class="rsp"></div>';
   h+=it('cfg','conta',ico('cfg'),'Configurações',pg==='config','Ajustes');
   r.innerHTML=h}
 // Início, Personagens e Mesa
@@ -280,11 +285,22 @@ function renderMenu(){const b=document.body;b.classList.add('menu');b.classList.
   $('nm').textContent=pg==='mesa'?m.nome:pg==='personagens'?'Personagens':'Início';
   $('sub').textContent=pg==='mesa'?(isMestre(m)?'Você é o mestre desta mesa':'Mestre: '+mestreNome(m)):'Conectado como '+S.me.name;
   $('who2').textContent=S.online?'':'Sem conexão com o servidor.';$('vit').innerHTML='';$('seg').innerHTML='';
-  const c=C(),mm=mesaOf(S.mesaAtual);
+  const c=C(),naMapas=pg==='mesa'&&S.mesaTab==='mapas';
   $('nav').innerHTML=[['inicio','Início','home'],['personagens','Personagens','pers'],...(c?[['ficha','Ficha','ficha']]:[])].map(([k,t,i])=>`<button class="ni ${pg===k?'on':''}" data-a="go" data-v="${k}">${ico(i)}${t}</button>`).join('')
-    +`<a class="ni" href="${esc(mapasUrl())}/${mm?'#mesa/'+esc(mm.id):''}" target="mapas">${ico('mapa')}Mapas</a><button class="ni" data-a="cfg" data-v="conta">${ico('cfg')}Ajustes</button>`;
-  $('main').innerHTML=(pg==='mesa'?pMesa(m):pg==='personagens'?pPersonagens():pInicio())+`<p class="status" id="st">${esc(statusText())}</p>`}
-function locLink(c){const l=locOf(c.id);if(!l.length)return '';const x=l[0];return `<a class="loc" href="${esc(tokHref(x))}" target="mapas">${ico('pin')}No mapa ${esc(x.mapaNome)}${l.length>1?` e em mais ${l.length-1}`:''}</a>`}
+    +(S.mesas.length?`<button class="ni ${naMapas?'on':''}" data-a="gomapas" data-v="">${ico('mapa')}Mapas</button>`:`<a class="ni" href="${esc(mapasUrl())}/" target="mapas">${ico('mapa')}Mapas</a>`)+`<button class="ni" data-a="cfg" data-v="conta">${ico('cfg')}Ajustes</button>`;
+  if(pg==='mesa'){
+    const abas=`<div class="mtabs" role="tablist" aria-label="Mesa ${esc(m.nome)}"><button role="tab" aria-selected="${!naMapas}" class="${naMapas?'':'on'}" data-a="gomesa" data-v="${esc(m.id)}">Mesa</button><button role="tab" aria-selected="${naMapas}" class="${naMapas?'on':''}" data-a="gomapas" data-v="${esc(m.id)}">Mapas</button>${naMapas?`<a class="btn sm" href="${esc(mapasUrl())}/#mesa/${esc(m.id)}" target="mapas">Abrir em outra aba</a>`:''}</div>`;
+    $('main').innerHTML=abas+(naMapas?'':pMesa(m)+`<p class="status" id="st">${esc(statusText())}</p>`);mapView(naMapas,m);return}
+  $('main').innerHTML=(pg==='personagens'?pPersonagens():pInicio())+`<p class="status" id="st">${esc(statusText())}</p>`}
+// a aba de mapas embute o app de mapas; o quadro fica fora de #main para não recarregar a cada atualização
+function mapView(on,m){const v=$('mapview');v.hidden=!on;document.body.classList.toggle('mapon',on);if(!on)return;
+  const a=S.alvo,src=`${mapasUrl()}/#${a?`mapa/${a.mapa}${a.tok?'/token/'+a.tok:''}`:'mesa/'+m.id}`,f=$('mapif');
+  if(f.dataset.src!==src){f.dataset.src=src;f.src=src}
+  requestAnimationFrame(fitMap)}
+function fitMap(){const v=$('mapview');if(v.hidden)return;const n=$('nav'),nb=n&&getComputedStyle(n).position==='fixed'?n.offsetHeight:0;
+  v.style.height=Math.max(320,innerHeight-v.getBoundingClientRect().top-nb-12)+'px'}
+addEventListener('resize',fitMap);
+function locLink(c){const l=locOf(c.id);if(!l.length)return '';const x=l[0];return `<a class="loc" href="${esc(tokHref(x))}">${ico('pin')}No mapa ${esc(x.mapaNome)}${l.length>1?` e em mais ${l.length-1}`:''}</a>`}
 function pcard(c){const m=mesaOf(c.mesa);const p=Math.max(0,Math.min(100,(+c.hp.cur||0)/Math.max(1,+c.hp.max||1)*100));
   return `<section class="card"><button class="hcard" data-a="open" data-v="${esc(c.id)}"><span class="mav pc">${esc(ini(c.name))}</span><span><b>${esc(c.name||'Sem nome')}</b><small>${esc(subline(c)||'Classe ainda não definida')}</small></span></button>
   <div class="pcm"><span>${m?'Mesa: '+esc(m.nome):'Sem mesa'}</span><span>PV ${esc(c.hp.cur)}/${esc(c.hp.max)} · CA ${esc(c.ac)}</span></div>
@@ -295,7 +311,7 @@ function pInicio(){const mine=myChars().sort(byUpd);
   const mesas=S.mesas.map(m=>{const mestre=isMestre(m),meus=mine.filter(c=>c.mesa===m.id),n=m.membros.length-1;
     return `<section class="card"><button class="hcard" data-a="gomesa" data-v="${esc(m.id)}"><span class="mav${mestre?' gm':''}">${esc(ini(m.nome))}</span><span><b>${esc(m.nome)}</b><small>${mestre?'Você é o mestre':'Mestre: '+esc(mestreNome(m))} · ${n} ${n===1?'jogador':'jogadores'}</small></span></button>
     ${meus.length?`<div class="chips" style="margin-bottom:12px">${meus.map(c=>`<button class="chip" data-a="open" data-v="${esc(c.id)}">${esc(c.name||'Sem nome')}</button>`).join('')}</div>`:`<p class="note">${mestre?'Abra a mesa para ver as fichas dos jogadores.':'Nenhum personagem seu nesta mesa ainda.'}</p>`}
-    <div class="btns"><button class="btn sm pri" data-a="gomesa" data-v="${esc(m.id)}">Abrir mesa</button><a class="btn sm" href="${esc(mapasUrl())}/#mesa/${esc(m.id)}" target="mapas">Mapa</a></div></section>`}).join('');
+    <div class="btns"><button class="btn sm pri" data-a="gomesa" data-v="${esc(m.id)}">Abrir mesa</button><button class="btn sm" data-a="gomapas" data-v="${esc(m.id)}">Mapas</button></div></section>`}).join('');
   const entrar=`<section class="card"><h2>Entrar numa mesa</h2><div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><input id="jcode" placeholder="Código de convite" autocapitalize="characters" aria-label="Código de convite"><button class="btn pri" data-a="join">Entrar</button></div><p class="foot">Peça o código ao mestre da mesa.</p>
     <h2 style="margin-top:18px">Criar mesa</h2><div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><input id="nmesa" placeholder="Ex.: A Mina Perdida" aria-label="Nome da nova mesa"><button class="btn" data-a="nmesa">Criar</button></div><p class="foot">Quem cria a mesa é o mestre dela.</p></section>`;
   const vazio=`<section class="card"><h2>Nenhuma mesa ainda</h2><p class="note">Entre na mesa do seu mestre com o código de convite, ou crie a sua.</p></section>`;
@@ -315,8 +331,8 @@ function pMesa(m){const mestre=isMestre(m),all=[...S.chars.values()].filter(c=>c
   const trazer=fora.length?card(mestre?'Trazer suas fichas':'Trazer personagem',`<p class="note">${mestre?'Monstros e NPCs seus entram ocultos dos jogadores.':'Leve um personagem seu para esta mesa. Ele sai da mesa em que está agora.'}</p>${fora.map(c=>`<div class="prow"><div class="pick" style="cursor:default"><div><b>${esc(c.name||'Sem nome')}</b><span>${esc(mesaOf(c.mesa)?'Na mesa '+mesaOf(c.mesa).nome:'Sem mesa')}</span></div></div><button class="tog" data-a="trazer" data-v="${esc(c.id)}|${esc(m.id)}">Trazer</button></div>`).join('')}`):'';
   const locs=[...S.loc.values()].flat().filter(l=>l.mesa===m.id&&S.chars.has(l.ficha));
   const mapa=card('Mapas',`<p class="note">${!S.locOk?'Não deu para falar com o serviço de mapas agora.':locs.length?'Onde estão os personagens que você vê:':'Nenhum personagem que você vê está num mapa desta mesa.'}</p>
-    ${locs.map(l=>`<div class="row"><span style="flex:1">${esc(S.chars.get(l.ficha).name||'Sem nome')}</span><a class="loc" style="margin:0" href="${esc(tokHref(l))}" target="mapas">${ico('pin')}${esc(l.mapaNome)}</a></div>`).join('')}
-    <div class="btns" style="margin-top:10px"><a class="btn pri" href="${esc(mapasUrl())}/#mesa/${esc(m.id)}" target="mapas">Abrir os mapas da mesa</a></div>`);
+    ${locs.map(l=>`<div class="row"><span style="flex:1">${esc(S.chars.get(l.ficha).name||'Sem nome')}</span><a class="loc" style="margin:0" href="${esc(tokHref(l))}">${ico('pin')}${esc(l.mapaNome)}</a></div>`).join('')}
+    <div class="btns" style="margin-top:10px"><button class="btn pri" data-a="gomapas" data-v="${esc(m.id)}">Abrir os mapas da mesa</button></div>`);
   const info=card('Na mesa',`${mestre?`<p class="note" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">Código de convite <span class="code" style="font-size:17px;padding:6px 10px">${esc(m.code)}</span></p>`:''}${m.descricao?`<p style="white-space:pre-wrap;margin:0 0 10px">${esc(m.descricao)}</p>`:''}
     <div class="members">${m.membros.map(x=>`<span class="member" style="padding-right:12px">${esc(x.name)}${x.id===m.mestre?' (mestre)':''}</span>`).join('')}</div>
     <div class="btns"><button class="btn sm" data-a="cfg" data-v="mesa|${esc(m.id)}">${mestre?'Configurar mesa':'Detalhes da mesa'}</button></div>`);
@@ -346,9 +362,9 @@ function loadConta(){if(K.loading)return K.loading;
     .finally(()=>{K.loading=null;if(S.me&&S.page==='config'&&S.cfgTab==='conta')softRender()});
   return K.loading}
 function mcpLine(tok){const t=tok||'COLE_O_TOKEN_AQUI';const q=x=>/[\s"]/.test(x)?'"'+x.replace(/"/g,'\\"')+'"':x;
-  const dir=(K.pasta||'/caminho/para/ficha-dnd').replace(/[\\/]+$/,'');const sep=dir.includes('\\')?'\\':'/';
-  if(K.modo==='docker')return `claude mcp add ficha-dnd --scope local -e FICHA_TOKEN=${t} -- docker compose -f ${q(dir+sep+'compose.yaml')} run --rm -T mcp`;
-  return `claude mcp add ficha-dnd --scope local -e FICHA_URL=${K.url||location.origin} -e FICHA_TOKEN=${t} -- node ${q(dir+sep+'mcp.js')}`}
+  const dir=(K.pasta||'/caminho/para/suite-dnd').replace(/[\\/]+$/,'');const sep=dir.includes('\\')?'\\':'/';
+  if(K.modo==='docker')return `claude mcp add suite-dnd --scope local -e FICHA_TOKEN=${t} -- docker compose -f ${q(dir+sep+'compose.yaml')} run --rm -T mcp`;
+  return `claude mcp add suite-dnd --scope local -e FICHA_URL=${K.url||location.origin} -e FICHA_TOKEN=${t} -- node ${q([dir,'apps','mcp','server.js'].join(sep))}`}
 const sw=(title,desc,on,a,v)=>`<div class="sw"><div><b>${title}</b><span>${desc}</span></div><button class="tog ${on?'on':''}" data-a="${a}" data-v="${esc(v)}" aria-pressed="${!!on}">${on?'Ligado':'Desligado'}</button></div>`;
 const segl=(opts,cur,a,pre='')=>`<div class="segl">${opts.map(([k,t])=>`<button class="${cur===k?'on':''}" data-a="${a}" data-v="${esc(pre+k)}" aria-pressed="${cur===k}">${t}</button>`).join('')}</div>`;
 function tConta(){const me=S.me,p=me.prefs||{},nv=K.novo;
@@ -361,7 +377,7 @@ function tConta(){const me=S.me,p=me.prefs||{},nv=K.novo;
     <div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><input id="tknome" placeholder="Nome, ex.: Claude no notebook" maxlength="40" aria-label="Nome do novo token"><button class="btn pri" data-a="tknovo">Gerar token</button></div>
     ${nv?`<div class="fresh"><p class="note" style="margin:0 0 6px"><b>Token “${esc(nv.nome)}” criado.</b> Copie agora: ele não aparece de novo.</p><div class="copyrow"><code id="tkval">${esc(nv.token)}</code><button class="btn sm" data-a="cp" data-v="tkval">Copiar</button></div></div>`:''}
     <label style="margin-top:14px">Linha de configuração do Claude Code</label>${segl([['node','Node neste computador'],['docker','Docker']],K.modo,'mcpmodo')}
-    <div class="g2" style="margin-top:8px"><div class="${K.modo==='docker'?'span2':''}"><label for="mcppasta">Pasta do projeto ficha-dnd</label><input id="mcppasta" data-k2="pasta" value="${esc(K.pasta)}" placeholder="F:\\Dev\\ficha-dnd" spellcheck="false"></div>${K.modo==='node'?`<div><label for="mcpurl">Endereço do app</label><input id="mcpurl" data-k2="url" value="${esc(K.url)}" spellcheck="false"></div>`:''}</div>
+    <div class="g2" style="margin-top:8px"><div class="${K.modo==='docker'?'span2':''}"><label for="mcppasta">Pasta do projeto suite-dnd</label><input id="mcppasta" data-k2="pasta" value="${esc(K.pasta)}" placeholder="F:\\Dev\\ficha-dnd" spellcheck="false"></div>${K.modo==='node'?`<div><label for="mcpurl">Endereço do app</label><input id="mcpurl" data-k2="url" value="${esc(K.url)}" spellcheck="false"></div>`:''}</div>
     <pre class="cmd" id="mcpcmd">${esc(mcpLine(nv&&nv.token))}</pre>
     <div class="btns"><button class="btn sm" data-a="cp" data-v="mcpcmd">Copiar linha</button></div>
     <p class="foot">${nv?'A linha já leva o token novo.':'Gere um token para a linha já sair com ele, ou troque COLE_O_TOKEN_AQUI por um token seu.'} Rode no terminal. O escopo local guarda o token só na sua configuração, fora do repositório.${K.modo==='docker'?' No Docker, o MCP fala com o app pela rede interna e liga o app se ele estiver parado.':''}${K.info&&K.info.docker&&!K.pasta?' Este app roda em Docker: informe a pasta do projeto no seu computador.':''}</p>`);
@@ -447,6 +463,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
   case'menu':go('inicio');break;
   case'go':go(v,v==='ficha'?S.view:null);break;
   case'gomesa':go('mesa',v);break;
+  case'gomapas':go('mapas',v||S.mesaAtual||'');break;
   case'novamesa':go('inicio');setTimeout(()=>{const x=$('jcode');x&&x.focus()},30);break;
   case'open':go('ficha',v);break;
   case'trazer':{const [cid,mid]=v.split('|');const ch=S.chars.get(cid);if(!ch||!isOwn(ch))return;ch.mesa=mid;ch._lib=false;save(ch);render();toast(`<div><b>${esc(ch.name||'Personagem')} está na mesa ${esc((mesaOf(mid)||{}).nome||'')}</b></div>`);break}
@@ -488,7 +505,8 @@ function route(){const h=decodeURIComponent(location.hash.slice(1));let m;
   if(h.startsWith('config')){const [,t,id]=h.split('/');S.page='config';S.cfgTab=t==='mesa'?'mesa':'conta';if(id)S.cfgMesa=id;return}
   if(h==='personagens'){S.page='personagens';return}
   if((m=/^mesa\/([\w-]+)\/ficha\/([\w-]+)$/.exec(h))){S.page='ficha';S.mesaAtual=m[1];S.view=m[2];return}
-  if((m=/^mesa\/([\w-]+)$/.exec(h))){S.page='mesa';S.mesaAtual=m[1];return}
+  if((m=/^mesa\/([\w-]+)\/mapas(?:\/([\w-]+)(?:\/([\w-]+))?)?$/.exec(h))){S.page='mesa';S.mesaAtual=m[1];S.mesaTab='mapas';S.alvo=m[2]?{mapa:m[2],tok:m[3]||''}:null;return}
+  if((m=/^mesa\/([\w-]+)$/.exec(h))){S.page='mesa';S.mesaAtual=m[1];S.mesaTab='mesa';return}
   if((m=/^ficha\/([\w-]+)$/.exec(h))){S.page='ficha';S.view=m[1];return}
   if(TABS.some(t=>t[0]===h)){S.page='ficha';S.tab=h;return}
   S.page='inicio'}

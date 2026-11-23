@@ -11,6 +11,10 @@ const TAM = { 1: 'Médio (1×1)', 2: 'Grande (2×2)', 3: 'Enorme (3×3)', 4: 'Im
 const SAUDE = { ileso: 1, ferido: 0.7, 'muito ferido': 0.35, 'caído': 0 };
 
 const $ = (id) => document.getElementById(id);
+// dentro da aba de mapas do app de fichas: os links para as fichas trocam a página de cima, sem abrir outra aba
+const EMBUTIDO = window.top !== window;
+if (EMBUTIDO) document.documentElement.classList.add('embutido');
+const alvoFichas = EMBUTIDO ? '_top' : 'fichas';
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const store = (k, v) => { try { if (v === undefined) return localStorage.getItem('mapas.' + k); localStorage.setItem('mapas.' + k, v); } catch { return null; } };
@@ -537,7 +541,7 @@ function ui() {
 }
 function vazio() {
   const e = $('empty'); let h = '';
-  const link = `<a class="btn pri" href="${esc(fichaBase())}/" target="fichas">Abrir o app de fichas</a>`;
+  const link = `<a class="btn pri" href="${esc(fichaBase())}/" target="${alvoFichas}">Abrir o app de fichas</a>`;
   if (S.falta === 'conta') h = `<h2>Entre na sua conta</h2><p class="note">Os mapas usam a mesma conta das fichas. Entre no app de fichas por este mesmo endereço (${esc(location.hostname)}) e volte aqui.</p><div class="btns" style="justify-content:center">${link}<button class="btn" data-a="recarregar">Já entrei</button></div>`;
   else if (S.falta === 'servidor') h = `<h2>Sem conexão</h2><p class="note">O servidor dos mapas não respondeu. Ele e o app de fichas estão ligados?</p><div class="btns" style="justify-content:center"><button class="btn pri" data-a="recarregar">Tentar de novo</button></div>`;
   else if (S.me && !S.mesas.length) h = `<h2>Nenhuma mesa ainda</h2><p class="note">Os mapas ficam nas mesas. Crie uma mesa ou entre numa com o código do mestre no app de fichas.</p><div class="btns" style="justify-content:center">${link}</div>`;
@@ -550,7 +554,7 @@ function vazio() {
       <div class="field" style="text-align:left"><label for="nnome">Nome do mapa</label><input id="nnome" placeholder="Ex.: Entrada da mina"></div>
       <div class="g2 field" style="text-align:left"><div><label for="ncols">Largura (quadrados)</label><input id="ncols" type="number" min="1" max="120" value="24"></div><div><label for="nrows">Altura (quadrados)</label><input id="nrows" type="number" min="1" max="120" value="18"></div></div>
       <button class="btn pri wide" data-a="criar">Criar mapa</button>`;
-    } else h = `<h2>Nenhum mapa ainda</h2><p class="note">Quando o mestre mostrar um mapa, ele aparece aqui sozinho.</p><div class="btns" style="justify-content:center"><a class="btn" href="${esc(fichaBase())}/" target="fichas">Ver minhas fichas</a></div>`;
+    } else h = `<h2>Nenhum mapa ainda</h2><p class="note">Quando o mestre mostrar um mapa, ele aparece aqui sozinho.</p><div class="btns" style="justify-content:center"><a class="btn" href="${esc(fichaBase())}/" target="${alvoFichas}">Ver minhas fichas</a></div>`;
   }
   e.classList.toggle('on', !!h);
   if (h && !digitando(e)) e.innerHTML = `<section class="card">${h}</section>`;
@@ -579,7 +583,7 @@ function painelToken(t) {
     <div class="hpbar"><i class="${v <= 0.25 ? 'low' : v <= 0.5 ? 'mid' : ''}" style="width:${v * 100}%"></i></div>`;
     h += f.cond.length ? `<div class="chips" style="margin-bottom:10px">${f.cond.map((c) => `<span class="chip on">${esc(c)}</span>`).join('')}</div>` : '';
     h += `<p class="note">Ficha de ${esc(f.minha ? 'você' : f.ownerName)}${f.cls ? ' · ' + esc(f.cls) : ''}. PV e condições mudam aqui quando mudam na ficha.</p>
-    <div class="btns" style="margin-bottom:6px"><a class="btn sm" href="${esc(fichaBase())}/#ficha/${esc(f.id)}" target="fichas">Abrir ficha</a><button class="btn sm" data-a="centro">Centralizar</button></div>`;
+    <div class="btns" style="margin-bottom:6px"><a class="btn sm" href="${esc(fichaBase())}/#ficha/${esc(f.id)}" target="${alvoFichas}">Abrir ficha</a><button class="btn sm" data-a="centro">Centralizar</button></div>`;
   } else if (t.ficha) h += `<p class="note">Estado: <b>${esc(t.saude || 'desconhecido')}</b>. A ficha deste token é do mestre.</p><div class="btns"><button class="btn sm" data-a="centro">Centralizar</button></div>`;
   else h += `<div class="btns"><button class="btn sm" data-a="centro">Centralizar</button></div>`;
   if (ms) {
@@ -649,7 +653,7 @@ function painelMapa() {
 function arma(k, txt, conf) { const on = S.arm === k; return `<button class="btn sm warn"${on ? ' style="background:var(--red);color:#fff;border-color:var(--red)"' : ''} data-a="arm" data-v="${k}">${on ? conf : txt}</button>`; }
 function gaveta() {
   let h = `<h2><span class="grow">Mapas</span><button class="x" data-a="close" aria-label="Fechar">×</button></h2>`;
-  h += `<p class="note">Conectado como <b>${esc(S.me ? S.me.name : '?')}</b>. <a href="${esc(fichaBase())}/" target="fichas" style="color:var(--redt)">Abrir as fichas</a></p>`;
+  h += `<p class="note">Conectado como <b>${esc(S.me ? S.me.name : '?')}</b>. <a href="${esc(fichaBase())}/" target="${alvoFichas}" style="color:var(--redt)">Abrir as fichas</a></p>`;
   for (const m of S.mesas) {
     const list = S.mapas.filter((x) => x.mesa === m.id);
     h += `<div class="grp"><h3>${esc(m.nome)}${m.souMestre ? ' <span class="badge">mestre</span>' : ''}</h3>`;

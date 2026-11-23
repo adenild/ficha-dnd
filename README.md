@@ -1,13 +1,18 @@
-# Fichas D&D 5e
+# suite-dnd
 
-App de fichas de D&D 5e feito para o celular, para jogar com os amigos na rede de casa. Um computador roda o servidor e todo mundo abre pelo navegador do celular, na mesma Wi-Fi.
+Suíte de D&D 5e feita para o celular, para jogar com os amigos na rede de casa. Um computador roda a suíte e todo mundo abre pelo navegador do celular, na mesma Wi-Fi.
+
+| App | Onde | O que faz |
+|---|---|---|
+| **Fichas** | `apps/fichas`, porta 3000 | Contas, mesas e fichas. É a porta de entrada da suíte. |
+| **Mapas** | `apps/mapas`, porta 3001 | Editor e visualizador de mapas quadriculados com os tokens das fichas. Aparece embutido na aba **Mapas** de cada mesa. |
+| **MCP** | `apps/mcp` | Servidor [MCP](https://modelcontextprotocol.io) para o Claude ler e mexer nas fichas, nas mesas e nos mapas, e mestrar com a skill `mestre-dnd`. |
 
 - **Ficha completa:** atributos, perícias, salvaguardas, PV, ataques, magias, inventário e notas, com os cálculos feitos sozinhos e rolagem de dados (com vantagem e desvantagem) ao tocar.
 - **Mesas:** quem cria uma mesa é o mestre dela e recebe um código de convite. Os jogadores entram com esse código e trazem um personagem para a mesa.
 - **Navegação:** o app abre no **Início**, com as mesas e os personagens. No computador, uma barra de ícones à esquerda leva ao Início, aos Personagens, à ficha aberta, a cada mesa, aos mapas e às Configurações; no celular, a mesma coisa fica numa barra embaixo.
 - **Privacidade:** cada jogador vê só as próprias fichas. O mestre vê todas as fichas da mesa e decide quais ficam **liberadas** para os outros jogadores, que só podem lê-las. A regra é aplicada pelo servidor, não só pela tela.
-- **Ao vivo:** quando alguém muda uma ficha, quem estiver vendo recebe a mudança na hora.
-- **Mapas:** um segundo serviço, na porta 3001, para o mestre desenhar mapas quadriculados e pôr neles os tokens das fichas da mesa. Veja [Mapas](#mapas).
+- **Ao vivo:** quando alguém muda uma ficha ou mexe no mapa, quem estiver vendo recebe a mudança na hora.
 
 ## Requisitos
 
@@ -16,58 +21,67 @@ App de fichas de D&D 5e feito para o celular, para jogar com os amigos na rede d
 ## Como rodar
 
 ```bash
-git clone git@github.com:adenild/ficha-dnd.git
-cd ficha-dnd
+git clone git@github.com:adenild/ficha-dnd.git suite-dnd
+cd suite-dnd
 npm start
 ```
 
-O terminal mostra os endereços, por exemplo:
+`npm start` liga a suíte inteira (fichas e mapas) num processo só. O terminal mostra os endereços, por exemplo:
 
 ```
 Fichas D&D rodando na porta 3000.
 Neste computador: http://localhost:3000
 No celular (mesma Wi-Fi): http://192.168.0.12:3000
+Mapas D&D rodando na porta 3001, usando o app de fichas em http://127.0.0.1:3000.
 ```
 
-Abra o endereço "No celular" no navegador de cada jogador. Para ficar com cara de app, use "Adicionar à tela de início" no menu do navegador.
+Abra o endereço "No celular" da porta 3000 no navegador de cada jogador. Para ficar com cara de app, use "Adicionar à tela de início" no menu do navegador. Os mapas abrem dentro do app de fichas, então não é preciso guardar o endereço da porta 3001.
 
-Se o celular não conseguir abrir, quase sempre é o firewall do computador bloqueando a porta 3000. No Windows, aceite o aviso do firewall na primeira vez que rodar o Node, marcando "Redes privadas". No Linux com `ufw`, rode `sudo ufw allow 3000/tcp`.
+Se o celular não conseguir abrir, quase sempre é o firewall do computador bloqueando as portas 3000 e 3001. No Windows, aceite o aviso do firewall na primeira vez que rodar o Node, marcando "Redes privadas". No Linux com `ufw`, rode `sudo ufw allow 3000:3001/tcp`.
+
+Também dá para ligar cada app sozinho: `npm run fichas` e `npm run mapas`.
 
 ### Configuração
 
 | Variável | Padrão | Para quê |
 |---|---|---|
-| `PORT` | `3000` | Porta do servidor |
+| `PORT` | `3000` | Porta do app de fichas |
+| `MAPAS_PORT` | `3001` | Porta do app de mapas |
 | `HOST` | `0.0.0.0` | Endereço onde escutar (`127.0.0.1` deixa só neste computador) |
 | `DATA_FILE` | `data/db.json` | Onde ficam contas, mesas e fichas |
+| `MAPAS_DATA` | `data/mapas.json` | Onde ficam os mapas; as imagens ficam em `mapas-img/`, na mesma pasta |
+| `MAPAS_URL` | `http://127.0.0.1:3001` | Onde o app de fichas e o MCP encontram os mapas |
+| `FICHA_URL` | `http://127.0.0.1:3000` | Onde o app de mapas e o MCP encontram as fichas |
+| `MAPAS_PORTA` / `MAPAS_PUBLICA` | `3001` | Porta (ou endereço completo) dos mapas para o navegador, quando for diferente da porta interna |
+| `FICHA_PORTA` / `FICHA_PUBLICA` | `3000` | Porta (ou endereço completo) das fichas para o navegador |
 
-Exemplo: `PORT=8080 npm start`.
-
-O app de fichas também usa `MAPAS_PORTA` (padrão `3001`) ou `MAPAS_PUBLICA` (endereço completo) para montar o link dos mapas.
+Exemplo: `PORT=8080 MAPAS_PORT=8081 npm start`.
 
 ### Com Docker
 
-Dá para rodar tudo em container, sem instalar Node e sem tocar na pasta `data/` local. Os dados ficam no volume `ficha-dnd_dados`.
+Dá para rodar tudo em container, sem instalar Node e sem tocar na pasta `data/` local. Cada app tem o seu container (`fichas` e `mapas`), e os dados ficam no volume `ficha-dnd_dados` (o nome vem de quando o projeto se chamava ficha-dnd e foi mantido para não perder nada).
 
 ```bash
 docker compose up -d --build   # liga (o --build só é preciso depois de mudar o código)
-docker compose logs -f app     # acompanha o servidor
+docker compose logs -f         # acompanha os servidores
 docker compose stop            # desliga, guardando os dados
 ```
 
-O app abre em http://localhost:3000 e os mapas em http://localhost:3001. No celular, use o IP deste computador na rede, na mesma porta. Para usar outras portas, defina `FICHA_PORTA` e `MAPAS_PORTA` (por exemplo, `FICHA_PORTA=8080 docker compose up -d`) ou coloque essas variáveis num arquivo `.env` ao lado do `compose.yaml`.
+As fichas abrem em http://localhost:3000. No celular, use o IP deste computador na rede, na mesma porta. Para usar outras portas, defina `FICHA_PORTA` e `MAPAS_PORTA` (por exemplo, `FICHA_PORTA=8080 docker compose up -d`) ou coloque essas variáveis num arquivo `.env` ao lado do `compose.yaml`.
 
 Para levar as fichas que você já tem em `data/db.json` para o volume, com o container criado e parado:
 
 ```bash
-docker compose stop app
-docker compose cp data/db.json app:/data/db.json
-docker compose start app
+docker compose stop fichas
+docker compose cp data/db.json fichas:/data/db.json
+docker compose start fichas
 ```
 
-Para redefinir uma senha: `docker compose stop app`, depois `docker compose run --rm app node server.js --reset-senha "Nome do jogador" novaSenha`, e por fim `docker compose start app`.
+Para redefinir uma senha: `docker compose stop fichas`, depois `docker compose run --rm fichas node apps/fichas/server.js --reset-senha "Nome do jogador" novaSenha`, e por fim `docker compose start fichas`.
 
-`docker compose down` remove o container e mantém os dados. `docker compose down -v` apaga o volume e **todas as fichas** junto.
+`docker compose down` remove os containers e mantém os dados. `docker compose down -v` apaga o volume e **todas as fichas e mapas** junto.
+
+Quem já rodava a versão com o nome antigo: antes do primeiro `docker compose up` desta versão, rode `docker compose -p ficha-dnd down` (sem `-v`) para tirar os containers antigos, que ocupam as mesmas portas. O volume com os dados continua e é usado pela suíte.
 
 ## Primeira sessão
 
@@ -86,62 +100,49 @@ O botão **Configurações** (ou **Ajustes**, no celular) abre duas abas:
 
 ## Mapas
 
-`mapas/server.js` é um editor e visualizador de mapas 2D. É um serviço separado, com seus próprios dados, que conversa com o app de fichas:
+A página de cada mesa tem as abas **Mesa** e **Mapas**. A aba Mapas mostra o app de mapas embutido (`#mesa/<mesa>/mapas`), e o botão **Abrir em outra aba** abre o mesmo mapa sozinho, em tela cheia. Os links "No mapa …" dos personagens abrem essa aba já com o token escolhido e centralizado.
 
-- **Mesma conta:** não tem cadastro. O navegador manda o cookie de sessão das fichas para outras portas do mesmo endereço, e o serviço de mapas pergunta ao app de fichas quem é a pessoa, de quais mesas participa e quais fichas pode ver. Por isso, abra os dois pelo mesmo endereço (os dois por `localhost` ou os dois pelo IP da rede). Um token de conta (`Authorization: Bearer fdnd_...`) também funciona.
+- **Mesma conta:** os mapas não têm cadastro. O navegador manda o cookie de sessão das fichas para outras portas do mesmo endereço, e o app de mapas pergunta ao app de fichas quem é a pessoa, de quais mesas participa e quais fichas pode ver. Por isso, abra tudo pelo mesmo endereço (tudo por `localhost` ou tudo pelo IP da rede). Um token de conta (`Authorization: Bearer fdnd_...`) também funciona. Só páginas desse mesmo endereço podem embutir os mapas.
 - **Mestre:** cria mapas para a mesa, pinta o terreno (pedra, madeira, grama, terra, água, parede, lava, porta e rocha) com pincel ou balde, usa uma imagem de fundo (PNG, JPEG, WebP ou GIF, até 8 MB) e põe tokens: das fichas dos jogadores, das fichas dele (monstros e NPCs, que viram inimigos) ou tokens livres. Pode deixar um token oculto, mudar o nome que os jogadores veem, o tipo, o tamanho (1×1 a 4×4) e a cor. O mapa começa oculto; **Mostrar aos jogadores** leva todos para ele.
 - **Jogadores:** veem os mapas que o mestre mostrou, sem os tokens ocultos. Movem só os tokens das próprias fichas e podem pôr o próprio personagem no mapa.
 - **Ao vivo:** quando um token se move ou o terreno muda, todos veem na hora. Os PV e as condições dos tokens vêm das fichas e mudam quando a ficha muda. De uma ficha que o jogador não pode ler, como a de um monstro, ele vê só o nome do token e se está ileso, ferido, muito ferido ou caído.
 - **Régua:** mede em quadrados e metros (1,5 m por quadrado; a diagonal conta como um, como no Livro do Jogador).
-
-Para rodar sem Docker, ligue os dois serviços, cada um num terminal:
-
-```bash
-npm start        # fichas, porta 3000
-npm run mapas    # mapas, porta 3001
-```
-
-No app de fichas, o botão **Mapa** de cada mesa abre os mapas dela, e os personagens mostram em qual mapa estão, com um link que abre o mapa já com o token escolhido. Para isso o app de fichas consulta o serviço de mapas em `MAPAS_URL` (padrão `http://127.0.0.1:3001`; no Docker, `http://mapas:3001`) com a mesma conta, então mapas e tokens ocultos continuam ocultos. Se o serviço de mapas estiver desligado, o app funciona igual, só sem as localizações. No mapa, **Abrir ficha** abre a ficha do token no app de fichas.
-
-| Variável | Padrão | Para quê |
-|---|---|---|
-| `MAPAS_PORT` | `3001` | Porta do serviço de mapas |
-| `FICHA_URL` | `http://localhost:3000` | Onde o serviço de mapas encontra a API das fichas |
-| `FICHA_PORTA` / `FICHA_PUBLICA` | porta de `FICHA_URL` | Porta (ou endereço completo) do app de fichas para os links no navegador |
-| `MAPAS_DATA` | `data/mapas.json` | Onde ficam os mapas; as imagens ficam em `mapas-img/`, na mesma pasta |
+- **Ficha a partir do mapa:** no mapa, **Abrir ficha** abre a ficha do token no app de fichas. Se o app de mapas estiver desligado, as fichas funcionam igual, só sem mapas e localizações.
 
 Atalhos no computador: `V` mover, `R` régua, `B` pintar, `G` preencher, setas movem o token escolhido, `Delete` tira do mapa, `Ctrl+Z` desfaz a pintura, `+`, `-` e `0` controlam o zoom, e a roda do mouse aproxima. No celular, um dedo arrasta e dois dedos movem e aproximam o mapa.
 
 ## Backup e senhas
 
-- Tudo fica em `data/db.json`, e os mapas em `data/mapas.json` e `data/mapas-img/`. Para fazer backup, copie esses arquivos com os servidores parados. Cada jogador também pode exportar as próprias fichas em Personagens › Exportar e importar.
+- Tudo fica em `data/db.json`, e os mapas em `data/mapas.json` e `data/mapas-img/`. Para fazer backup, copie esses arquivos com a suíte parada. Cada jogador também pode exportar as próprias fichas em Personagens › Exportar e importar.
 - As senhas são guardadas com hash (scrypt), nunca em texto.
-- Se alguém esquecer a senha, quem roda o servidor pode redefinir:
+- Se alguém esquecer a senha, quem roda a suíte pode redefinir:
 
   ```bash
-  node server.js --reset-senha "Nome do jogador" novaSenha
+  node apps/fichas/server.js --reset-senha "Nome do jogador" novaSenha
   ```
 
 ## Assistente (MCP)
 
-`mcp.js` é um servidor [MCP](https://modelcontextprotocol.io) que deixa um assistente como o Claude ler e mexer nas fichas e mesas. Ele entra no app com um **token de conta**, nunca com a senha, e usa a mesma API dos celulares: segue as mesmas regras de acesso, e quem estiver com a ficha aberta vê as mudanças na hora. Use um token da conta do mestre para o assistente enxergar todas as fichas da mesa.
+`apps/mcp` é um servidor MCP que deixa um assistente como o Claude ler e mexer nas fichas, mesas e mapas. Ele entra na suíte com um **token de conta**, nunca com a senha, e usa a mesma API dos celulares: segue as mesmas regras de acesso, e quem estiver com a ficha ou o mapa aberto vê as mudanças na hora. Use um token da conta do mestre para o assistente enxergar todas as fichas da mesa.
 
 Para ligar no Claude Code:
 
-1. Com o app rodando, abra **Configurações › Conta** e gere um token em **Assistente (MCP)**. Ele aparece uma vez só.
+1. Com a suíte rodando, abra **Configurações › Conta** e gere um token em **Assistente (MCP)**. Ele aparece uma vez só.
 2. Escolha **Node neste computador** ou **Docker**, confira a pasta do projeto e copie a linha pronta. Ela fica assim:
 
    ```bash
-   claude mcp add ficha-dnd --scope local -e FICHA_URL=http://localhost:3000 -e FICHA_TOKEN=fdnd_... -- node /caminho/para/ficha-dnd/mcp.js
+   claude mcp add suite-dnd --scope local -e FICHA_URL=http://localhost:3000 -e FICHA_TOKEN=fdnd_... -- node /caminho/para/suite-dnd/apps/mcp/server.js
    ```
 
-   No Docker, o MCP roda em container e liga o app sozinho se ele estiver parado:
+   No Docker, o MCP roda em container e liga as fichas e os mapas sozinho se estiverem parados:
 
    ```bash
-   claude mcp add ficha-dnd --scope local -e FICHA_TOKEN=fdnd_... -- docker compose -f /caminho/para/ficha-dnd/compose.yaml run --rm -T mcp
+   claude mcp add suite-dnd --scope local -e FICHA_TOKEN=fdnd_... -- docker compose -f /caminho/para/suite-dnd/compose.yaml run --rm -T mcp
    ```
 
 3. Rode a linha no terminal. O escopo `local` guarda o token só na configuração do seu usuário, fora do repositório.
+
+Quem já tinha o MCP registrado com o nome antigo: rode `claude mcp remove ficha-dnd` e registre de novo com a linha acima (o token pode ser o mesmo).
 
 Na mesma tela você pausa um token (as chamadas passam a ser recusadas até retomar), remove (perde o acesso de vez) e vê o registro de auditoria: cada chamada feita com cada token, com data, ação, ficha ou mesa afetada e se foi recusada, além de quando os tokens foram criados, pausados ou removidos. Um token não troca senha, não mexe em tokens nem lê a auditoria: isso só com nome e senha no app. O servidor guarda só o hash do token.
 
@@ -162,7 +163,7 @@ Na mesma tela você pausa um token (as chamadas passam a ser recusadas até reto
 
 Fichas, mesas, mapas e tokens podem ser indicados pelo nome, e posições no mapa são coluna e linha (C7). As rolagens feitas pelo assistente não aparecem nos celulares, só as mudanças na ficha e no mapa.
 
-As ferramentas de mapa falam com o serviço de mapas usando o mesmo token. O endereço vem de `MAPAS_URL`; sem ela, o MCP usa o endereço de `FICHA_URL` na porta 3001 (no Docker, o compose já aponta para o serviço `mapas`). Se o serviço de mapas estiver desligado, as ferramentas de fichas continuam funcionando.
+As ferramentas de mapa falam com o app de mapas usando o mesmo token. O endereço vem de `MAPAS_URL`; sem ela, o MCP usa o endereço de `FICHA_URL` na porta 3001 (no Docker, o compose já aponta para o serviço `mapas`). Se os mapas estiverem desligados, as ferramentas de fichas continuam funcionando.
 
 ### Jogar com o Claude como mestre
 
@@ -172,9 +173,9 @@ O token usado pelo MCP precisa ser de uma conta **mestre da mesa**, porque só o
 
 ## Limites
 
-- O servidor usa HTTP sem criptografia, pensado só para a rede de casa. Não o exponha na internet sem colocar HTTPS na frente (por exemplo com Caddy ou um túnel).
-- As fontes vêm do Google Fonts. Sem internet, o app usa as fontes do próprio celular e funciona igual.
-- O armazenamento é um único arquivo JSON, adequado para um grupo de amigos, não para centenas de usuários.
+- A suíte usa HTTP sem criptografia, pensada só para a rede de casa. Não a exponha na internet sem colocar HTTPS na frente (por exemplo com Caddy ou um túnel).
+- As fontes vêm do Google Fonts. Sem internet, os apps usam as fontes do próprio celular e funcionam igual.
+- O armazenamento é feito em arquivos JSON, adequado para um grupo de amigos, não para centenas de usuários.
 
 ## Testes
 
@@ -182,19 +183,18 @@ O token usado pelo MCP precisa ser de uma conta **mestre da mesa**, porque só o
 npm test
 ```
 
-Os testes cobrem as regras de acesso: cadastro, mesas, código de convite, fichas ocultas e liberadas, edição pelo mestre, tokens de conta (pausar, remover e auditoria), preferências da conta, configurações da mesa e persistência. Também cobrem o servidor MCP de ponta a ponta e o serviço de mapas junto com o app de fichas (conta, mapas ocultos, quem move qual token, saúde dos monstros e imagem de fundo).
+Os testes cobrem as regras de acesso: cadastro, mesas, código de convite, fichas ocultas e liberadas, edição pelo mestre, tokens de conta (pausar, remover e auditoria), preferências da conta, configurações da mesa e persistência. Também cobrem o app de mapas junto com o de fichas (conta, mapas ocultos, quem move qual token, saúde dos monstros, imagem de fundo, localizações e quem pode embutir os mapas) e o servidor MCP de ponta a ponta, inclusive um encontro montado e jogado no mapa.
 
 ## Estrutura
 
 ```
-server.js         servidor HTTP, API, regras de acesso e eventos ao vivo
-mcp.js            servidor MCP para assistentes (fala com a API do server.js)
-public/index.html página do app
-public/app.js     ficha, rolagens, mesas e conversa com a API
-public/style.css  visual
-mapas/server.js   serviço de mapas: API, regras de acesso e eventos ao vivo
-mapas/public/     editor e visualizador de mapas (canvas)
-test/             testes da API (node:test)
-Dockerfile        imagem do app e do MCP
-compose.yaml      serviços do app, dos mapas e do MCP (portas e volume)
+suite.js              liga fichas e mapas num processo só (npm start)
+apps/fichas/          app de fichas: server.js (API, regras de acesso, eventos ao vivo) e public/ (página, ficha, mesas)
+apps/mapas/           app de mapas: server.js (API, regras de acesso, eventos ao vivo) e public/ (editor em canvas)
+apps/mcp/server.js    servidor MCP para assistentes (fala com as APIs de fichas e mapas)
+.claude/skills/       skill mestre-dnd para o Claude mestrar
+test/                 testes (node:test)
+Dockerfile            uma imagem para os três apps
+compose.yaml          serviços fichas, mapas e mcp (portas e volume)
+data/                 dados ao rodar sem Docker (fora do git)
 ```

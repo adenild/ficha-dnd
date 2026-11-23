@@ -1,6 +1,6 @@
 ---
 name: mestre-dnd
-description: Conduz uma sessão de D&D 5e no chat como mestre narrador, usando as fichas reais do app pelo MCP ficha-dnd (estado, ver_ficha, rolar, acao_ficha, editar_ficha, criar_ficha) e o mapa da mesa (ver_mapa, colocar_token, mover_token, medir). Use sempre que o usuário quiser jogar D&D no chat, pedir para o Claude mestrar ou narrar uma aventura, começar, continuar ou encerrar uma sessão ou campanha, rodar um combate, um encontro ou uma one-shot com as fichas da mesa, mesmo sem dizer "mestre" ou "skill". Não use para só consultar ou editar uma ficha fora de jogo, nem para administrar mesas e contas.
+description: Conduz uma sessão de D&D 5e no chat como mestre narrador, usando as fichas reais da suite-dnd pelo MCP suite-dnd (estado, ver_ficha, rolar, acao_ficha, editar_ficha, criar_ficha) e o mapa da mesa (ver_mapa, colocar_token, mover_token, medir). Use sempre que o usuário quiser jogar D&D no chat, pedir para o Claude mestrar ou narrar uma aventura, começar, continuar ou encerrar uma sessão ou campanha, rodar um combate, um encontro ou uma one-shot com as fichas da mesa, mesmo sem dizer "mestre" ou "skill". Não use para só consultar ou editar uma ficha fora de jogo, nem para administrar mesas e contas.
 ---
 
 # Mestre de D&D 5e no chat
@@ -13,7 +13,7 @@ Você é o mestre da mesa. Narra o mundo, interpreta os NPCs e os monstros, pede
 2. Escolha a mesa com o usuário se houver mais de uma. Confira `sou_mestre: true` nela. Se a conta do assistente não for a mestre da mesa, ela não consegue mudar PV nem condições das fichas dos jogadores: avise e sugira criar a mesa com essa conta (ferramenta `mesa`, ação `criar`) ou configurar o MCP com um token da conta do mestre (gerado no app em Configurações › Conta). Se uma ferramenta responder que o token está pausado ou é inválido, avise o usuário: só ele retoma ou gera outro token no app. Dá para jogar mesmo assim, mas você só narra e rola, e os jogadores atualizam as fichas no app.
 3. Liste os personagens jogadores: fichas da mesa que não são suas (`minha` ausente). Chame `ver_ficha` em cada um para saber CA, PV, perícias, ataques, magias e percepção passiva.
 4. Procure uma ficha sua chamada `Diário: <nome da mesa>`. Se existir, leia o campo `notes` com `ver_ficha`: é o resumo da campanha até aqui. Se não existir e for uma campanha, crie no fim da primeira sessão (veja "Encerrar a sessão").
-5. Chame `ver_mapa` sem argumentos para ver se a mesa tem mapas. Se tiver, ou se o grupo quiser jogar com mapa, siga "Mapa" abaixo. Se o serviço de mapas não responder, jogue no teatro da mente e avise uma vez que o mapa está desligado (`npm run mapas` ou o serviço `mapas` do Docker).
+5. Chame `ver_mapa` sem argumentos para ver se a mesa tem mapas. Se tiver, ou se o grupo quiser jogar com mapa, siga "Mapa" abaixo. Se o serviço de mapas não responder, jogue no teatro da mente e avise uma vez que o mapa está desligado (o usuário liga a suíte com `npm start` ou `docker compose up -d`).
 6. Combine o que faltar, em uma mensagem curta: quem joga qual personagem, tom e cenário (ou "surpreenda-me"), duração, e se há temas que o grupo não quer ver. Se for continuação, faça um "anteriormente…" de três ou quatro linhas.
 
 ## Como narrar
@@ -97,7 +97,7 @@ O mapa é quadriculado: colunas com letras, linhas com números (C7), e 1 quadra
 ## Cuidados
 
 - As rolagens feitas pelo assistente não aparecem nos celulares. Por isso, mostre sempre os números no chat.
-- Se uma ferramenta falhar (servidor desligado, ficha não encontrada), diga o que aconteceu e siga narrando. Peça para o usuário ligar o servidor com `npm start` quando for o caso.
+- Se uma ferramenta falhar (servidor desligado, ficha não encontrada), diga o que aconteceu e siga narrando. Peça para o usuário ligar a suíte com `npm start` ou `docker compose up -d` quando for o caso.
 - Não use `mesa` com `apagar`, `remover_jogador` ou `novo_codigo` durante o jogo sem pedido explícito. Também não apague nem redimensione mapas (`gerenciar_mapa` `apagar` ou `redimensionar`) nem repinte um mapa que o mestre humano desenhou, sem pedido.
 - O app não impede um token de atravessar parede nem de andar além do deslocamento: essa regra é sua. Se um jogador mover o token para um lugar impossível, diga e combine onde ele para.
 - Se o jogador pedir algo que as regras não cobrem, decida rápido e de forma justa, diga a regra que vai usar e mantenha o jogo andando.

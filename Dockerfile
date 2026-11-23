@@ -1,3 +1,4 @@
+# imagem da suite-dnd: o mesmo build roda o app de fichas (padrão), os mapas e o MCP
 FROM node:22-alpine
 
 ENV NODE_ENV=production \
@@ -7,9 +8,8 @@ ENV NODE_ENV=production \
     IN_DOCKER=1
 
 WORKDIR /app
-COPY package.json server.js mcp.js ./
-COPY public ./public
-COPY mapas ./mapas
+COPY package.json suite.js ./
+COPY apps ./apps
 
 # os dados ficam num volume, fora da imagem; o usuário node não roda como root
 RUN mkdir /data && chown node:node /data
@@ -18,4 +18,4 @@ VOLUME /data
 EXPOSE 3000 3001
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s CMD wget -qO /dev/null http://127.0.0.1:3000/ || exit 1
-CMD ["node", "server.js"]
+CMD ["node", "apps/fichas/server.js"]

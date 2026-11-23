@@ -1,6 +1,6 @@
 'use strict';
-// Servidor MCP das fichas de D&D 5e. Sem dependências: só Node.js 18+.
-// Fala MCP por stdio (JSON-RPC, uma mensagem por linha) e conversa com server.js pela mesma API
+// Servidor MCP da suite-dnd: fichas, mesas e mapas de D&D 5e. Sem dependências: só Node.js 18+.
+// Fala MCP por stdio (JSON-RPC, uma mensagem por linha) e conversa com apps/fichas e apps/mapas pela mesma API
 // que os celulares usam, entrando como um jogador. Assim as regras de acesso continuam valendo e
 // quem estiver com a ficha aberta recebe as mudanças ao vivo.
 //
@@ -94,7 +94,7 @@ function createClient({ url, token, servico = 'o servidor das fichas', comando =
     try {
       res = await fetch(url + path, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: body ? JSON.stringify(body) : undefined });
     } catch (e) {
-      fail(`Não consegui falar com ${servico} em ${url}. Ele está rodando (${comando})?`);
+      fail(`Não consegui falar com ${servico} em ${url}. Ele está rodando (${comando} ou o Docker)?`);
     }
     const out = await res.json().catch(() => null);
     if (res.status !== 200) fail(out?.error || `Erro ${res.status}`);
@@ -365,7 +365,7 @@ function createTools(call, mcall) {
   return tools;
 }
 
-// ---------- ferramentas de mapa (falam com mapas/server.js) ----------
+// ---------- ferramentas de mapa (falam com apps/mapas) ----------
 const TERRENO = { vazio: '.', pedra: 'c', madeira: 'm', grama: 'g', terra: 't', agua: 'a', parede: 'p', lava: 'l', porta: 'o', rocha: 'r' };
 const TERRENO_NOME = Object.fromEntries(Object.entries(TERRENO).map(([k, v]) => [v, k === 'agua' ? 'água' : k]));
 const TIPOS_TOKEN = ['pj', 'aliado', 'inimigo', 'objeto'];
@@ -646,7 +646,7 @@ function createMcp(tools) {
         return reply({
           protocolVersion: PROTOCOLS.includes(params?.protocolVersion) ? params.protocolVersion : PROTOCOLS[0],
           capabilities: { tools: {} },
-          serverInfo: { name: 'ficha-dnd', version: '1.0.0' },
+          serverInfo: { name: 'suite-dnd', version: '1.0.0' },
           instructions: 'Acesso às fichas de D&D 5e, às mesas e aos mapas do app da rede de casa. Use "estado" para ver mesas e fichas e "ver_mapa" para ver os mapas; fichas, mesas, mapas e tokens podem ser indicados pelo nome, e posições no mapa são coluna e linha (ex.: C7, 1 quadrado = 1,5 m). As regras de acesso do app valem: o assistente só vê e muda o que a conta dele pode.',
         });
       case 'ping': return reply({});
@@ -697,7 +697,7 @@ if (require.main === module) {
   const fichaUrl = (process.env.FICHA_URL || 'http://localhost:3000').replace(/\/$/, '');
   const mapasUrl = process.env.MAPAS_URL || (() => { const u = new URL(fichaUrl); u.port = '3001'; return u.origin; })();
   const call = createClient({ url: fichaUrl, token: process.env.FICHA_TOKEN });
-  const mcall = createClient({ url: mapasUrl.replace(/\/$/, ''), token: process.env.FICHA_TOKEN, servico: 'o serviço de mapas', comando: 'npm run mapas' });
+  const mcall = createClient({ url: mapasUrl.replace(/\/$/, ''), token: process.env.FICHA_TOKEN, servico: 'o serviço de mapas', comando: 'npm start' });
   serveStdio(createMcp(createTools(call, mcall)));
 }
 

@@ -5,8 +5,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { createApp } = require('../server.js');
-const { createMapas } = require('../mapas/server.js');
+const { createApp } = require('../apps/fichas/server.js');
+const { createMapas } = require('../apps/mapas/server.js');
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ficha-mapas-'));
 const fichas = createApp({ dataFile: path.join(dir, 'db.json'), mapasUrl: () => base });
@@ -165,4 +165,13 @@ test('apagar mapa', async () => {
   assert.equal((await ana.mapa('DELETE', '/api/mapas/' + mapa.id)).status, 403);
   assert.equal((await mestre.mapa('DELETE', '/api/mapas/' + mapa.id)).status, 200);
   assert.equal((await mestre.mapa('GET', '/api/mapas/' + mapa.id)).status, 404);
+});
+
+test('a página dos mapas só pode ser embutida pelo mesmo endereço', async () => {
+  const r = await fetch(base + '/');
+  assert.equal(r.status, 200);
+  const csp = r.headers.get('content-security-policy');
+  assert.match(csp, /^frame-ancestors 'self' http:\/\/127\.0\.0\.1:\* https:\/\/127\.0\.0\.1:\*$/);
+  const r2 = await fetch(base + '/', { headers: { host: 'evil.com"; script-src *' } });
+  assert.doesNotMatch(r2.headers.get('content-security-policy') || '', /evil/, 'Host estranho não entra na política');
 });

@@ -33,6 +33,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,ca
 .tools .sep{width:1px;background:var(--line);margin:6px 2px;flex:none}
 .zoom{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:4px}
 .zoom[hidden]{display:none}
+/* embutido na aba de mapas da suíte: cabeçalho mais baixo e sem o atalho para as fichas, que já estão em volta */
+.embutido #fichas{display:none}
+.embutido .top{padding-top:6px;padding-bottom:6px;background:var(--card);color:var(--ink);border-bottom:1px solid var(--line)}
+.embutido .top .ib{background:var(--field)}.embutido .top .ib svg{stroke:var(--ink)}
+.embutido .who h1{color:var(--redt)}
+.embutido .who h1{font-size:19px}
 .zoom button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;box-shadow:var(--shadow)}
 .zoom svg{width:20px;height:20px;fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .conn{position:absolute;left:12px;top:12px;margin:0;background:var(--gold);color:#1d1716;font-size:13px;font-weight:600;padding:6px 12px;border-radius:10px}

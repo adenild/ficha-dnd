@@ -1,12 +1,14 @@
 {
-  "name": "ficha-dnd",
+  "name": "suite-dnd",
   "version": "1.0.0",
-  "description": "Fichas de D&D 5e para jogar com amigos na rede local: mestre, jogadores e mesas.",
+  "description": "Suíte de D&D 5e para jogar com amigos na rede local: fichas, mesas, mapas e um servidor MCP para o Claude mestrar.",
   "private": true,
-  "main": "server.js",
+  "main": "suite.js",
   "scripts": {
-    "start": "node server.js",
-    "mapas": "node mapas/server.js",
+    "start": "node suite.js",
+    "fichas": "node apps/fichas/server.js",
+    "mapas": "node apps/mapas/server.js",
+    "mcp": "node apps/mcp/server.js",
     "test": "node --test"
   },
   "engines": {
