@@ -11,7 +11,7 @@ const COINS=[['pc','PC'],['pp','PP'],['pe','PE'],['po','PO'],['pl','PL']];
 
 /* ---------- estado ---------- */
 const MUT=new Set(['sv','sk','insp','cond','ds','slot','prep','add','rm','dmg','heal','hd','long']);
-const S={me:null,mesas:[],chars:new Map(),view:null,locked:true,mode:0,tab:'principal',page:'ficha',cfgTab:'conta',cfgMesa:null,online:true,authMode:'login',pending:new Set(),busy:new Set()};
+const S={me:null,mesas:[],chars:new Map(),view:null,locked:true,mode:0,tab:'principal',page:'inicio',mesaAtual:null,loc:new Map(),locOk:false,cfgTab:'conta',cfgMesa:null,online:true,authMode:'login',pending:new Set(),busy:new Set()};
 let hist=[],lastPush=0,toastT,pendR=false,arm=null,refreshT=null,es=null;
 const saveT={};
 const $=id=>document.getElementById(id);
@@ -33,11 +33,11 @@ function applyState(st){
   for(const [id,c] of S.chars)if(!seen.has(id)&&!c._new)S.chars.delete(id);
   if(!C())S.view=(myChars()[0]||[...S.chars.values()][0]||{}).id||null;
   applyTheme();prefs()}
-async function refresh(){try{applyState(await api('GET','/api/state'));setConn(true);softRender()}catch(e){if(e.status===401)return showAuth();setConn(false)}}
+async function refresh(){try{applyState(await api('GET','/api/state'));setConn(true);softRender();loadLoc()}catch(e){if(e.status===401)return showAuth();setConn(false)}}
 function refreshSoon(){clearTimeout(refreshT);refreshT=setTimeout(refresh,250)}
 function listen(){if(es)es.close();if(!window.EventSource)return setInterval(refresh,8000);
   es=new EventSource('/api/events');es.onmessage=refreshSoon;es.onopen=()=>{setConn(true);refreshSoon()};es.onerror=()=>setConn(false)}
-function setConn(ok){if(S.online===ok)return;S.online=ok;document.body.classList.toggle('offline',!ok);if(S.me&&C())head();status()}
+function setConn(ok){if(S.online===ok)return;S.online=ok;document.body.classList.toggle('offline',!ok);if(S.me&&S.page==='ficha'&&C())head();status()}
 function statusText(){return S.online?'Conectado ao servidor da mesa':'Sem conexão com o servidor: as mudanças serão enviadas quando ele voltar'}
 function status(){const s=$('st');if(s)s.textContent=statusText()}
 function prefs(){try{localStorage.setItem('fichas5e-prefs',JSON.stringify({locked:S.locked,view:S.view,tab:S.tab}))}catch(e){}}
@@ -67,7 +67,7 @@ async function flushChar(id){const c=S.chars.get(id);if(!c)return;
     if(e.status>=400&&e.status<500&&e.status!==408&&e.status!==429){S.pending.delete(id);toast(`<div><b>Não foi possível salvar</b><small>${esc(e.message)}</small></div>`);refreshSoon()}
     else{setConn(false);saveT[id]=setTimeout(()=>flushChar(id),4000)}}
   S.busy.delete(id)}
-async function act(method,url,body,okMsg){try{const st=await api(method,url,body);if(st&&st.me)applyState(st);setConn(true);render();if($('sheet').classList.contains('on'))drawer();if(okMsg)toast(`<div><b>${okMsg}</b></div>`);return true}
+async function act(method,url,body,okMsg){try{const st=await api(method,url,body);if(st&&st.me)applyState(st);setConn(true);render();if(okMsg)toast(`<div><b>${okMsg}</b></div>`);return true}
   catch(e){if(e.status===401)return showAuth();toast(`<div><b>${esc(e.message)}</b></div>`);return false}}
 window.addEventListener('beforeunload',e=>{if(S.pending.size){e.preventDefault();e.returnValue=''}});
 
@@ -114,7 +114,7 @@ const card=(t,inner,extra='')=>`<section class="card"><h2>${t}${extra}</h2>${inn
 /* ---------- abas ---------- */
 function mesaField(c){const m=mesaOf(c.mesa);
   if(S.locked||RO()||!isOwn(c))return L('Mesa',`<input readonly value="${esc(m?m.nome:'Sem mesa')}">`,'span2');
-  if(!S.mesas.length)return L('Mesa',`<p class="note" style="margin:6px 0 0">Entre numa mesa pelo menu ☰ com o código do mestre.</p>`,'span2');
+  if(!S.mesas.length)return L('Mesa',`<p class="note" style="margin:6px 0 0">Entre numa mesa pelo Início com o código do mestre.</p>`,'span2');
   return L('Mesa',sel('mesa',[['','Sem mesa'],...S.mesas.map(m=>[m.id,m.nome])]),'span2')}
 function tPrincipal(c){
   const id=card('Identidade',`<div class="g2">${L('Nome',f('name'),'span2')}${mesaField(c)}${L('Classe',f('cls',{ph:'Ex.: Guerreiro'}))}${L('Nível',f('level',{n:1}))}${L('Raça',f('race'))}${L('Antecedente',f('bg'))}${L('Alinhamento',f('align'))}${L('XP',f('xp',{n:1}))}</div>`);
@@ -155,33 +155,35 @@ function tNotas(){
 function shield(){return `<svg viewBox="0 0 60 58" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d="M30 2 56 9v17c0 15-11 26-26 30C15 52 4 41 4 26V9Z" fill="rgba(0,0,0,.22)" stroke="rgba(255,255,255,.55)" stroke-width="2"/><path d="M30 6 52 12v14c0 12-9 21-22 25" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2"/></svg>`}
 function subline(c){return [c.race,[c.cls,c.level?'nível '+c.level:''].filter(Boolean).join(' '),c.bg].filter(Boolean).join(' · ')}
 function head(){const c=C();$('nm').textContent=c.name||'Sem nome';$('sub').textContent=subline(c);
-  const m=mesaOf(c.mesa);let w='';
-  if(!S.online)w='Sem conexão com o servidor: as mudanças serão enviadas quando ele voltar.';
-  else if(!isOwn(c))w='Ficha de '+(c._ownerName||'outro jogador')+(canWrite(c)?' · você está editando como mestre':' · liberada pelo mestre, somente leitura');
-  else if(m)w='Mesa: '+m.nome+(isLib(c)?' · liberada para a mesa':'');
-  $('who2').textContent=w;
+  const m=mesaOf(c.mesa),l=locOf(c.id)[0];let w=[];
+  if(!S.online)w.push('Sem conexão com o servidor: as mudanças serão enviadas quando ele voltar.');
+  else{if(m)w.push(`Mesa <button class="crumb" data-a="gomesa" data-v="${esc(m.id)}">${esc(m.nome)}</button>`);
+    if(!isOwn(c))w.push(esc('Ficha de '+(c._ownerName||'outro jogador')+(canWrite(c)?' · você está editando como mestre':' · liberada pelo mestre, somente leitura')));
+    else if(m&&isLib(c))w.push('liberada para a mesa');
+    if(l)w.push(`<a class="crumb" href="${esc(tokHref(l))}" target="mapas">${ico('pin')}${esc(l.mapaNome)}</a>`)}
+  $('who2').innerHTML=w.join(' · ');
   $('vit').innerHTML=`<div class="shield">${shield()}<b data-d="ac">${esc(c.ac)}</b><span>CA</span></div><div><b data-d="hpt">${calc('hpt',c)}</b><span>PV</span></div><div><b data-d="init">${calc('init',c)}</b><span>Inic.</span></div><div><b data-d="prof">${calc('prof',c)}</b><span>Prof.</span></div><div><b data-d="spd">${calc('spd',c)}</b><span>Desl.</span></div>`;
   $('seg').innerHTML=['Normal','Vantagem','Desvantagem'].map((t,i)=>`<button class="${S.mode===i?'on':''}" data-a="mode" data-v="${i}">${t}</button>`).join('');
   hpbar()}
 function hpbar(){const c=C();if(!c)return;const p=Math.max(0,Math.min(100,(+c.hp.cur||0)/Math.max(1,+c.hp.max||1)*100));const w=$('hpw');w.style.width=p+'%';w.className=p<=25?'low':''}
 function render(){
   if(!S.me)return showAuth();
-  document.body.classList.remove('auth');
+  document.body.classList.remove('auth');document.body.dataset.page=S.page;rail();
   if(S.page==='config')return renderConfig();
   document.body.classList.remove('cfg');
-  const c=C();document.body.classList.toggle('nochar',!c);
-  if(!c){$('nm').textContent='Fichas';$('sub').textContent=S.me.name;$('who2').textContent=S.online?'':'Sem conexão com o servidor.';$('vit').innerHTML='';$('seg').innerHTML='';$('nav').innerHTML='';
-    $('main').innerHTML=`<section class="card empty"><h2>Nenhuma ficha ainda</h2><p class="note">Crie sua primeira ficha, comece pelo exemplo ou entre na mesa do seu mestre com o código de convite.</p><div class="btns" style="justify-content:center"><button class="btn pri" data-a="new">Nova ficha</button><button class="btn" data-a="sample">Começar com exemplo</button><button class="btn" data-a="drawer">Mesas</button></div></section><p class="status" id="st">${esc(statusText())}</p>`;side();return}
+  if(S.page!=='ficha')return renderMenu();
+  const c=C();
+  if(!c)return go('personagens',null,false);
+  document.body.classList.remove('menu','nochar');
+  if(c.mesa)S.mesaAtual=c.mesa;
+  const fh=fichaHash(c);if(location.hash!==fh)history.replaceState(null,'',fh);
   document.body.classList.toggle('locked',S.locked||RO());document.body.classList.toggle('ro',RO());
   const lk=$('lk');lk.classList.toggle('on',!S.locked);lk.setAttribute('aria-label',S.locked?'Editar ficha':'Concluir edição');
   $('nav').innerHTML=TABS.map(([k,t])=>`<button class="${S.tab===k?'on':''}" data-a="tab" data-v="${k}">${t}</button>`).join('');
   head();const fn={principal:tPrincipal,combate:tCombate,magias:tMagias,itens:tItens,notas:tNotas}[S.tab]||tPrincipal;
-  $('main').innerHTML=fn(c)+`<p class="status" id="st">${esc(statusText())}</p>`;side()}
-const wide=matchMedia('(min-width:1200px)');
-function side(){if(wide.matches&&S.me&&!typing($('panel')))drawer()}
-wide.addEventListener('change',()=>{if(wide.matches)side();else $('sheet').classList.remove('on')});
+  $('main').innerHTML=fn(c)+`<p class="status" id="st">${esc(statusText())}</p>`}
 const typing=root=>{const a=document.activeElement;return a&&root.contains(a)&&/INPUT|TEXTAREA/.test(a.tagName)};
-function softRender(){if(!S.me)return;if(typing($('main')))pendR=true;else render();if($('sheet').classList.contains('on')&&!wide.matches&&!typing($('panel')))drawer()}
+function softRender(){if(!S.me)return;if(typing($('main')))pendR=true;else render()}
 document.addEventListener('focusout',()=>{if(pendR)setTimeout(()=>{if(!typing($('main'))){pendR=false;render()}},60)});
 function derive(){const c=C();document.querySelectorAll('[data-d]').forEach(e=>{e.textContent=calc(e.dataset.d,c)});hpbar();$('nm').textContent=c.name||'Sem nome';$('sub').textContent=subline(c)}
 
@@ -209,7 +211,7 @@ function rollAtk(i){const a=C().atk[i];if(!a)return;const b=parseInt(String(a.b)
   toast(`<span class="tot${x.v===20||x.v===1?' crit':''}">${x.v+b}</span><div><b>${esc(a.n||'Ataque')}</b><small>d20: ${x.t} ${sg(b)}${x.v===20?' · crítico!':x.v===1?' · erro crítico':''}</small><div style="font-size:14px">${dtxt}</div></div>`)}
 
 /* ---------- entrar ---------- */
-function showAuth(){S.me=null;if(es){es.close();es=null}document.body.classList.add('auth');$('sheet').classList.remove('on');
+function showAuth(){S.me=null;if(es){es.close();es=null}document.body.classList.add('auth');
   const reg=S.authMode==='register';
   $('main').innerHTML=`<div class="authbox"><svg class="crest" viewBox="0 0 60 58" aria-hidden="true"><path d="M30 2 56 9v17c0 15-11 26-26 30C15 52 4 41 4 26V9Z" fill="#9e1b22"/><path d="M30 14 41 21v13L30 41 19 34V21Z" fill="none" stroke="#d6a23a" stroke-width="2.5"/><path d="M19 21l11 7 11-7M30 28v13" fill="none" stroke="#d6a23a" stroke-width="2"/></svg>
   <h1>Fichas D&amp;D 5e</h1><p class="note">Suas fichas e as mesas do grupo, num servidor da sua casa.</p>
@@ -219,7 +221,7 @@ function showAuth(){S.me=null;if(es){es.close();es=null}document.body.classList.
   <button class="btn pri" type="submit">${reg?'Criar conta':'Entrar'}</button><p class="err" id="aerr" role="alert"></p></form>
   ${reg?'<p class="note">O nome é como os outros jogadores vão te ver.</p>':'<p class="note">Esqueceu a senha? Quem roda o servidor pode redefinir.</p>'}</div>`}
 document.addEventListener('submit',async e=>{if(e.target.id!=='authf')return;e.preventDefault();const fd=new FormData(e.target);const btn=e.target.querySelector('button[type=submit]');btn.disabled=true;
-  try{const st=await api('POST',S.authMode==='register'?'/api/register':'/api/login',{name:fd.get('name'),pass:fd.get('pass')});S.chars=new Map();applyState(st);const pf=S.me.prefs||{};if(typeof pf.abrirTravada==='boolean')S.locked=pf.abrirTravada;if(pf.abaInicial&&S.page==='ficha')S.tab=pf.abaInicial;setConn(true);render();listen()}
+  try{const st=await api('POST',S.authMode==='register'?'/api/register':'/api/login',{name:fd.get('name'),pass:fd.get('pass')});S.chars=new Map();applyState(st);const pf=S.me.prefs||{};if(typeof pf.abrirTravada==='boolean')S.locked=pf.abrirTravada;if(pf.abaInicial&&S.page==='ficha')S.tab=pf.abaInicial;setConn(true);render();listen();loadLoc(true)}
   catch(err){$('aerr').textContent=err.status?err.message:'Não foi possível falar com o servidor.'}btn.disabled=false});
 
 /* ---------- histórico ---------- */
@@ -230,34 +232,100 @@ function undo(){if(RO())return;const s=hist.pop();if(!s){toast('<div><b>Nada par
 
 /* ---------- painel de fichas e mesas ---------- */
 function row(c,lib){const on=c===C();const m=mesaOf(c.mesa);
-  const info=[isOwn(c)?'Você':c._ownerName,subline(c),lib===undefined&&m?m.nome:'',lib===undefined&&isLib(c)?'liberada':''].filter(Boolean).join(' · ');
+  const info=[isOwn(c)?'Você':c._ownerName,subline(c),lib===undefined&&m?m.nome:'',lib===undefined&&isLib(c)?'liberada':'',locOf(c.id).length?'no mapa':''].filter(Boolean).join(' · ');
   return `<div class="prow"><button class="pick ${on?'on':''}" data-a="open" data-v="${esc(c.id)}"><div><b>${esc(c.name||'Sem nome')}</b><span>${esc(info)}</span></div></button>${lib?`<button class="tog ${isLib(c)?'on':''}" data-a="lib" data-v="${esc(c.id)}" aria-pressed="${isLib(c)}">${isLib(c)?'Liberada':'Oculta'}</button>`:''}</div>`}
 const armBtn=(key,label,confirm,cls='warn')=>`<button class="btn sm ${cls}" data-a="${key.split(':')[0]}" data-v="${esc(key.split(':').slice(1).join(':'))}">${arm===key?confirm:label}</button>`;
 function mapasUrl(){const x=K.info&&K.info.mapas;return x&&x.url?x.url.replace(/\/+$/,''):`${location.protocol}//${location.hostname}:${x?x.porta:3001}`}
-function drawer(){const p=$('panel');const mine=myChars();const all=[...S.chars.values()];let b='';
-  b+=`<div class="role" style="display:flex;align-items:center;gap:8px"><span style="flex:1">Conectado como <b>${esc(S.me.name)}</b>.${S.online?'':' Sem conexão com o servidor agora.'}</span><button class="btn sm" data-a="cfg" data-v="conta">Configurações</button></div>`;
-  b+=`<div class="grp" style="border:0;margin:0;padding:0"><h3>Minhas fichas</h3>${mine.length?mine.map(c=>row(c)).join(''):'<p class="note">Você ainda não tem fichas.</p>'}
-    <div class="btns"><button class="btn pri" data-a="new">Nova ficha</button><button class="btn" data-a="sample">Ficha de exemplo</button></div></div>`;
-  for(const m of S.mesas){const mestre=isMestre(m);const list=all.filter(c=>c.mesa===m.id&&(mestre||!isOwn(c)));
-    const n=m.membros.length-1;
-    b+=`<div class="grp"><h3><span style="flex:1">${esc(m.nome)}</span><a class="btn sm" href="${esc(mapasUrl())}/#mesa/${esc(m.id)}" target="mapas">Mapa</a><button class="btn sm" data-a="cfg" data-v="mesa|${esc(m.id)}">${mestre?'Configurar':'Detalhes'}</button></h3>`;
-    b+=mestre?`<p class="note" style="margin:0 0 8px">Você é o mestre · código <b>${esc(m.code)}</b> · ${n} ${n===1?'jogador':'jogadores'}${m.convites?'':' · convites fechados'}</p>`
-      :`<p class="note" style="margin:0 0 8px">Mestre: ${esc((m.membros.find(x=>x.id===m.mestre)||{}).name||'?')}. Abaixo, as fichas que ele liberou.</p>`;
-    b+=list.length?list.map(c=>row(c,mestre)).join(''):`<p class="note">${mestre?'Nenhuma ficha nesta mesa ainda. Os jogadores escolhem a mesa na aba Principal da ficha.':'Nenhuma ficha liberada ainda.'}</p>`;
-    b+=`</div>`}
-  b+=`<div class="grp"><h3>Entrar numa mesa</h3><div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><input id="jcode" placeholder="Código de convite" autocapitalize="characters" aria-label="Código de convite"><button class="btn pri" data-a="join">Entrar</button></div></div>
-  <div class="grp"><h3>Criar mesa</h3><div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><input id="nmesa" placeholder="Ex.: A Mina Perdida" aria-label="Nome da nova mesa"><button class="btn" data-a="nmesa">Criar</button></div><p class="foot">Quem cria a mesa é o mestre dela.</p></div>`;
-  const c=C();
-  if(c)b+=`<div class="btns" style="margin:14px 0"><button class="btn" data-a="dup">Duplicar ficha aberta</button>${isOwn(c)?armBtn('del:'+c.id,'Apagar ficha aberta','Toque de novo para apagar'):''}</div>`;
-  b+=`<details class="grp"><summary>Exportar e importar</summary><p class="note">Copie o texto para guardar um backup. Ao importar, as fichas viram suas.</p>
+const tokHref=l=>`${mapasUrl()}/#mapa/${l.mapa}/token/${l.token}`;
+const locOf=id=>S.loc.get(id)||[];
+const mestreNome=m=>(m.membros.find(x=>x.id===m.mestre)||{}).name||'?';
+const ini=n=>{const w=String(n||'?').trim().split(/\s+/);const l=w[w.length-1];return((w.length>1&&/^\d+$/.test(l))?w[0][0]+l:w.length>1?w[0][0]+l[0]:w[0].slice(0,2)).toUpperCase()};
+const IC={home:'<path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>',pers:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><circle cx="18" cy="9" r="3"/><path d="M17 15a5 5 0 0 1 5 5"/>',
+  ficha:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/>',mapa:'<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',cfg:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>'};
+const ico=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
+const fichaHash=c=>c.mesa?`#mesa/${c.mesa}/ficha/${c.id}`:`#ficha/${c.id}`;
+// troca de página; ao abrir uma ficha, o endereço já diz em que mesa ela está
+function go(page,arg,push=true){
+  if(page==='ficha'){const c=S.chars.get(arg||S.view);if(!c)return go('personagens',null,push);if(S.view!==c.id){S.view=c.id;hist=[];S.locked=S.me.prefs?S.me.prefs.abrirTravada!==false:S.locked}prefs()}
+  if(page==='mesa')S.mesaAtual=arg;
+  S.page=page;arm=null;
+  const h=page==='ficha'?fichaHash(C()):page==='mesa'?'#mesa/'+arg:page==='config'?cfgHash():'#'+page;
+  if(location.hash!==h)history[push?'pushState':'replaceState'](null,'',h);
+  render();scrollTo(0,0);if(page!=='config')loadLoc()}
+// onde os personagens estão nos mapas (o servidor pergunta ao serviço de mapas, com as regras dele)
+let locT=0;
+function loadLoc(force){if(!S.me||(!force&&Date.now()-locT<3000))return;locT=Date.now();
+  api('GET','/api/localizacoes').then(r=>{const m=new Map();for(const l of r.localizacoes||[]){if(!m.has(l.ficha))m.set(l.ficha,[]);m.get(l.ficha).push(l)}
+    const mudou=JSON.stringify([...m])!==JSON.stringify([...S.loc])||S.locOk!==!!r.mapas;S.loc=m;S.locOk=!!r.mapas;if(mudou)softRender()}).catch(()=>{})}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadLoc(true)});
+// menu lateral de ícones (computador)
+function rail(){const r=$('rail'),c=C(),pg=S.page,ficha=pg==='ficha'&&c;
+  const it=(a,v,icon,label,on,curto)=>`<button class="ri${on?' on':''}" data-a="${a}" data-v="${esc(v)}" title="${esc(label)}" aria-label="${esc(label)}"${on?' aria-current="page"':''}>${icon}<span aria-hidden="true">${esc(curto||label)}</span></button>`;
+  const nome1=n=>String(n||'').trim().split(/\s+/)[0]||'Ficha';
+  let h=it('go','inicio',ico('home'),'Início',pg==='inicio')+it('go','personagens',ico('pers'),'Personagens',pg==='personagens');
+  if(c)h+=it('go','ficha',`<i class="rav pc">${esc(ini(c.name))}</i>`,'Ficha: '+(c.name||'sem nome'),pg==='ficha',nome1(c.name));
+  h+='<hr>';
+  for(const m of S.mesas)h+=it('gomesa',m.id,`<i class="rav${isMestre(m)?' gm':''}">${esc(ini(m.nome))}</i>`,m.nome,(pg==='mesa'&&S.mesaAtual===m.id)||(ficha&&c.mesa===m.id));
+  h+=it('novamesa','',`<i class="rav add">${ico('plus')}</i>`,'Entrar ou criar mesa',false,'Nova mesa')+'<hr>';
+  const mm=mesaOf(S.mesaAtual);
+  h+=`<a class="ri" href="${esc(mapasUrl())}/${mm?'#mesa/'+esc(mm.id):''}" target="mapas" title="Mapas" aria-label="Mapas">${ico('mapa')}<span>Mapas</span></a><div class="rsp"></div>`;
+  h+=it('cfg','conta',ico('cfg'),'Configurações',pg==='config','Ajustes');
+  r.innerHTML=h}
+// Início, Personagens e Mesa
+function renderMenu(){const b=document.body;b.classList.add('menu');b.classList.remove('locked','ro','nochar','cfg');
+  let m=mesaOf(S.mesaAtual);
+  if(S.page==='mesa'&&!m){S.page='inicio';b.dataset.page='inicio';history.replaceState(null,'','#inicio')}
+  const pg=S.page==='mesa'?'mesa':S.page==='personagens'?'personagens':'inicio';
+  $('nm').textContent=pg==='mesa'?m.nome:pg==='personagens'?'Personagens':'Início';
+  $('sub').textContent=pg==='mesa'?(isMestre(m)?'Você é o mestre desta mesa':'Mestre: '+mestreNome(m)):'Conectado como '+S.me.name;
+  $('who2').textContent=S.online?'':'Sem conexão com o servidor.';$('vit').innerHTML='';$('seg').innerHTML='';
+  const c=C(),mm=mesaOf(S.mesaAtual);
+  $('nav').innerHTML=[['inicio','Início','home'],['personagens','Personagens','pers'],...(c?[['ficha','Ficha','ficha']]:[])].map(([k,t,i])=>`<button class="ni ${pg===k?'on':''}" data-a="go" data-v="${k}">${ico(i)}${t}</button>`).join('')
+    +`<a class="ni" href="${esc(mapasUrl())}/${mm?'#mesa/'+esc(mm.id):''}" target="mapas">${ico('mapa')}Mapas</a><button class="ni" data-a="cfg" data-v="conta">${ico('cfg')}Ajustes</button>`;
+  $('main').innerHTML=(pg==='mesa'?pMesa(m):pg==='personagens'?pPersonagens():pInicio())+`<p class="status" id="st">${esc(statusText())}</p>`}
+function locLink(c){const l=locOf(c.id);if(!l.length)return '';const x=l[0];return `<a class="loc" href="${esc(tokHref(x))}" target="mapas">${ico('pin')}No mapa ${esc(x.mapaNome)}${l.length>1?` e em mais ${l.length-1}`:''}</a>`}
+function pcard(c){const m=mesaOf(c.mesa);const p=Math.max(0,Math.min(100,(+c.hp.cur||0)/Math.max(1,+c.hp.max||1)*100));
+  return `<section class="card"><button class="hcard" data-a="open" data-v="${esc(c.id)}"><span class="mav pc">${esc(ini(c.name))}</span><span><b>${esc(c.name||'Sem nome')}</b><small>${esc(subline(c)||'Classe ainda não definida')}</small></span></button>
+  <div class="pcm"><span>${m?'Mesa: '+esc(m.nome):'Sem mesa'}</span><span>PV ${esc(c.hp.cur)}/${esc(c.hp.max)} · CA ${esc(c.ac)}</span></div>
+  <div class="hpmini"><i class="${p<=25?'low':''}" style="width:${p}%"></i></div>${locLink(c)}
+  <div class="btns"><button class="btn sm pri" data-a="open" data-v="${esc(c.id)}">${m?'Abrir na mesa':'Abrir ficha'}</button><button class="btn sm" data-a="dup" data-v="${esc(c.id)}">Duplicar</button>${armBtn('del:'+c.id,'Apagar','Toque de novo para apagar')}</div></section>`}
+const byUpd=(a,b)=>(b.upd||0)-(a.upd||0);
+function pInicio(){const mine=myChars().sort(byUpd);
+  const mesas=S.mesas.map(m=>{const mestre=isMestre(m),meus=mine.filter(c=>c.mesa===m.id),n=m.membros.length-1;
+    return `<section class="card"><button class="hcard" data-a="gomesa" data-v="${esc(m.id)}"><span class="mav${mestre?' gm':''}">${esc(ini(m.nome))}</span><span><b>${esc(m.nome)}</b><small>${mestre?'Você é o mestre':'Mestre: '+esc(mestreNome(m))} · ${n} ${n===1?'jogador':'jogadores'}</small></span></button>
+    ${meus.length?`<div class="chips" style="margin-bottom:12px">${meus.map(c=>`<button class="chip" data-a="open" data-v="${esc(c.id)}">${esc(c.name||'Sem nome')}</button>`).join('')}</div>`:`<p class="note">${mestre?'Abra a mesa para ver as fichas dos jogadores.':'Nenhum personagem seu nesta mesa ainda.'}</p>`}
+    <div class="btns"><button class="btn sm pri" data-a="gomesa" data-v="${esc(m.id)}">Abrir mesa</button><a class="btn sm" href="${esc(mapasUrl())}/#mesa/${esc(m.id)}" target="mapas">Mapa</a></div></section>`}).join('');
+  const entrar=`<section class="card"><h2>Entrar numa mesa</h2><div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><input id="jcode" placeholder="Código de convite" autocapitalize="characters" aria-label="Código de convite"><button class="btn pri" data-a="join">Entrar</button></div><p class="foot">Peça o código ao mestre da mesa.</p>
+    <h2 style="margin-top:18px">Criar mesa</h2><div class="amt" style="grid-template-columns:minmax(0,1fr) auto"><input id="nmesa" placeholder="Ex.: A Mina Perdida" aria-label="Nome da nova mesa"><button class="btn" data-a="nmesa">Criar</button></div><p class="foot">Quem cria a mesa é o mestre dela.</p></section>`;
+  const vazio=`<section class="card"><h2>Nenhuma mesa ainda</h2><p class="note">Entre na mesa do seu mestre com o código de convite, ou crie a sua.</p></section>`;
+  return `<h2 class="ph">Suas mesas</h2><div class="grid">${mesas||vazio}${entrar}</div>
+  <h2 class="ph">Seus personagens${mine.length>3?`<button class="btn sm" data-a="go" data-v="personagens">Ver todos (${mine.length})</button>`:''}</h2>
+  <div class="grid">${mine.slice(0,3).map(pcard).join('')}${mine.length?'':`<section class="card"><h2>Nenhum personagem ainda</h2><p class="note">Crie o primeiro ou comece pela ficha de exemplo.</p><div class="btns"><button class="btn pri" data-a="new">Nova ficha</button><button class="btn" data-a="sample">Ficha de exemplo</button></div></section>`}</div>`}
+function pPersonagens(){const mine=myChars().sort(byUpd);
+  return `<div class="btns" style="margin:4px 0 14px"><button class="btn pri" data-a="new">Nova ficha</button><button class="btn" data-a="sample">Ficha de exemplo</button></div>
+  ${mine.length?`<div class="grid">${mine.map(pcard).join('')}</div>`:`<section class="card empty"><h2>Nenhum personagem ainda</h2><p class="note">Crie o primeiro ou comece pela ficha de exemplo. Depois, escolha a mesa dele na aba Principal da ficha ou pela página da mesa.</p></section>`}
+  <details class="card" style="margin-top:16px"><summary>Exportar e importar</summary><p class="note">Copie o texto para guardar um backup. Ao importar, as fichas viram suas.</p>
   <textarea id="io" style="min-height:120px;font-size:13px" placeholder="Cole aqui o texto de uma ficha exportada"></textarea>
-  <div class="btns" style="margin-top:8px"><button class="btn sm" data-a="exp">Mostrar ficha aberta</button><button class="btn sm" data-a="expall">Mostrar minhas fichas</button><button class="btn sm" data-a="copy">Copiar</button><button class="btn sm pri" data-a="imp">Importar texto</button><label class="btn sm" style="display:inline-flex;align-items:center;color:var(--ink);font-size:14px">Arquivo<input type="file" id="file" accept=".json,application/json" style="display:none"></label></div><p class="foot" id="iomsg"></p></details>`;
-  p.innerHTML=`<h2>Fichas e mesas<small><button class="btn sm" data-a="close">Fechar</button></small></h2>${b}`;$('sheet').classList.add('on')}
+  <div class="btns" style="margin-top:8px">${C()&&isOwn(C())?'<button class="btn sm" data-a="exp">Mostrar a última ficha aberta</button>':''}<button class="btn sm" data-a="expall">Mostrar minhas fichas</button><button class="btn sm" data-a="copy">Copiar</button><button class="btn sm pri" data-a="imp">Importar texto</button><label class="btn sm" style="display:inline-flex;align-items:center;color:var(--ink);font-size:14px">Arquivo<input type="file" id="file" accept=".json,application/json" style="display:none"></label></div><p class="foot" id="iomsg"></p></details>`}
+function pMesa(m){const mestre=isMestre(m),all=[...S.chars.values()].filter(c=>c.mesa===m.id),meus=all.filter(isOwn),outros=all.filter(c=>!isOwn(c)),fora=myChars().filter(c=>c.mesa!==m.id);
+  const nova=`<div class="btns" style="margin-top:4px"><button class="btn sm" data-a="new" data-v="${esc(m.id)}">Nova ficha nesta mesa</button></div>`;
+  const fichas=mestre?card('Fichas da mesa',`<p class="note">Você vê todas. Toque em Oculta ou Liberada para decidir o que os jogadores veem.</p>${all.length?all.map(c=>row(c,true)).join(''):'<p class="note">Nenhuma ficha nesta mesa ainda.</p>'}${nova}`)
+    :card('Seus personagens',`${meus.length?meus.map(c=>row(c,false)).join(''):'<p class="note">Nenhum personagem seu nesta mesa ainda.</p>'}${nova}`)+card('Liberadas pelo mestre',outros.length?outros.map(c=>row(c,false)).join(''):'<p class="note">O mestre ainda não liberou nenhuma ficha.</p>');
+  const trazer=fora.length?card(mestre?'Trazer suas fichas':'Trazer personagem',`<p class="note">${mestre?'Monstros e NPCs seus entram ocultos dos jogadores.':'Leve um personagem seu para esta mesa. Ele sai da mesa em que está agora.'}</p>${fora.map(c=>`<div class="prow"><div class="pick" style="cursor:default"><div><b>${esc(c.name||'Sem nome')}</b><span>${esc(mesaOf(c.mesa)?'Na mesa '+mesaOf(c.mesa).nome:'Sem mesa')}</span></div></div><button class="tog" data-a="trazer" data-v="${esc(c.id)}|${esc(m.id)}">Trazer</button></div>`).join('')}`):'';
+  const locs=[...S.loc.values()].flat().filter(l=>l.mesa===m.id&&S.chars.has(l.ficha));
+  const mapa=card('Mapas',`<p class="note">${!S.locOk?'Não deu para falar com o serviço de mapas agora.':locs.length?'Onde estão os personagens que você vê:':'Nenhum personagem que você vê está num mapa desta mesa.'}</p>
+    ${locs.map(l=>`<div class="row"><span style="flex:1">${esc(S.chars.get(l.ficha).name||'Sem nome')}</span><a class="loc" style="margin:0" href="${esc(tokHref(l))}" target="mapas">${ico('pin')}${esc(l.mapaNome)}</a></div>`).join('')}
+    <div class="btns" style="margin-top:10px"><a class="btn pri" href="${esc(mapasUrl())}/#mesa/${esc(m.id)}" target="mapas">Abrir os mapas da mesa</a></div>`);
+  const info=card('Na mesa',`${mestre?`<p class="note" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">Código de convite <span class="code" style="font-size:17px;padding:6px 10px">${esc(m.code)}</span></p>`:''}${m.descricao?`<p style="white-space:pre-wrap;margin:0 0 10px">${esc(m.descricao)}</p>`:''}
+    <div class="members">${m.membros.map(x=>`<span class="member" style="padding-right:12px">${esc(x.name)}${x.id===m.mestre?' (mestre)':''}</span>`).join('')}</div>
+    <div class="btns"><button class="btn sm" data-a="cfg" data-v="mesa|${esc(m.id)}">${mestre?'Configurar mesa':'Detalhes da mesa'}</button></div>`);
+  return `<div class="cols"><div class="stackc">${fichas}${trazer}</div><div class="stackc">${mapa}</div><div class="stackc">${info}</div></div>`}
 function addOwn(c,open=true){c._owner=meId();c._ownerName=S.me.name;c._lib=false;c._new=true;delete c.demo;S.chars.set(c.id,c);if(open){S.view=c.id;hist=[];prefs()}save(c);return c}
 function importTxt(txt){let o;try{o=JSON.parse(txt)}catch(e){$('iomsg').textContent='Texto inválido: não parece uma ficha exportada.';return}
   const arr=(Array.isArray(o)?o:[o]).filter(x=>x&&typeof x==='object'&&x.ab);if(!arr.length){$('iomsg').textContent='Nenhuma ficha encontrada no texto.';return}
   for(const x of arr){const c=fix(x);for(const k of Object.keys(c))if(k.startsWith('_'))delete c[k];c.id='c'+uidGen();c.mesa='';addOwn(c)}
-  render();drawer();$('iomsg').textContent=arr.length+(arr.length>1?' fichas importadas.':' ficha importada.')}
+  render();$('iomsg').textContent=arr.length+(arr.length>1?' fichas importadas.':' ficha importada.')}
 
 /* ---------- configurações ---------- */
 const CFG=[['conta','Conta'],['mesa','Mesa']];
@@ -266,7 +334,7 @@ try{const x=JSON.parse(localStorage.getItem('fichas5e-mcp')||'{}');for(const k o
 function saveK(){try{localStorage.setItem('fichas5e-mcp',JSON.stringify({modo:K.modo,pasta:K.pasta,url:K.url}))}catch(e){}}
 const cfgHash=()=>'#config/'+S.cfgTab+(S.cfgTab==='mesa'&&S.cfgMesa?'/'+S.cfgMesa:'');
 const when=t=>t?new Date(t).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'nunca';
-function redraw(){if($('sheet').classList.contains('on')&&!wide.matches)drawer();render()}
+function redraw(){render()}
 function applyTheme(){const t=S.me&&S.me.prefs&&S.me.prefs.tema;const r=document.documentElement;
   if(t==='claro')r.dataset.theme='light';else if(t==='escuro')r.dataset.theme='dark';else delete r.dataset.theme}
 function setPref(k,v){const old=S.me.prefs[k];S.me.prefs={...S.me.prefs,[k]:v};applyTheme();render();
@@ -309,7 +377,7 @@ function tConta(){const me=S.me,p=me.prefs||{},nv=K.novo;
     <div class="btns" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><button class="btn sm" data-a="sairoutras">Sair dos outros aparelhos</button><button class="btn sm warn" data-a="logout">Sair da conta</button></div>`);
   return `<div class="cols"><div class="stackc">${perfil}${seg}</div><div class="stackc">${mcp}${tks}</div><div class="stackc">${aud}</div></div>`}
 function tMesa(){
-  if(!S.mesas.length)return `<div class="cols"><div class="stackc">${card('Nenhuma mesa ainda',`<p class="note">Entre numa mesa com o código do mestre ou crie a sua no painel de fichas e mesas. Quem cria a mesa é o mestre dela.</p><div class="btns"><button class="btn pri" data-a="drawer">Abrir fichas e mesas</button></div>`)}</div></div>`;
+  if(!S.mesas.length)return `<div class="cols"><div class="stackc">${card('Nenhuma mesa ainda',`<p class="note">Entre numa mesa com o código do mestre ou crie a sua no Início. Quem cria a mesa é o mestre dela.</p><div class="btns"><button class="btn pri" data-a="go" data-v="inicio">Ir para o início</button></div>`)}</div></div>`;
   const m=mesaOf(S.cfgMesa)||S.mesas[0];S.cfgMesa=m.id;
   const pick=S.mesas.length>1?`<div class="chips" style="margin-bottom:14px" role="group" aria-label="Escolher mesa">${S.mesas.map(x=>`<button class="chip ${x.id===m.id?'on':''}" data-a="cfgmesa" data-v="${esc(x.id)}" aria-pressed="${x.id===m.id}">${esc(x.nome)}</button>`).join('')}</div>`:'';
   const fichas=[...S.chars.values()].filter(c=>c.mesa===m.id);
@@ -333,11 +401,11 @@ function tMesa(){
   const perigo=card('Apagar mesa',`<p class="note">As fichas saem da mesa e voltam para os donos. Não dá para desfazer.</p>${armBtn('dmesa:'+m.id,'Apagar mesa','Toque de novo para apagar')}`);
   return pick+`<div class="cols"><div class="stackc">${geral}${conv}</div><div class="stackc">${fch}</div><div class="stackc">${jog}${perigo}</div></div>`}
 function renderConfig(){
-  document.body.classList.add('cfg');document.body.classList.remove('locked','ro','nochar');
+  document.body.classList.add('cfg');document.body.classList.remove('locked','ro','nochar','menu');
   $('nm').textContent='Configurações';$('sub').textContent=S.me.name;$('who2').textContent=S.online?'':'Sem conexão com o servidor.';
-  $('nav').innerHTML=CFG.map(([k,t])=>`<button class="${S.cfgTab===k?'on':''}" data-a="cfgtab" data-v="${k}">${t}</button>`).join('')+'<button data-a="ficha">Fichas</button>';
+  $('nav').innerHTML=CFG.map(([k,t])=>`<button class="${S.cfgTab===k?'on':''}" data-a="cfgtab" data-v="${k}">${t}</button>`).join('')+'<button data-a="go" data-v="inicio">Início</button>';
   $('main').innerHTML=(S.cfgTab==='mesa'?tMesa():tConta())+`<p class="status" id="st">${esc(statusText())}</p>`;
-  side();if(S.cfgTab==='conta'&&K.tokens===null&&!K.loading)loadConta()}
+  if(S.cfgTab==='conta'&&K.tokens===null&&!K.loading)loadConta()}
 
 /* ---------- eventos ---------- */
 document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.k2){K[el.dataset.k2]=el.value.trim();saveK();const x=$('mcpcmd');if(x)x.textContent=mcpLine(K.novo&&K.novo.token);return}if(!el.dataset||!el.dataset.k||el.tagName==='SELECT'||RO())return;const c=C();touch();let v=el.value;if('n' in el.dataset){v=v===''?0:+v;if(isNaN(v))return}setP(c,el.dataset.k,v);save();derive()});
@@ -346,20 +414,18 @@ document.addEventListener('change',e=>{const el=e.target;if(el.id==='file'&&el.f
   if(el.dataset&&el.dataset.pref){setPref(el.dataset.pref,el.value);return}
   if(el.id==='audf'){K.filtro=el.value;K.audit=null;render();loadConta();return}
   if(el.tagName==='SELECT'&&el.dataset.k&&!RO()){const c=C();touch();let v=el.value;if(/^\d+$/.test(v)&&el.dataset.k!=='hd.die')v=+v;setP(c,el.dataset.k,v);if(el.dataset.k==='mesa')c._lib=false;save();render()}});
-document.addEventListener('keydown',e=>{if(!S.me||!C()||e.altKey||/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName))return;
+document.addEventListener('keydown',e=>{if(!S.me||S.page!=='ficha'||!C()||e.altKey||/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName))return;
   if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'){e.preventDefault();undo();return}
   if(e.ctrlKey||e.metaKey)return;
-  if(e.key==='Escape'&&$('sheet').classList.contains('on')&&!wide.matches){$('sheet').classList.remove('on');return}
-  const t=TABS[+e.key-1];if(t){S.tab=t[0];prefs();history.replaceState(null,'','#'+t[0]);render();scrollTo(0,0)}});
-document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const id=e.target.id;if(id==='jcode')$('panel').querySelector('[data-a=join]').click();if(id==='nmesa')$('panel').querySelector('[data-a=nmesa]').click()});
+  const t=TABS[+e.key-1];if(t){S.tab=t[0];prefs();render();scrollTo(0,0)}});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const id=e.target.id;if(id==='jcode')document.querySelector('[data-a=join]').click();if(id==='nmesa')document.querySelector('[data-a=nmesa]').click()});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v,c=C();
-  if(a==='close'&&b.id==='sheet'&&e.target!==b)return;
   if(MUT.has(a)&&RO())return toast('<div><b>Somente leitura</b><small>Esta ficha é de outro jogador.</small></div>');
   const edit=fn=>{touch();fn();save();render()};
   const twoTap=key=>{if(arm!==key){arm=key;redraw();return false}arm=null;return true};
   switch(a){
   case'authmode':S.authMode=v;showAuth();break;
-  case'tab':S.tab=v;prefs();history.replaceState(null,'','#'+v);render();scrollTo(0,0);break;
+  case'tab':S.tab=v;prefs();render();scrollTo(0,0);break;
   case'lock':S.locked=!S.locked;prefs();render();break;
   case'undo':undo();break;
   case'mode':S.mode=+v;head();break;
@@ -378,14 +444,16 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
   case'dmg':case'heal':{const n=Math.abs(parseInt($('amt').value)||0);if(!n){$('amt').focus();return}edit(()=>{if(a==='heal'){c.hp.cur=Math.min(+c.hp.max||0,(+c.hp.cur||0)+n);if(c.hp.cur>0)c.death={s:0,f:0}}else{let left=n;const t=+c.hp.tmp||0;const u=Math.min(t,left);c.hp.tmp=t-u;left-=u;c.hp.cur=Math.max(0,(+c.hp.cur||0)-left)}});toast(`<span class="tot">${a==='heal'?'+':'−'}${n}</span><div><b>${a==='heal'?'Cura':'Dano'}</b><small>PV agora: ${c.hp.cur}${+c.hp.tmp?' + '+c.hp.tmp+' temp.':''} / ${c.hp.max}${c.hp.cur===0?' · caído!':''}</small></div>`);break}
   case'hd':{const lv=Math.max(1,+c.level||1);if((+c.hd.used||0)>=lv)return toast('<div><b>Sem dados de vida</b><small>Recupere no descanso longo.</small></div>');const s=parseInt(String(c.hd.die).slice(1))||8;const rv=r(s);const h=Math.max(1,rv+mod(c.ab.con));edit(()=>{c.hd.used=(+c.hd.used||0)+1;c.hp.cur=Math.min(+c.hp.max||0,(+c.hp.cur||0)+h)});toast(`<span class="tot">+${h}</span><div><b>Dado de vida</b><small>${c.hd.die}: ${rv} ${sg(mod(c.ab.con))} CON · PV ${c.hp.cur}/${c.hp.max}</small></div>`);break}
   case'long':edit(()=>{c.hp.cur=+c.hp.max||0;c.hp.tmp=0;c.death={s:0,f:0};c.slots.forEach(s=>s.used=0);c.hd.used=Math.max(0,(+c.hd.used||0)-Math.max(1,Math.floor((+c.level||1)/2)))});toast('<div><b>Descanso longo</b><small>PV, espaços de magia e metade dos dados de vida recuperados.</small></div>');break;
-  case'drawer':arm=null;drawer();break;
-  case'close':$('sheet').classList.remove('on');break;
-  case'open':S.view=v;S.page='ficha';S.locked=S.me.prefs?S.me.prefs.abrirTravada!==false:S.locked;hist=[];prefs();history.replaceState(null,'','#'+S.tab);$('sheet').classList.remove('on');render();scrollTo(0,0);break;
+  case'menu':go('inicio');break;
+  case'go':go(v,v==='ficha'?S.view:null);break;
+  case'gomesa':go('mesa',v);break;
+  case'novamesa':go('inicio');setTimeout(()=>{const x=$('jcode');x&&x.focus()},30);break;
+  case'open':go('ficha',v);break;
+  case'trazer':{const [cid,mid]=v.split('|');const ch=S.chars.get(cid);if(!ch||!isOwn(ch))return;ch.mesa=mid;ch._lib=false;save(ch);render();toast(`<div><b>${esc(ch.name||'Personagem')} está na mesa ${esc((mesaOf(mid)||{}).nome||'')}</b></div>`);break}
   case'lib':{const ch=S.chars.get(v);if(!ch)return;const want=!ch._lib;ch._lib=want;redraw();api('POST','/api/chars/'+v+'/lib',{lib:want}).then(()=>{render()}).catch(err=>{ch._lib=!want;redraw();toast(`<div><b>${esc(err.message)}</b></div>`)});break}
-  case'cfg':{const [t,id]=String(v).split('|');S.page='config';S.cfgTab=t==='mesa'?'mesa':'conta';if(id)S.cfgMesa=id;arm=null;history.pushState(null,'',cfgHash());if(!wide.matches)$('sheet').classList.remove('on');render();scrollTo(0,0);break}
+  case'cfg':{const [t,id]=String(v).split('|');S.cfgTab=t==='mesa'?'mesa':'conta';if(id)S.cfgMesa=id;go('config');break}
   case'cfgtab':S.cfgTab=v;arm=null;history.replaceState(null,'',cfgHash());render();scrollTo(0,0);break;
   case'cfgmesa':S.cfgMesa=v;arm=null;history.replaceState(null,'',cfgHash());render();break;
-  case'ficha':S.page='ficha';K.novo=null;history.replaceState(null,'','#'+S.tab);render();scrollTo(0,0);break;
   case'pref':{const [k,x]=v.split('|');setPref(k,k==='abrirTravada'?x==='1':x);break}
   case'cfnome':{const n=$('cfnome').value.trim();if(n&&n!==S.me.name)act('PATCH','/api/me',{name:n},'Nome atualizado.');break}
   case'sairoutras':api('POST','/api/sessions/sair-outras').then(r=>toast(`<div><b>${r.encerradas?r.encerradas+(r.encerradas===1?' sessão encerrada':' sessões encerradas'):'Nenhuma outra sessão aberta'}</b><small>Este aparelho continua conectado.</small></div>`)).catch(err=>toast(`<div><b>${esc(err.message)}</b></div>`));break;
@@ -398,33 +466,38 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
   case'cp':{const x=$(v);if(!x)return;const t=x.textContent;Promise.resolve(navigator.clipboard&&navigator.clipboard.writeText(t)).then(()=>toast('<div><b>Copiado</b></div>')).catch(()=>{const r=document.createRange();r.selectNodeContents(x);const sl=getSelection();sl.removeAllRanges();sl.addRange(r);toast('<div><b>Texto selecionado</b><small>Copie com Ctrl+C.</small></div>')});break}
   case'mtog':{const [id,k]=v.split('|');const m=mesaOf(id);if(m)act('PATCH','/api/mesas/'+id,{[k]:!m[k]});break}
   case'mlib':{const [id,x]=v.split('|');act('POST','/api/mesas/'+id+'/lib',{lib:x==='1'},x==='1'?'Todas as fichas da mesa liberadas.':'Todas as fichas da mesa ocultas.');break}
-  case'nmesa':{const n=$('nmesa').value.trim();if(!n){$('nmesa').focus();return}act('POST','/api/mesas',{nome:n},'Mesa criada. Passe o código aos jogadores.');break}
-  case'join':{const code=$('jcode').value.trim();if(!code){$('jcode').focus();return}act('POST','/api/mesas/join',{code},'Você entrou na mesa. Escolha ela na aba Principal da sua ficha.');break}
+  case'nmesa':{const n=$('nmesa').value.trim();if(!n){$('nmesa').focus();return}const antes=new Set(S.mesas.map(m=>m.id));act('POST','/api/mesas',{nome:n},'Mesa criada. Passe o código aos jogadores.').then(ok=>{const nova=ok&&S.mesas.find(m=>!antes.has(m.id));if(nova)go('mesa',nova.id)});break}
+  case'join':{const code=$('jcode').value.trim();if(!code){$('jcode').focus();return}const antes=new Set(S.mesas.map(m=>m.id));act('POST','/api/mesas/join',{code},'Você entrou na mesa.').then(ok=>{const nova=ok&&S.mesas.find(m=>!antes.has(m.id));if(nova)go('mesa',nova.id)});break}
   case'newcode':act('POST','/api/mesas/'+v+'/code',{},'Código trocado: o antigo não funciona mais.');break;
   case'kick':{const [mid,u]=v.split('|');if(twoTap('kick:'+v))act('POST','/api/mesas/'+mid+'/kick',{user:u},'Jogador removido da mesa.');break}
   case'dmesa':if(twoTap('dmesa:'+v))act('DELETE','/api/mesas/'+v,null,'Mesa apagada.');break;
   case'leave':if(twoTap('leave:'+v))act('POST','/api/mesas/'+v+'/leave',{},'Você saiu da mesa.');break;
-  case'new':{const n=addOwn(blank());S.locked=false;S.tab='principal';$('sheet').classList.remove('on');render();setTimeout(()=>{const x=document.querySelector('[data-k="name"]');x&&x.select()},30);break}
-  case'sample':{addOwn(sample());S.locked=true;S.tab='principal';$('sheet').classList.remove('on');render();break}
-  case'dup':{if(!c)return;const n=fix(JSON.parse(JSON.stringify(pack(c))));n.id='c'+uidGen();n.mesa='';n.name=(c.name||'Personagem')+' (cópia)';addOwn(n);S.page='ficha';render();drawer();break}
-  case'del':{if(!c||!isOwn(c)||!twoTap('del:'+v))return;const id=c.id;clearTimeout(saveT[id]);S.pending.delete(id);S.chars.delete(id);S.view=(myChars()[0]||{}).id||null;hist=[];prefs();
-    if(!c._new)api('DELETE','/api/chars/'+id).catch(err=>{toast(`<div><b>Não foi possível apagar</b><small>${esc(err.message)}</small></div>`);refreshSoon()});render();drawer();break}
+  case'new':{const n=blank();if(v&&mesaOf(v))n.mesa=v;addOwn(n);S.locked=false;S.tab='principal';go('ficha',n.id);setTimeout(()=>{const x=document.querySelector('[data-k="name"]');x&&x.select()},30);break}
+  case'sample':{const n=addOwn(sample());S.locked=true;S.tab='principal';go('ficha',n.id);break}
+  case'dup':{const o=S.chars.get(v)||c;if(!o)return;const n=fix(JSON.parse(JSON.stringify(pack(o))));n.id='c'+uidGen();n.mesa='';n.name=(o.name||'Personagem')+' (cópia)';addOwn(n,false);render();toast(`<div><b>Cópia criada</b><small>${esc(n.name)}, sem mesa.</small></div>`);break}
+  case'del':{const o=S.chars.get(v);if(!o||!isOwn(o)||!twoTap('del:'+v))return;const id=o.id;clearTimeout(saveT[id]);S.pending.delete(id);S.chars.delete(id);if(S.view===id){S.view=(myChars()[0]||{}).id||null;hist=[]}prefs();
+    if(!o._new)api('DELETE','/api/chars/'+id).catch(err=>{toast(`<div><b>Não foi possível apagar</b><small>${esc(err.message)}</small></div>`);refreshSoon()});render();toast(`<div><b>${esc(o.name||'Ficha')} apagada</b></div>`);break}
   case'exp':if(c){$('io').value=JSON.stringify(pack(c),null,1);$('iomsg').textContent='Ficha aberta pronta para copiar.'}break;
   case'expall':$('io').value=JSON.stringify(myChars().map(pack),null,1);$('iomsg').textContent='Suas fichas estão prontas para copiar.';break;
   case'copy':{const t=$('io');if(!t.value&&c)t.value=JSON.stringify(pack(c),null,1);Promise.resolve(navigator.clipboard&&navigator.clipboard.writeText(t.value)).then(()=>{$('iomsg').textContent='Copiado.'}).catch(()=>{t.select();$('iomsg').textContent='Não deu para copiar sozinho: o texto está selecionado, copie manualmente.'});break}
   case'imp':importTxt($('io').value);break;
   case'pass':act('POST','/api/password',{old:$('pold').value,pass:$('pnew').value},'Senha trocada.');break;
-  case'logout':api('POST','/api/logout').catch(()=>{}).then(()=>{S.chars=new Map();S.authMode='login';S.page='ficha';Object.assign(K,{tokens:null,audit:null,novo:null,filtro:''});history.replaceState(null,'','#'+S.tab);showAuth()});break;
+  case'logout':api('POST','/api/logout').catch(()=>{}).then(()=>{S.chars=new Map();S.authMode='login';S.page='inicio';Object.assign(K,{tokens:null,audit:null,novo:null,filtro:''});history.replaceState(null,'','#inicio');showAuth()});break;
   }});
-function route(){const h=decodeURIComponent(location.hash.slice(1));
+function route(){const h=decodeURIComponent(location.hash.slice(1));let m;
   if(h.startsWith('config')){const [,t,id]=h.split('/');S.page='config';S.cfgTab=t==='mesa'?'mesa':'conta';if(id)S.cfgMesa=id;return}
-  S.page='ficha';if(h.startsWith('ficha/')){S.view=h.slice(6);return}if(TABS.some(t=>t[0]===h))S.tab=h}
+  if(h==='personagens'){S.page='personagens';return}
+  if((m=/^mesa\/([\w-]+)\/ficha\/([\w-]+)$/.exec(h))){S.page='ficha';S.mesaAtual=m[1];S.view=m[2];return}
+  if((m=/^mesa\/([\w-]+)$/.exec(h))){S.page='mesa';S.mesaAtual=m[1];return}
+  if((m=/^ficha\/([\w-]+)$/.exec(h))){S.page='ficha';S.view=m[1];return}
+  if(TABS.some(t=>t[0]===h)){S.page='ficha';S.tab=h;return}
+  S.page='inicio'}
 window.addEventListener('hashchange',()=>{route();if(S.me)render()});
 window.addEventListener('popstate',()=>{route();if(S.me)render()});
 
 /* ---------- início ---------- */
 loadPrefs();
 const h0=location.hash.slice(1);route();
-(async()=>{try{applyState(await api('GET','/api/state'));const pf=S.me.prefs||{};if(typeof pf.abrirTravada==='boolean')S.locked=pf.abrirTravada;if(!h0&&pf.abaInicial)S.tab=pf.abaInicial;render();listen();api('GET','/api/info').then(i=>{K.info=i}).catch(()=>{})}catch(e){if(e.status===401)showAuth();else{showAuth();$('aerr').textContent='Não foi possível falar com o servidor. Ele está ligado?'}}})();
+(async()=>{try{applyState(await api('GET','/api/state'));const pf=S.me.prefs||{};if(typeof pf.abrirTravada==='boolean')S.locked=pf.abrirTravada;if(!h0&&pf.abaInicial)S.tab=pf.abaInicial;render();listen();loadLoc(true);api('GET','/api/info').then(i=>{K.info=i;render()}).catch(()=>{})}catch(e){if(e.status===401)showAuth();else{showAuth();$('aerr').textContent='Não foi possível falar com o servidor. Ele está ligado?'}}})();
 
 }

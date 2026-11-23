@@ -9,7 +9,7 @@ const { createApp } = require('../server.js');
 const { createMapas } = require('../mapas/server.js');
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ficha-mapas-'));
-const fichas = createApp({ dataFile: path.join(dir, 'db.json') });
+const fichas = createApp({ dataFile: path.join(dir, 'db.json'), mapasUrl: () => base });
 let fichaBase, base, mapas;
 
 test.before(async () => {
@@ -106,6 +106,18 @@ test('tokens das fichas: mestre coloca, jogador move só o seu', async () => {
   assert.equal((await bruno.mapa('POST', `/api/mapas/${mapa.id}/tokens`, { ficha: fichaAna })).status, 404, 'ficha de outro, que ele nem vê');
   assert.equal((await bruno.mapa('POST', `/api/mapas/${mapa.id}/tokens`, { ficha: fichaBruno, x: 2, y: 2 })).status, 200, 'a própria ficha pode');
   assert.equal((await bruno.mapa('POST', `/api/mapas/${mapa.id}/tokens`, { ficha: fichaBruno })).status, 409, 'uma vez só');
+});
+
+test('o app de fichas mostra onde os personagens estão, com as regras dos mapas', async () => {
+  const deAna = (await ana.ficha('GET', '/api/localizacoes')).body;
+  assert.equal(deAna.mapas, true);
+  assert.deepEqual(deAna.localizacoes.map((l) => l.ficha).sort(), [fichaAna, fichaBruno].sort(), 'Ana não fica sabendo do goblin oculto');
+  const thorin = deAna.localizacoes.find((l) => l.ficha === fichaAna);
+  assert.equal(thorin.mapaNome, 'Entrada da mina');
+  const doMestre = (await mestre.ficha('GET', '/api/localizacoes')).body;
+  assert.ok(doMestre.localizacoes.some((l) => l.ficha === goblin), 'o mestre vê o goblin');
+  assert.equal((await intruso.ficha('GET', '/api/localizacoes')).body.localizacoes.length, 0);
+  assert.equal((await pessoa().ficha('GET', '/api/localizacoes')).status, 401, 'sem conta não consulta');
 });
 
 test('saúde do monstro chega aos jogadores, os números não', async () => {

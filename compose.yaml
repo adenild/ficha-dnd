@@ -11,6 +11,7 @@ services:
     environment:
       PUBLIC_PORT: ${FICHA_PORTA:-3000}
       MAPAS_PORTA: ${MAPAS_PORTA:-3001}
+      MAPAS_URL: http://mapas:3001
     volumes:
       - dados:/data
 
