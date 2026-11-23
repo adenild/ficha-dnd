@@ -1,0 +1,103 @@
+'use strict';
+// Testa o servidor MCP de ponta a ponta: sobe a API, liga mcp.js por stdio e chama as ferramentas.
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { spawn } = require('node:child_process');
+const { createApp } = require('../server.js');
+
+const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ficha-mcp-'));
+const app = createApp({ dataFile: path.join(dir, 'db.json') });
+let base, proc, ana, nextId = 1, buf = '';
+const waiting = new Map();
+
+function rpc(method, params) {
+  const id = nextId++;
+  proc.stdin.write(JSON.stringify({ jsonrpc: '2.0', id, method, params }) + '\n');
+  return new Promise((ok) => waiting.set(id, ok));
+}
+async function tool(name, args) {
+  const r = await rpc('tools/call', { name, arguments: args });
+  const text = r.result.content[0].text;
+  return r.result.isError ? { erro: text } : JSON.parse(text);
+}
+async function post(url, body, cookie = '') {
+  const r = await fetch(base + url, { method: 'POST', headers: { 'Content-Type': 'application/json', cookie }, body: JSON.stringify(body) });
+  return { cookie: (r.headers.get('set-cookie') || '').split(';')[0], body: await r.json() };
+}
+
+test.before(async () => {
+  await new Promise((ok) => app.server.listen(0, '127.0.0.1', ok));
+  base = `http://127.0.0.1:${app.server.address().port}`;
+  await post('/api/register', { name: 'Mestre', pass: 'segredo1' });
+  ana = await post('/api/register', { name: 'Ana', pass: 'segredo2' });
+  const ficha = await post('/api/chars', { data: { name: 'Thorin', level: 3, ab: { con: 14 }, hp: { max: 20, cur: 20, tmp: 0 } } }, ana.cookie);
+  ana.fichaId = ficha.body.id;
+  proc = spawn(process.execPath, [path.join(__dirname, '..', 'mcp.js')], { env: { ...process.env, FICHA_URL: base, FICHA_USUARIO: 'Mestre', FICHA_SENHA: 'segredo1' } });
+  proc.stdout.setEncoding('utf8');
+  proc.stdout.on('data', (ch) => {
+    buf += ch; let i;
+    while ((i = buf.indexOf('\n')) >= 0) { const m = JSON.parse(buf.slice(0, i)); buf = buf.slice(i + 1); waiting.get(m.id)?.(m); }
+  });
+});
+test.after(() => { proc.kill(); app.server.close(); app.flush(); });
+
+test('handshake e lista de ferramentas', async () => {
+  const init = await rpc('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 't', version: '1' } });
+  assert.equal(init.result.protocolVersion, '2025-06-18');
+  proc.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
+  const names = (await rpc('tools/list')).result.tools.map((t) => t.name);
+  for (const n of ['estado', 'ver_ficha', 'criar_ficha', 'editar_ficha', 'acao_ficha', 'rolar', 'liberar_ficha', 'apagar_ficha', 'mesa']) assert.ok(names.includes(n), n);
+  assert.equal((await rpc('metodo/inexistente')).error.code, -32601);
+});
+
+test('mesas e fichas respeitam as regras do app', async () => {
+  const m = await tool('mesa', { acao: 'criar', nome: 'Mesa de teste' });
+  const code = m.mesas[0].codigo;
+  assert.ok(code);
+  assert.deepEqual((await tool('estado', {})).fichas, [], 'mestre não vê ficha fora da mesa');
+  await fetch(base + '/api/mesas/join', { method: 'POST', headers: { 'Content-Type': 'application/json', cookie: ana.cookie }, body: JSON.stringify({ code }) });
+  await fetch(base + `/api/chars/${ana.fichaId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', cookie: ana.cookie }, body: JSON.stringify({ data: { name: 'Thorin', level: 3, ab: { con: 14 }, hp: { max: 20, cur: 20, tmp: 0 } }, mesa: m.mesas[0].id }) });
+  const st = await tool('estado', {});
+  assert.equal(st.fichas[0].nome, 'Thorin');
+  assert.equal(st.fichas[0].mesa, 'Mesa de teste');
+  assert.match((await tool('apagar_ficha', { ficha: 'thorin' })).erro, /dono/, 'mestre não apaga ficha alheia');
+  assert.equal((await tool('liberar_ficha', { ficha: 'Thorin', liberada: true })).liberada, true);
+});
+
+test('ações de jogo seguem as regras da ficha', async () => {
+  await tool('acao_ficha', { ficha: 'Thorin', acao: 'pv_temporarios', valor: 5 });
+  const d = await tool('acao_ficha', { ficha: 'Thorin', acao: 'dano', valor: 8 });
+  assert.equal(d.pv, '17/20', 'temporários absorvem primeiro');
+  await tool('acao_ficha', { ficha: 'Thorin', acao: 'adicionar_condicao', condicao: 'envenenado' });
+  const f = await tool('ver_ficha', { ficha: 'Thorin' });
+  assert.deepEqual(f.dados.cond, ['Envenenado']);
+  assert.equal(f.calculado.proficiencia, '+2');
+  assert.equal(f.calculado.salvaguardas.con, '+2');
+  await tool('acao_ficha', { ficha: 'Thorin', acao: 'descanso_longo' });
+  assert.equal((await tool('ver_ficha', { ficha: 'Thorin' })).dados.hp.cur, 20);
+});
+
+test('editar mescla objetos e criar usa padrões', async () => {
+  await tool('editar_ficha', { ficha: 'Thorin', alteracoes: { hp: { max: 25 }, atk: [{ n: 'Machado', b: '+5', d: '1d8+3', t: 'cortante' }] } });
+  const f = await tool('ver_ficha', { ficha: 'Thorin' });
+  assert.equal(f.dados.hp.max, 25);
+  assert.equal(f.dados.hp.cur, 20, 'o resto do objeto fica');
+  const nova = await tool('criar_ficha', { dados: { name: 'Goblin', ab: { des: 14 } }, mesa: 'Mesa de teste' });
+  assert.equal(nova.mesa, 'Mesa de teste');
+  assert.equal((await tool('ver_ficha', { ficha: 'Goblin' })).dados.ab.for, 10);
+  assert.ok((await tool('apagar_ficha', { ficha: 'Goblin' })).apagada);
+});
+
+test('rolagens', async () => {
+  const x = await tool('rolar', { expressao: '2d6+3' });
+  assert.ok(x.total >= 5 && x.total <= 15);
+  const a = await tool('rolar', { ficha: 'Thorin', teste: 'ataque:machado', modo: 'vantagem' });
+  assert.equal(a.d20.length, 2);
+  assert.ok(a.dano >= 4);
+  const p = await tool('rolar', { ficha: 'Thorin', teste: 'pericia:Percepção', vezes: 3 });
+  assert.equal(p.length, 3);
+  assert.ok((await tool('rolar', { expressao: 'abc' })).erro);
+});

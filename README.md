@@ -57,6 +57,30 @@ Exemplo: `PORT=8080 npm start`.
   node server.js --reset-senha "Nome do jogador" novaSenha
   ```
 
+## Assistente (MCP)
+
+`mcp.js` é um servidor [MCP](https://modelcontextprotocol.io) que deixa um assistente como o Claude ler e mexer nas fichas e mesas. Ele entra no app como uma conta normal e usa a mesma API dos celulares, então segue as mesmas regras de acesso e quem estiver com a ficha aberta vê as mudanças na hora. Use a conta do mestre para o assistente enxergar todas as fichas da mesa.
+
+O servidor do app precisa estar rodando (`npm start`). Para ligar no Claude Code, rode isto na pasta do projeto:
+
+```bash
+claude mcp add ficha-dnd --scope local -e FICHA_URL=http://localhost:3000 -e FICHA_USUARIO="Nome da conta" -e FICHA_SENHA="senha" -- node /caminho/para/ficha-dnd/mcp.js
+```
+
+O escopo `local` guarda a senha só na configuração do seu usuário, fora do repositório.
+
+| Ferramenta | O que faz |
+|---|---|
+| `estado` | Mesas, membros, códigos de convite e resumo das fichas visíveis |
+| `ver_ficha` | Ficha completa com os valores calculados (modificadores, perícias, CD de magia...) |
+| `criar_ficha` / `editar_ficha` / `apagar_ficha` | Cria, altera em parte ou apaga uma ficha |
+| `acao_ficha` | Dano, cura, PV temporários, dado de vida, descanso longo, espaços de magia, salvaguarda contra morte, condições e inspiração |
+| `rolar` | Rola uma expressão (`2d6+3`) ou um teste da ficha (perícia, salvaguarda, ataque com dano...), com vantagem ou desvantagem |
+| `liberar_ficha` | Mestre libera ou oculta uma ficha para os jogadores |
+| `mesa` | Cria, entra, renomeia, troca o código, remove jogador, sai ou apaga uma mesa |
+
+Fichas e mesas podem ser indicadas pelo nome. As rolagens feitas pelo assistente não aparecem nos celulares, só as mudanças na ficha.
+
 ## Limites
 
 - O servidor usa HTTP sem criptografia, pensado só para a rede de casa. Não o exponha na internet sem colocar HTTPS na frente (por exemplo com Caddy ou um túnel).
@@ -69,12 +93,13 @@ Exemplo: `PORT=8080 npm start`.
 npm test
 ```
 
-Os testes cobrem as regras de acesso: cadastro, mesas, código de convite, fichas ocultas e liberadas, edição pelo mestre e persistência.
+Os testes cobrem as regras de acesso: cadastro, mesas, código de convite, fichas ocultas e liberadas, edição pelo mestre e persistência. Também cobrem o servidor MCP de ponta a ponta.
 
 ## Estrutura
 
 ```
 server.js         servidor HTTP, API, regras de acesso e eventos ao vivo
+mcp.js            servidor MCP para assistentes (fala com a API do server.js)
 public/index.html página do app
 public/app.js     ficha, rolagens, mesas e conversa com a API
 public/style.css  visual
