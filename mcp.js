@@ -8,6 +8,8 @@
 //   FICHA_URL      endereço do servidor (padrão http://localhost:3000)
 //   FICHA_TOKEN    token de conta, gerado no app em Configurações › Conta. Pode ser pausado ou
 //                  removido lá, e cada chamada feita com ele fica no registro de auditoria.
+//   MAPAS_URL      endereço do serviço de mapas (padrão: o mesmo de FICHA_URL na porta 3001). Ele
+//                  aceita o mesmo token e aplica as mesmas regras de acesso.
 
 const PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 
@@ -85,14 +87,14 @@ function test20(label, bonus, modo) {
 class ToolError extends Error {}
 const fail = (msg) => { throw new ToolError(msg); };
 
-function createClient({ url, token }) {
+function createClient({ url, token, servico = 'o servidor das fichas', comando = 'npm start' }) {
   return async function call(method, path, body) {
     if (!token) fail('Configure FICHA_TOKEN no servidor MCP: gere um token no app, em Configurações › Conta.');
     let res;
     try {
       res = await fetch(url + path, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: body ? JSON.stringify(body) : undefined });
     } catch (e) {
-      fail(`Não consegui falar com o servidor das fichas em ${url}. Ele está rodando (npm start)?`);
+      fail(`Não consegui falar com ${servico} em ${url}. Ele está rodando (${comando})?`);
     }
     const out = await res.json().catch(() => null);
     if (res.status !== 200) fail(out?.error || `Erro ${res.status}`);
@@ -101,7 +103,7 @@ function createClient({ url, token }) {
 }
 
 // ---------- ferramentas ----------
-function createTools(call) {
+function createTools(call, mcall) {
   const state = () => call('GET', '/api/state');
 
   function findChar(st, ref) {
@@ -359,8 +361,277 @@ function createTools(call) {
       },
     },
   ];
+  if (mcall) tools.push(...createMapTools(mcall));
   return tools;
 }
+
+// ---------- ferramentas de mapa (falam com mapas/server.js) ----------
+const TERRENO = { vazio: '.', pedra: 'c', madeira: 'm', grama: 'g', terra: 't', agua: 'a', parede: 'p', lava: 'l', porta: 'o', rocha: 'r' };
+const TERRENO_NOME = Object.fromEntries(Object.entries(TERRENO).map(([k, v]) => [v, k === 'agua' ? 'água' : k]));
+const TIPOS_TOKEN = ['pj', 'aliado', 'inimigo', 'objeto'];
+const TAMANHO = { 1: 'Médio ou menor (1×1)', 2: 'Grande (2×2)', 3: 'Enorme (3×3)', 4: 'Imenso (4×4)' };
+const MARCAS = '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const metros = (q) => String(q * 1.5).replace('.', ',') + ' m';
+
+function colName(x) { let s = ''; x += 1; while (x > 0) { const m = (x - 1) % 26; s = String.fromCharCode(65 + m) + s; x = Math.floor((x - 1) / 26); } return s; }
+const coord = (x, y) => colName(x) + (y + 1);
+function parsePos(p, mp) {
+  const m = /^\s*([a-z]+)\s*(\d+)\s*$/i.exec(String(p ?? ''));
+  if (!m) fail(`Posição "${p}" inválida. Use coluna e linha, como C7.`);
+  let x = 0;
+  for (const ch of m[1].toUpperCase()) x = x * 26 + (ch.charCodeAt(0) - 64);
+  x -= 1; const y = +m[2] - 1;
+  if (x < 0 || y < 0 || x >= mp.cols || y >= mp.rows) fail(`${String(p).toUpperCase()} fica fora do mapa, que vai de A1 a ${coord(mp.cols - 1, mp.rows - 1)}.`);
+  return { x, y };
+}
+// distância de 5e no quadriculado: a diagonal conta como um quadrado; tokens grandes contam da borda mais próxima
+const gap = (a0, a1, b0, b1) => Math.max(0, b0 - a1, a0 - b1);
+const distQ = (a, b) => Math.max(gap(a.x, a.x + (a.tam || 1) - 1, b.x, b.x + (b.tam || 1) - 1), gap(a.y, a.y + (a.tam || 1) - 1, b.y, b.y + (b.tam || 1) - 1));
+
+function createMapTools(mcall) {
+  const mstate = () => mcall('GET', '/api/state');
+  function findMapa(ms, ref, mesaRef) {
+    let list = ms.mapas;
+    if (mesaRef) {
+      const me = ms.mesas.find((x) => x.id === mesaRef || plain(x.nome) === plain(mesaRef)) || ms.mesas.find((x) => plain(x.nome).includes(plain(mesaRef))) || fail(`Mesa "${mesaRef}" não encontrada.`);
+      list = list.filter((x) => x.mesa === me.id);
+    }
+    if (!ref) {
+      if (list.length === 1) return list[0];
+      if (!list.length) fail('Nenhum mapa disponível. O mestre cria um com gerenciar_mapa (acao criar).');
+      fail(`Informe o mapa. Mapas: ${list.map((x) => `${x.nome} (${x.id})`).join('; ')}.`);
+    }
+    const hit = list.find((x) => x.id === ref) || list.find((x) => plain(x.nome) === plain(ref));
+    if (hit) return hit;
+    const part = list.filter((x) => plain(x.nome).includes(plain(ref)));
+    if (part.length === 1) return part[0];
+    fail(part.length ? `Mais de um mapa combina com "${ref}": ${part.map((x) => `${x.nome} (${x.id})`).join('; ')}.` : `Mapa "${ref}" não encontrado entre os que esta conta vê.`);
+  }
+  async function abrir(ref, mesa) {
+    const ms = await mstate();
+    const r = findMapa(ms, ref, mesa);
+    return { ms, mp: await mcall('GET', `/api/mapas/${r.id}`) };
+  }
+  const fichaDe = (ms, id) => ms.fichas.find((f) => f.id === id);
+  function findToken(ms, mp, ref) {
+    if (!ref) fail('Informe o token (nome, nome da ficha ou id).');
+    const byId = mp.tokens.find((t) => t.id === ref);
+    if (byId) return byId;
+    const nomeDe = (t) => [t.nome, t.fnome, (fichaDe(ms, t.ficha) || {}).nome].filter(Boolean);
+    const exato = mp.tokens.filter((t) => nomeDe(t).some((n) => plain(n) === plain(ref)));
+    const hits = exato.length ? exato : mp.tokens.filter((t) => nomeDe(t).some((n) => plain(n).includes(plain(ref))));
+    if (hits.length === 1) return hits[0];
+    fail(hits.length ? `Mais de um token combina com "${ref}": ${hits.map((t) => `${t.nome} em ${coord(t.x, t.y)} (${t.id})`).join('; ')}. Use o id.` : `Token "${ref}" não está no mapa ${mp.nome}. Tokens: ${mp.tokens.map((t) => t.nome).join(', ') || 'nenhum'}.`);
+  }
+  function findFicha(ms, ref) {
+    const hit = ms.fichas.find((f) => f.id === ref) || ms.fichas.filter((f) => plain(f.nome) === plain(ref)).at(0);
+    if (hit) return hit;
+    const part = ms.fichas.filter((f) => plain(f.nome).includes(plain(ref)));
+    if (part.length === 1) return part[0];
+    fail(part.length ? `Mais de uma ficha combina com "${ref}": ${part.map((f) => `${f.nome} (${f.id})`).join('; ')}.` : `Ficha "${ref}" não encontrada entre as que esta conta vê.`);
+  }
+  const souMestre = (ms, mp) => !!(ms.mesas.find((x) => x.id === mp.mesa) || {}).souMestre;
+  function tokenView(ms, mp, t, marca) {
+    const f = t.ficha && fichaDe(ms, t.ficha);
+    return {
+      ...(marca ? { marca } : {}), id: t.id, nome: t.nome, posicao: coord(t.x, t.y), ...(t.tam > 1 ? { ocupa: `${coord(t.x, t.y)} a ${coord(t.x + t.tam - 1, t.y + t.tam - 1)}` } : {}),
+      tipo: t.tipo, tamanho: TAMANHO[t.tam], ...(t.oculto ? { oculto: true } : {}),
+      ...(f ? { ficha: f.nome, pv: `${f.hp.cur}/${f.hp.max}${f.hp.tmp ? ' +' + f.hp.tmp : ''}`, ca: f.ac, ...(f.cond.length ? { condicoes: f.cond } : {}) } : t.ficha ? { saude: t.saude } : {}),
+    };
+  }
+  function resumo(ms, mp) {
+    const me = ms.mesas.find((x) => x.id === mp.mesa) || {};
+    return { id: mp.id, nome: mp.nome, mesa: me.nome, visivel_para_jogadores: !!mp.visivel, tamanho: `${mp.cols}×${mp.rows} quadrados (${metros(mp.cols)} × ${metros(mp.rows)}), de A1 a ${coord(mp.cols - 1, mp.rows - 1)}` };
+  }
+  function grade(mp) {
+    if (mp.cols * mp.rows > 4000) return null;
+    const cell = Array.from(mp.tiles);
+    mp.tokens.forEach((t, i) => {
+      const mk = MARCAS[i] || '*';
+      for (let y = t.y; y < t.y + t.tam; y++) for (let x = t.x; x < t.x + t.tam; x++) if (x < mp.cols && y < mp.rows) cell[y * mp.cols + x] = mk;
+    });
+    const w = mp.cols > 26 ? 3 : 2;
+    const linhas = ['    ' + Array.from({ length: mp.cols }, (_, x) => colName(x).padEnd(w)).join('').trimEnd()];
+    for (let y = 0; y < mp.rows; y++) linhas.push(String(y + 1).padStart(3) + ' ' + cell.slice(y * mp.cols, (y + 1) * mp.cols).map((c) => c.padEnd(w)).join('').trimEnd());
+    return linhas.join('\n');
+  }
+  async function patchTiles(mp, arr) { return mcall('PATCH', `/api/mapas/${mp.id}`, { tiles: arr.join('') }); }
+  const terrenoDe = (n) => TERRENO[plain(n)] || fail(`Terreno "${n}" desconhecido. Opções: ${Object.values(TERRENO_NOME).join(', ')}.`);
+
+  return [
+    {
+      name: 'ver_mapa',
+      description: 'Sem "mapa": lista os mapas que esta conta vê. Com "mapa": mostra o mapa em texto (colunas com letras, linhas com números; cada letra minúscula é um terreno da legenda e cada marca 1-9/A-Z é um token), a lista de tokens com posição (ex.: C7), PV e condições das fichas que a conta lê, ou só a saúde aproximada das outras. 1 quadrado = 1,5 m.',
+      inputSchema: { type: 'object', properties: { mapa: { type: 'string', description: 'Id ou nome do mapa' }, mesa: { type: 'string', description: 'Filtra por mesa (id ou nome)' }, grade: { type: 'boolean', description: 'false para não mandar o desenho em texto' } } },
+      async run({ mapa, mesa, grade: comGrade }) {
+        if (!mapa) {
+          const ms = await mstate();
+          const list = mesa ? ms.mapas.filter((x) => x.mesa === findMapaMesa(ms, mesa)) : ms.mapas;
+          return { mapas: list.map((x) => ({ id: x.id, nome: x.nome, mesa: (ms.mesas.find((m) => m.id === x.mesa) || {}).nome, tamanho: `${x.cols}×${x.rows}`, visivel_para_jogadores: x.visivel })) };
+        }
+        const { ms, mp } = await abrir(mapa, mesa);
+        const out = { ...resumo(ms, mp), escala: '1 quadrado = 1,5 m; a diagonal conta como 1 quadrado' };
+        if (comGrade !== false) {
+          const g = grade(mp);
+          if (g) { out.grade = g; out.legenda = { ...Object.fromEntries(Object.entries(TERRENO_NOME)), marcas: 'tokens, ver lista' }; }
+          else out.grade = 'Mapa grande demais para mostrar em texto; use as posições dos tokens.';
+        }
+        if (mp.fundo) out.imagem_de_fundo = 'O mapa tem uma imagem de fundo que só aparece no app; o texto mostra só o terreno pintado.';
+        out.tokens = mp.tokens.map((t, i) => tokenView(ms, mp, t, MARCAS[i] || '*'));
+        return out;
+      },
+    },
+    {
+      name: 'gerenciar_mapa',
+      description: 'Mestre da mesa: criar (mesa, nome, largura, altura em quadrados, terreno base opcional), mostrar (os jogadores passam a ver e o app deles abre este mapa), ocultar, renomear (nome), redimensionar (largura, altura) ou apagar (não dá para desfazer: confirme antes). Mapas novos começam ocultos.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          acao: { type: 'string', enum: ['criar', 'mostrar', 'ocultar', 'renomear', 'redimensionar', 'apagar'] },
+          mapa: { type: 'string', description: 'Id ou nome do mapa (menos em criar)' },
+          mesa: { type: 'string', description: 'Id ou nome da mesa (em criar)' },
+          nome: { type: 'string' },
+          largura: { type: 'number', description: 'Quadrados de largura (1 a 120)' },
+          altura: { type: 'number', description: 'Quadrados de altura (1 a 120)' },
+          terreno: { type: 'string', description: 'Terreno base ao criar: ' + Object.values(TERRENO_NOME).join(', ') },
+        },
+        required: ['acao'],
+      },
+      async run({ acao, mapa, mesa, nome, largura, altura, terreno }) {
+        const ms = await mstate();
+        if (acao === 'criar') {
+          const mid = findMapaMesa(ms, mesa);
+          let mp = await mcall('POST', '/api/mapas', { mesa: mid, nome, cols: largura, rows: altura });
+          if (terreno) mp = await patchTiles(mp, Array(mp.cols * mp.rows).fill(terrenoDe(terreno)));
+          return { ...resumo(ms, mp), aviso: 'O mapa está oculto: use acao mostrar quando os jogadores puderem ver.' };
+        }
+        const r = findMapa(ms, mapa);
+        if (acao === 'apagar') { await mcall('DELETE', `/api/mapas/${r.id}`); return { apagado: r.nome }; }
+        const body = acao === 'mostrar' ? { mostrar: true } : acao === 'ocultar' ? { visivel: false }
+          : acao === 'renomear' ? { nome: nome || fail('Informe o novo nome.') }
+            : acao === 'redimensionar' ? { cols: largura ?? r.cols, rows: altura ?? r.rows } : fail(`Ação desconhecida: ${acao}`);
+        return resumo(ms, await mcall('PATCH', `/api/mapas/${r.id}`, body));
+      },
+    },
+    {
+      name: 'pintar_mapa',
+      description: 'Mestre da mesa: pinta o terreno em retângulos, na ordem dada. Cada área: de e ate (cantos, ex.: A1 e J8), terreno (' + Object.values(TERRENO_NOME).join(', ') + ') e, opcional, contorno: true para pintar só a borda (bom para paredes de uma sala). Exemplo de sala com porta: [{de:"B2",ate:"K9",terreno:"pedra"},{de:"B2",ate:"K9",terreno:"parede",contorno:true},{de:"F9",ate:"F9",terreno:"porta"}].',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          mapa: { type: 'string', description: 'Id ou nome do mapa' },
+          areas: { type: 'array', items: { type: 'object', properties: { de: { type: 'string' }, ate: { type: 'string' }, terreno: { type: 'string' }, contorno: { type: 'boolean' } }, required: ['de', 'terreno'] } },
+        },
+        required: ['mapa', 'areas'],
+      },
+      async run({ mapa, areas }) {
+        const { ms, mp } = await abrir(mapa);
+        if (!souMestre(ms, mp)) fail('Só o mestre da mesa pinta o mapa.');
+        if (!Array.isArray(areas) || !areas.length) fail('Informe ao menos uma área.');
+        const arr = Array.from(mp.tiles);
+        let n = 0;
+        for (const a of areas) {
+          const p = parsePos(a.de, mp), q = parsePos(a.ate || a.de, mp), ch = terrenoDe(a.terreno);
+          const [x0, x1] = [Math.min(p.x, q.x), Math.max(p.x, q.x)], [y0, y1] = [Math.min(p.y, q.y), Math.max(p.y, q.y)];
+          for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (!a.contorno || x === x0 || x === x1 || y === y0 || y === y1) { arr[y * mp.cols + x] = ch; n++; }
+        }
+        await patchTiles(mp, arr);
+        return { mapa: mp.nome, quadrados_pintados: n };
+      },
+    },
+    {
+      name: 'colocar_token',
+      description: 'Coloca um token no mapa. Com "ficha", o token mostra os PV e as condições dela (ficha do mestre vira inimigo, de jogador vira personagem). Sem ficha, é um token livre com "nome" (só o mestre). Posição é o canto de cima à esquerda (ex.: C7). Use oculto: true para monstros que os jogadores ainda não viram. Jogadores só colocam as próprias fichas.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          mapa: { type: 'string', description: 'Id ou nome do mapa' },
+          ficha: { type: 'string', description: 'Id ou nome da ficha' },
+          nome: { type: 'string', description: 'Nome do token livre, ou o nome que os jogadores veem' },
+          posicao: { type: 'string', description: 'Ex.: C7' },
+          tipo: { type: 'string', enum: TIPOS_TOKEN },
+          tamanho: { type: 'number', description: '1 médio ou menor, 2 grande, 3 enorme, 4 imenso' },
+          oculto: { type: 'boolean' },
+          cor: { type: 'string', description: 'Cor em #rrggbb (opcional)' },
+        },
+        required: ['mapa', 'posicao'],
+      },
+      async run({ mapa, ficha, nome, posicao, tipo, tamanho, oculto, cor }) {
+        const { ms, mp } = await abrir(mapa);
+        const pos = parsePos(posicao, mp);
+        if (!ficha && !nome) fail('Informe a ficha ou o nome do token livre.');
+        const body = { x: pos.x, y: pos.y };
+        if (ficha) body.ficha = findFicha(ms, ficha).id;
+        if (nome) body.nome = nome;
+        if (tipo) body.tipo = tipo;
+        if (tamanho) body.tam = tamanho;
+        if (oculto !== undefined) body.oculto = !!oculto;
+        if (cor) body.cor = cor;
+        const v = await mcall('POST', `/api/mapas/${mp.id}/tokens`, body);
+        const t = v.tokens[v.tokens.length - 1];
+        return { mapa: mp.nome, token: tokenView(ms, v, t), ...(t.x !== pos.x || t.y !== pos.y ? { aviso: 'O token foi ajustado para caber no mapa.' } : {}) };
+      },
+    },
+    {
+      name: 'mover_token',
+      description: 'Move um token para uma posição (canto de cima à esquerda, ex.: F4) e diz quantos quadrados e metros andou. Os jogadores veem o movimento na hora. Jogadores só movem os próprios tokens; o mestre move qualquer um. O app não bloqueia paredes nem deslocamento: confira com ver_mapa e com o deslocamento da ficha.',
+      inputSchema: { type: 'object', properties: { mapa: { type: 'string' }, token: { type: 'string', description: 'Nome do token, nome da ficha ou id' }, posicao: { type: 'string', description: 'Ex.: F4' } }, required: ['mapa', 'token', 'posicao'] },
+      async run({ mapa, token, posicao }) {
+        const { ms, mp } = await abrir(mapa);
+        const t = findToken(ms, mp, token), pos = parsePos(posicao, mp);
+        const andou = distQ(t, { ...pos, tam: 1 });
+        const v = await mcall('PATCH', `/api/mapas/${mp.id}/tokens/${t.id}`, { x: pos.x, y: pos.y });
+        const n = v.tokens.find((x) => x.id === t.id);
+        return { token: n.nome, de: coord(t.x, t.y), para: coord(n.x, n.y), andou: `${andou} ${andou === 1 ? 'quadrado' : 'quadrados'} (${metros(andou)})` };
+      },
+    },
+    {
+      name: 'editar_token',
+      description: 'Mestre da mesa: muda o nome que os jogadores veem, o tipo, o tamanho, a cor ou se o token está oculto (oculto: false revela um monstro). remover: true tira o token do mapa (a ficha continua existindo). Jogadores só podem remover os próprios tokens.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          mapa: { type: 'string' }, token: { type: 'string', description: 'Nome do token, nome da ficha ou id' },
+          nome: { type: 'string' }, tipo: { type: 'string', enum: TIPOS_TOKEN }, tamanho: { type: 'number' }, oculto: { type: 'boolean' }, cor: { type: 'string' }, remover: { type: 'boolean' },
+        },
+        required: ['mapa', 'token'],
+      },
+      async run({ mapa, token, nome, tipo, tamanho, oculto, cor, remover }) {
+        const { ms, mp } = await abrir(mapa);
+        const t = findToken(ms, mp, token);
+        if (remover) { await mcall('DELETE', `/api/mapas/${mp.id}/tokens/${t.id}`); return { removido: t.nome, mapa: mp.nome }; }
+        const body = {};
+        if (nome !== undefined) body.nome = nome;
+        if (tipo !== undefined) body.tipo = tipo;
+        if (tamanho !== undefined) body.tam = tamanho;
+        if (oculto !== undefined) body.oculto = !!oculto;
+        if (cor !== undefined) body.cor = cor;
+        if (!Object.keys(body).length) fail('Nada para mudar: informe nome, tipo, tamanho, oculto, cor ou remover.');
+        if (!souMestre(ms, mp)) fail('Só o mestre da mesa muda os tokens; jogadores só movem ou removem os próprios.');
+        const v = await mcall('PATCH', `/api/mapas/${mp.id}/tokens/${t.id}`, body);
+        return { mapa: mp.nome, token: tokenView(ms, v, v.tokens.find((x) => x.id === t.id)) };
+      },
+    },
+    {
+      name: 'medir',
+      description: 'Distância no mapa entre dois tokens, dois quadrados (ex.: C7) ou um token e um quadrado, pelas regras do quadriculado (diagonal conta 1; tokens grandes contam da borda mais próxima). Tokens vizinhos estão a 1 quadrado (1,5 m), o alcance de corpo a corpo.',
+      inputSchema: { type: 'object', properties: { mapa: { type: 'string' }, de: { type: 'string', description: 'Token ou posição' }, ate: { type: 'string', description: 'Token ou posição' } }, required: ['mapa', 'de', 'ate'] },
+      async run({ mapa, de, ate }) {
+        const { ms, mp } = await abrir(mapa);
+        const ponto = (ref) => (/^\s*[a-z]{1,2}\s*\d+\s*$/i.test(String(ref)) && !mp.tokens.some((t) => plain(t.nome) === plain(ref)) ? { ...parsePos(ref, mp), tam: 1, rotulo: String(ref).toUpperCase().replace(/\s/g, '') } : (() => { const t = findToken(ms, mp, ref); return { ...t, rotulo: `${t.nome} (${coord(t.x, t.y)})` }; })());
+        const a = ponto(de), b = ponto(ate), q = distQ(a, b);
+        return { de: a.rotulo, ate: b.rotulo, quadrados: q, metros: metros(q), ...(q <= 1 ? { corpo_a_corpo: true } : {}) };
+      },
+    },
+  ];
+
+  function findMapaMesa(ms, ref) {
+    if (!ref) { if (ms.mesas.length === 1) return ms.mesas[0].id; fail(`Informe a mesa. Mesas: ${ms.mesas.map((x) => x.nome).join(', ')}.`); }
+    const me = ms.mesas.find((x) => x.id === ref || plain(x.nome) === plain(ref)) || (() => { const p = ms.mesas.filter((x) => plain(x.nome).includes(plain(ref))); return p.length === 1 ? p[0] : null; })();
+    return (me || fail(`Mesa "${ref}" não encontrada.`)).id;
+  }
+}
+
 
 // ---------- protocolo MCP (stdio) ----------
 function createMcp(tools) {
@@ -376,7 +647,7 @@ function createMcp(tools) {
           protocolVersion: PROTOCOLS.includes(params?.protocolVersion) ? params.protocolVersion : PROTOCOLS[0],
           capabilities: { tools: {} },
           serverInfo: { name: 'ficha-dnd', version: '1.0.0' },
-          instructions: 'Acesso às fichas de D&D 5e e às mesas do app da rede de casa. Use "estado" para ver mesas e fichas; fichas e mesas podem ser indicadas pelo nome. As regras de acesso do app valem: o assistente só vê e muda o que a conta dele pode.',
+          instructions: 'Acesso às fichas de D&D 5e, às mesas e aos mapas do app da rede de casa. Use "estado" para ver mesas e fichas e "ver_mapa" para ver os mapas; fichas, mesas, mapas e tokens podem ser indicados pelo nome, e posições no mapa são coluna e linha (ex.: C7, 1 quadrado = 1,5 m). As regras de acesso do app valem: o assistente só vê e muda o que a conta dele pode.',
         });
       case 'ping': return reply({});
       case 'tools/list': return reply({ tools: tools.map(({ name, description, inputSchema }) => ({ name, description, inputSchema })) });
@@ -423,8 +694,11 @@ function serveStdio(handle) {
 }
 
 if (require.main === module) {
-  const call = createClient({ url: (process.env.FICHA_URL || 'http://localhost:3000').replace(/\/$/, ''), token: process.env.FICHA_TOKEN });
-  serveStdio(createMcp(createTools(call)));
+  const fichaUrl = (process.env.FICHA_URL || 'http://localhost:3000').replace(/\/$/, '');
+  const mapasUrl = process.env.MAPAS_URL || (() => { const u = new URL(fichaUrl); u.port = '3001'; return u.origin; })();
+  const call = createClient({ url: fichaUrl, token: process.env.FICHA_TOKEN });
+  const mcall = createClient({ url: mapasUrl.replace(/\/$/, ''), token: process.env.FICHA_TOKEN, servico: 'o serviço de mapas', comando: 'npm run mapas' });
+  serveStdio(createMcp(createTools(call, mcall)));
 }
 
-module.exports = { createClient, createTools, createMcp };
+module.exports = { createClient, createTools, createMcp, createMapTools };

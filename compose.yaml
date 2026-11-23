@@ -39,7 +39,7 @@ services:
       app:
         condition: service_healthy
 
-  # servidor MCP para o Claude, por stdio; sobe o app sozinho se ele estiver parado
+  # servidor MCP para o Claude, por stdio; sobe o app e os mapas sozinho se estiverem parados
   mcp:
     image: ficha-dnd
     init: true
@@ -48,9 +48,12 @@ services:
     command: ["node", "mcp.js"]
     environment:
       FICHA_URL: http://app:3000
+      MAPAS_URL: http://mapas:3001
       FICHA_TOKEN: ${FICHA_TOKEN:-}
     depends_on:
       app:
+        condition: service_healthy
+      mapas:
         condition: service_healthy
 
 volumes:
