@@ -154,12 +154,19 @@ Na mesma tela você pausa um token (as chamadas passam a ser recusadas até reto
 | `rolar` | Rola uma expressão (`2d6+3`) ou um teste da ficha (perícia, salvaguarda, ataque com dano...), com vantagem ou desvantagem |
 | `liberar_ficha` | Mestre libera ou oculta uma ficha para os jogadores |
 | `mesa` | Cria, entra, renomeia, troca o código, remove jogador, sai ou apaga uma mesa |
+| `ver_mapa` | Lista os mapas, ou mostra um mapa em texto (colunas com letras, linhas com números) com os tokens, a posição, os PV e as condições de cada um |
+| `gerenciar_mapa` | Mestre cria, mostra aos jogadores, oculta, renomeia, redimensiona ou apaga um mapa |
+| `pintar_mapa` | Mestre pinta o terreno em retângulos (com a opção de só o contorno, para paredes) |
+| `colocar_token` / `mover_token` / `editar_token` | Põe um token de ficha ou livre, move (dizendo quanto andou), revela, oculta, renomeia ou tira do mapa |
+| `medir` | Distância entre tokens ou quadrados pelas regras do quadriculado (diagonal conta 1, 1,5 m por quadrado) |
 
-Fichas e mesas podem ser indicadas pelo nome. As rolagens feitas pelo assistente não aparecem nos celulares, só as mudanças na ficha.
+Fichas, mesas, mapas e tokens podem ser indicados pelo nome, e posições no mapa são coluna e linha (C7). As rolagens feitas pelo assistente não aparecem nos celulares, só as mudanças na ficha e no mapa.
+
+As ferramentas de mapa falam com o serviço de mapas usando o mesmo token. O endereço vem de `MAPAS_URL`; sem ela, o MCP usa o endereço de `FICHA_URL` na porta 3001 (no Docker, o compose já aponta para o serviço `mapas`). Se o serviço de mapas estiver desligado, as ferramentas de fichas continuam funcionando.
 
 ### Jogar com o Claude como mestre
 
-A skill [`mestre-dnd`](.claude/skills/mestre-dnd/SKILL.md) faz o Claude conduzir a sessão no chat: narra, interpreta NPCs, pede testes, roda o combate com iniciativa e aplica dano, cura e condições nas fichas, que mudam ao vivo nos celulares. Ela já vem com o repositório: abra o Claude Code nesta pasta, com o MCP ligado, e peça algo como "vamos jogar, mestra pra gente na mesa A Mina Perdida".
+A skill [`mestre-dnd`](.claude/skills/mestre-dnd/SKILL.md) faz o Claude conduzir a sessão no chat: narra, interpreta NPCs, pede testes, roda o combate com iniciativa e aplica dano, cura e condições nas fichas, que mudam ao vivo nos celulares. Se a mesa usa mapa, ele monta o lugar, põe os monstros ocultos, revela quando aparecem, move os tokens nos turnos e mede alcance e áreas de efeito, e os jogadores veem o mapa mudar na tela. Ela já vem com o repositório: abra o Claude Code nesta pasta, com o MCP ligado, e peça algo como "vamos jogar, mestra pra gente na mesa A Mina Perdida".
 
 O token usado pelo MCP precisa ser de uma conta **mestre da mesa**, porque só o mestre pode mudar as fichas dos jogadores. Os monstros viram fichas ocultas dessa conta, e o resumo da campanha fica numa ficha "Diário: nome da mesa", para a próxima sessão continuar de onde parou.
 
