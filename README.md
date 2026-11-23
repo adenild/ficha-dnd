@@ -59,7 +59,7 @@ Exemplo: `PORT=8080 MAPAS_PORT=8081 npm start`.
 
 ### Com Docker
 
-Dá para rodar tudo em container, sem instalar Node e sem tocar na pasta `data/` local. Cada app tem o seu container (`fichas` e `mapas`), e os dados ficam no volume `ficha-dnd_dados` (o nome vem de quando o projeto se chamava ficha-dnd e foi mantido para não perder nada).
+Dá para rodar tudo em container, sem instalar Node e sem tocar na pasta `data/` local. Cada app tem o seu container (`fichas` e `mapas`), e os dados ficam no volume `suite-dnd_dados`.
 
 ```bash
 docker compose up -d --build   # liga (o --build só é preciso depois de mudar o código)
@@ -81,7 +81,16 @@ Para redefinir uma senha: `docker compose stop fichas`, depois `docker compose r
 
 `docker compose down` remove os containers e mantém os dados. `docker compose down -v` apaga o volume e **todas as fichas e mapas** junto.
 
-Quem já rodava a versão com o nome antigo: antes do primeiro `docker compose up` desta versão, rode `docker compose -p ficha-dnd down` (sem `-v`) para tirar os containers antigos, que ocupam as mesmas portas. O volume com os dados continua e é usado pela suíte.
+Quem já rodava a versão com o nome antigo (ficha-dnd) leva os dados do volume `ficha-dnd_dados` para o `suite-dnd_dados` assim, com tudo parado:
+
+```bash
+docker compose -p ficha-dnd down --remove-orphans   # tira os containers antigos, sem apagar o volume (nada de -v)
+docker compose up --no-start                        # cria os containers e o volume novos, sem ligar
+docker run --rm -v ficha-dnd_dados:/de -v suite-dnd_dados:/para alpine cp -a /de/. /para/
+docker compose up -d
+```
+
+O volume antigo fica como cópia de segurança. Quando tiver certeza de que está tudo na suíte, apague com `docker volume rm ficha-dnd_dados`.
 
 ## Primeira sessão
 
