@@ -1,0 +1,14 @@
+{
+  "name": "ficha-dnd",
+  "version": "1.0.0",
+  "description": "Fichas de D&D 5e para jogar com amigos na rede local: mestre, jogadores e mesas.",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
