@@ -10,9 +10,10 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="locked">
+<aside class="rail" id="rail" aria-label="Menu"></aside>
 <header class="top">
   <div class="bar">
-    <button class="ib" data-a="drawer" aria-label="Fichas e mesas"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <button class="ib" data-a="menu" aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     <div class="who"><h1 id="nm">Fichas</h1><p id="sub"></p></div>
   </div>
   <div class="acts">
@@ -27,7 +28,6 @@
 </header>
 <main id="main"></main>
 <div id="toast" data-a="toast"></div>
-<div class="sheet" id="sheet" data-a="close"><div class="panel" id="panel"></div></div>
 <script src="app.js"></script>
 </body>
 </html>

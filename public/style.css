@@ -112,10 +112,6 @@ body:not(.locked) .vw{display:none!important}
 #toast .tot{font:700 36px/1 Cinzel,serif;min-width:2ch;text-align:center}
 #toast .tot.crit{color:var(--gold)}
 #toast small{display:block;opacity:.75;font-size:13px}
-.sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;display:none;align-items:flex-end;justify-content:center}
-.sheet.on{display:flex}
-.panel{background:var(--card);width:min(100%,560px);max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
-@media(min-width:600px){.sheet{align-items:center}.panel{border-radius:18px}}
 .pick{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--line);border-radius:12px;background:var(--field);padding:10px 12px;margin-bottom:8px;text-align:left;min-height:56px}
 .pick.on{border-color:var(--redt);box-shadow:inset 3px 0 var(--redt)}
 .pick b{display:block}.pick span{font-size:13px;color:var(--mut)}
@@ -152,7 +148,7 @@ body.auth .top,body.auth nav{display:none}
 .empty h2{justify-content:center;font-size:22px}
 .offline #who2{display:block}
 body.nochar .vit,body.nochar .hpb,body.nochar .seg,body.nochar nav,body.nochar #lk,body.nochar [data-a=undo]{display:none}
-/* desktop: cabeçalho compacto e fixo com as abas; a partir de 1200px o painel de fichas e mesas fica na lateral */
+/* desktop: cabeçalho compacto e fixo com as abas */
 @media(hover:hover){.btn:hover,.chip:hover,.pick:hover,.tog:hover{filter:brightness(.95)}.rows .row:hover{background:var(--field);border-radius:8px}.ab button:hover .m,.roll:hover,.rl:hover{color:var(--redt)}nav button:hover{color:var(--ink)}}
 @media(min-width:900px){
   body{padding-bottom:24px}
@@ -175,15 +171,49 @@ body.nochar .vit,body.nochar .hpb,body.nochar .seg,body.nochar nav,body.nochar #
   #toast{left:auto;right:24px;bottom:24px;transform:translateY(20px)}
   #toast.on{transform:none}
 }
-@media(min-width:1200px){
-  body:not(.auth){display:grid;grid-template-columns:320px minmax(0,1fr);grid-template-rows:auto 1fr}
-  body:not(.auth) .top,body:not(.auth) main{grid-column:2}
-  body:not(.auth) main{width:100%}
-  body:not(.auth) .sheet{display:block;position:sticky;top:0;height:100vh;grid-column:1;grid-row:1/span 2;background:none;z-index:7}
-  body:not(.auth) .panel{width:auto;height:100%;max-height:none;border-radius:0;border-right:1px solid var(--line);padding:18px 16px}
-  body:not(.auth) .panel>h2 small,body:not(.auth) .bar [data-a=drawer]{display:none}
-  .panel .pick{min-height:48px;padding:8px 10px}
-  body.nochar main{align-self:start}
+/* menu: barra de ícones no computador, barra embaixo no celular */
+.rail{display:none}
+.ri{width:80px;border:0;background:none;border-radius:14px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--mut);font-size:11px;font-weight:600;text-decoration:none;flex:none}
+.ri svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ri>span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ri.on{color:var(--redt);background:var(--field)}
+.rav{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font:700 14px/1 Cinzel,serif;font-style:normal;background:var(--field);color:var(--ink);border:2px solid var(--line)}
+.rav.pc{border-radius:50%}
+.rav.gm{border-color:var(--gold)}
+.rav.add{border-style:dashed;color:var(--mut)}.rav.add svg{width:20px;height:20px}
+.ri.on .rav{background:var(--redt);border-color:var(--redt);color:#fff}
+.ri.on .rav.gm{box-shadow:0 0 0 2px var(--gold)}
+.rail hr{width:40px;border:0;border-top:1px solid var(--line);margin:6px 0;flex:none}
+.rsp{flex:1}
+nav .ni{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;text-decoration:none}
+nav a.ni{flex:1;padding:10px 2px;font-weight:600;color:var(--mut);min-height:56px}
+nav .ni svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+body.menu .vit,body.menu .hpb,body.menu .seg,body.menu .acts,body[data-page=inicio] .bar [data-a=menu]{display:none}
+.crumb{border:0;background:none;color:inherit;font:inherit;font-weight:700;padding:0;text-decoration:underline;text-underline-offset:3px;display:inline-flex;align-items:center;gap:4px;vertical-align:bottom;min-height:0}
+a.crumb{color:inherit}
+.crumb svg,.loc svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* páginas de menu */
+.ph{font:700 19px/1.2 Cinzel,serif;margin:8px 2px 12px;display:flex;align-items:center;gap:8px}
+.ph .btn{margin-left:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px;align-items:start;margin-bottom:24px}
+.grid .card+.card{margin-top:0}
+.hcard{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;text-align:left;margin-bottom:12px}
+.hcard b{display:block;font:700 18px/1.2 Cinzel,serif}
+.hcard small{display:block;font-size:13px;color:var(--mut);margin-top:2px}
+.mav{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font:700 17px/1 Cinzel,serif;background:var(--red);color:#fff;flex:none}
+.mav.gm{box-shadow:0 0 0 3px var(--gold)}
+.mav.pc{border-radius:50%;background:light-dark(#2f6fb3,#3a72b0)}
+.pcm{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--mut);margin-bottom:6px;flex-wrap:wrap}
+.hpmini{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-bottom:10px}
+.hpmini i{display:block;height:100%;background:#3f8f4f}.hpmini i.low{background:var(--gold)}
+.loc{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--redt);text-decoration:none;margin:0 0 10px}
+@media(hover:hover){.ri:hover{color:var(--ink);background:var(--field)}.hcard:hover b{color:var(--redt)}.loc:hover{text-decoration:underline}}
+@media(min-width:900px){
+  body:not(.auth){padding-left:92px}
+  .rail{display:flex;flex-direction:column;align-items:center;gap:4px;position:fixed;left:0;top:0;bottom:0;width:92px;background:var(--card);border-right:1px solid var(--line);padding:12px 6px;z-index:8;overflow-y:auto;scrollbar-width:none}
+  body.auth .rail{display:none}
+  .bar [data-a=menu],body.menu nav{display:none}
+  body.menu .top{padding-bottom:14px}
 }
 /* configurações: conta e mesa */
 body.cfg .vit,body.cfg .hpb,body.cfg .seg,body.cfg .acts{display:none}

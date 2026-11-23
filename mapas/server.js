@@ -278,6 +278,20 @@ function createMapas({ dataFile, fichaUrl, fichaPublica = null, fichaPorta = 300
       return view(mp, true);
     }
 
+    // onde estão os tokens das fichas, nos mapas que a pessoa pode ver (o app de fichas mostra isso nos personagens)
+    if (p === '/api/localizacoes' && m === 'GET') {
+      const st = await fichaState(req);
+      const localizacoes = [];
+      for (const mp of Object.values(db.mapas)) {
+        if (!mesaDe(st, mp.mesa)) continue;
+        const mestre = souMestre(st, mp.mesa);
+        if (!mestre && !mp.visivel) continue;
+        for (const t of mp.tokens) if (t.ficha && (mestre || !t.oculto)) localizacoes.push({ ficha: t.ficha, token: t.id, mapa: mp.id, mapaNome: mp.nome, mesa: mp.mesa, visivel: !!mp.visivel, mostrado: mp.mostrado || 0 });
+      }
+      localizacoes.sort((a, b) => b.visivel - a.visivel || b.mostrado - a.mostrado);
+      return { localizacoes };
+    }
+
     const body = m === 'GET' || m === 'DELETE' ? {} : JSON.parse((await readBody(req, MAX_JSON, 'Pedido grande demais.')).toString('utf8') || '{}');
 
     if (p === '/api/state' && m === 'GET') {

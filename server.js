@@ -19,7 +19,7 @@ const AUDIT_MAX = 5000; // registros de auditoria guardados no total (os mais an
 const TEMAS = ['auto', 'claro', 'escuro'];
 const ABAS = ['principal', 'combate', 'magias', 'itens', 'notas'];
 
-function createApp({ dataFile }) {
+function createApp({ dataFile, mapasUrl = null }) {
   let db = { users: {}, sessions: {}, mesas: {}, chars: {}, tokens: {}, audit: [] };
   try {
     db = Object.assign(db, JSON.parse(fs.readFileSync(dataFile, 'utf8')));
@@ -125,6 +125,7 @@ function createApp({ dataFile }) {
     const me = (mid) => (db.mesas[mid] && db.mesas[mid].nome) || mid;
     let x;
     if (p === '/api/state') return 'Consultou fichas e mesas';
+    if (p === '/api/localizacoes') return 'Consultou onde os personagens estão nos mapas';
     if (p === '/api/events') return 'Acompanhou mudanças ao vivo';
     if (p === '/api/chars' && m === 'POST') return `Criou a ficha ${(body.data && body.data.name) || ''}`.trim();
     if ((x = p.match(/^\/api\/chars\/([\w-]+)(\/lib)?$/))) {
@@ -247,6 +248,18 @@ function createApp({ dataFile }) {
     const gestao = (acao) => audit({ uid: u, acao, status: 200, via: 'conta' });
 
     if (p === '/api/state' && m === 'GET') return stateFor(u);
+    // onde os personagens estão nos mapas: pergunta ao serviço de mapas com a mesma credencial,
+    // e ele aplica as regras (mapas ocultos e tokens ocultos não aparecem para jogadores)
+    if (p === '/api/localizacoes' && m === 'GET') {
+      const base = typeof mapasUrl === 'function' ? mapasUrl() : mapasUrl;
+      if (!base) return { localizacoes: [], mapas: false };
+      const headers = tok ? { authorization: req.headers.authorization } : { cookie: 'sid=' + encodeURIComponent(parseCookies(req).sid || '') };
+      try {
+        const r = await fetch(String(base).replace(/\/+$/, '') + '/api/localizacoes', { headers, signal: AbortSignal.timeout(3000) });
+        const j = r.status === 200 ? await r.json() : null;
+        return j && Array.isArray(j.localizacoes) ? { localizacoes: j.localizacoes, mapas: true } : { localizacoes: [], mapas: false };
+      } catch { return { localizacoes: [], mapas: false }; }
+    }
     if (p === '/api/info' && m === 'GET') return { docker: !!process.env.IN_DOCKER, pasta: process.env.IN_DOCKER ? null : __dirname, mapas: { url: process.env.MAPAS_PUBLICA || null, porta: +process.env.MAPAS_PORTA || 3001 } };
 
     // conta: nome e preferências
@@ -488,7 +501,7 @@ function lanAddresses() {
 
 if (require.main === module) {
   const dataFile = process.env.DATA_FILE || path.join(__dirname, 'data', 'db.json');
-  const app = createApp({ dataFile });
+  const app = createApp({ dataFile, mapasUrl: process.env.MAPAS_URL || `http://127.0.0.1:${+process.env.MAPAS_PORT || 3001}` });
   const args = process.argv.slice(2);
   if (args[0] === '--reset-senha') {
     if (args.length < 3) { console.log('Uso: node server.js --reset-senha "Nome do jogador" novaSenha'); process.exit(1); }

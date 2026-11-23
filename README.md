@@ -3,7 +3,8 @@
 App de fichas de D&D 5e feito para o celular, para jogar com os amigos na rede de casa. Um computador roda o servidor e todo mundo abre pelo navegador do celular, na mesma Wi-Fi.
 
 - **Ficha completa:** atributos, perícias, salvaguardas, PV, ataques, magias, inventário e notas, com os cálculos feitos sozinhos e rolagem de dados (com vantagem e desvantagem) ao tocar.
-- **Mesas:** quem cria uma mesa é o mestre dela e recebe um código de convite. Os jogadores entram com esse código e escolhem a mesa na aba Principal da ficha.
+- **Mesas:** quem cria uma mesa é o mestre dela e recebe um código de convite. Os jogadores entram com esse código e trazem um personagem para a mesa.
+- **Navegação:** o app abre no **Início**, com as mesas e os personagens. No computador, uma barra de ícones à esquerda leva ao Início, aos Personagens, à ficha aberta, a cada mesa, aos mapas e às Configurações; no celular, a mesma coisa fica numa barra embaixo.
 - **Privacidade:** cada jogador vê só as próprias fichas. O mestre vê todas as fichas da mesa e decide quais ficam **liberadas** para os outros jogadores, que só podem lê-las. A regra é aplicada pelo servidor, não só pela tela.
 - **Ao vivo:** quando alguém muda uma ficha, quem estiver vendo recebe a mudança na hora.
 - **Mapas:** um segundo serviço, na porta 3001, para o mestre desenhar mapas quadriculados e pôr neles os tokens das fichas da mesa. Veja [Mapas](#mapas).
@@ -70,13 +71,15 @@ Para redefinir uma senha: `docker compose stop app`, depois `docker compose run 
 
 ## Primeira sessão
 
-1. O mestre cria a conta, abre o menu ☰ e cria a mesa em **Criar mesa**. O código de convite aparece no menu, junto da mesa.
-2. Cada jogador cria a conta, cria a ficha (ou começa pelo exemplo), entra na mesa pelo menu ☰ com o código e escolhe a mesa na aba **Principal** da ficha.
-3. No menu ☰, o mestre vê as fichas da mesa e toca em **Oculta/Liberada** para decidir o que os outros jogadores podem ver.
+1. O mestre cria a conta e cria a mesa no **Início**, em **Criar mesa**. O código de convite aparece na página da mesa.
+2. Cada jogador cria a conta, entra na mesa pelo **Início** com o código e, na página da mesa, cria um personagem ali (**Nova ficha nesta mesa**) ou traz um que já tem (**Trazer**). Também dá para escolher a mesa na aba **Principal** da ficha.
+3. Na página da mesa, o mestre vê as fichas da mesa e toca em **Oculta/Liberada** para decidir o que os outros jogadores podem ver.
+
+A página **Personagens** lista os seus personagens com PV, CA, a mesa e, se estiverem num mapa, em qual. Abrir um personagem leva à ficha dele dentro da mesa em que ele está (o endereço fica `#mesa/<mesa>/ficha/<ficha>`), e o cabeçalho da ficha tem atalhos para a mesa e para o personagem no mapa.
 
 ## Configurações
 
-O botão **Configurações** do menu ☰ abre duas abas:
+O botão **Configurações** (ou **Ajustes**, no celular) abre duas abas:
 
 - **Conta:** nome, tema, se as fichas abrem em modo leitura e qual aba aparece primeiro (valem em todos os aparelhos), troca de senha, sair dos outros aparelhos, os tokens para assistentes e o registro de auditoria.
 - **Mesa:** escolha a mesa. O mestre muda o nome e a descrição, copia ou troca o código, fecha a mesa para jogadores novos, decide se as fichas novas já entram liberadas, libera ou oculta todas de uma vez, remove jogadores e apaga a mesa. Os jogadores veem a descrição, quem está na mesa e podem sair dela.
@@ -98,7 +101,7 @@ npm start        # fichas, porta 3000
 npm run mapas    # mapas, porta 3001
 ```
 
-No app de fichas, o botão **Mapa** de cada mesa (menu ☰) abre os mapas dela. No mapa, **Abrir ficha** abre a ficha do token no app de fichas.
+No app de fichas, o botão **Mapa** de cada mesa abre os mapas dela, e os personagens mostram em qual mapa estão, com um link que abre o mapa já com o token escolhido. Para isso o app de fichas consulta o serviço de mapas em `MAPAS_URL` (padrão `http://127.0.0.1:3001`; no Docker, `http://mapas:3001`) com a mesma conta, então mapas e tokens ocultos continuam ocultos. Se o serviço de mapas estiver desligado, o app funciona igual, só sem as localizações. No mapa, **Abrir ficha** abre a ficha do token no app de fichas.
 
 | Variável | Padrão | Para quê |
 |---|---|---|
@@ -111,7 +114,7 @@ Atalhos no computador: `V` mover, `R` régua, `B` pintar, `G` preencher, setas m
 
 ## Backup e senhas
 
-- Tudo fica em `data/db.json`, e os mapas em `data/mapas.json` e `data/mapas-img/`. Para fazer backup, copie esses arquivos com os servidores parados. Cada jogador também pode exportar as próprias fichas pelo menu ☰ › Exportar e importar.
+- Tudo fica em `data/db.json`, e os mapas em `data/mapas.json` e `data/mapas-img/`. Para fazer backup, copie esses arquivos com os servidores parados. Cada jogador também pode exportar as próprias fichas em Personagens › Exportar e importar.
 - As senhas são guardadas com hash (scrypt), nunca em texto.
 - Se alguém esquecer a senha, quem roda o servidor pode redefinir:
 

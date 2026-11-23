@@ -49,6 +49,8 @@ async function abrir(id, quiet) {
   try {
     const mp = await api('GET', '/api/mapas/' + id);
     setMapa(mp);
+    // vindo do app de fichas: escolhe e centraliza o personagem
+    if (S.focoTok) { const t = tokenDe(S.focoTok); S.focoTok = null; if (t) foca(t); }
     store('mapa', id);
     if (location.hash !== '#mapa/' + id) history.replaceState(null, '', '#mapa/' + id);
   } catch (e) {
@@ -74,8 +76,8 @@ function setMapa(mp) {
 }
 function escolher() {
   const h = decodeURIComponent(location.hash.slice(1));
-  const m = /^mapa\/(.+)$/.exec(h);
-  if (m && S.mapas.some((x) => x.id === m[1])) return m[1];
+  const m = /^mapa\/([\w-]+)(?:\/token\/([\w-]+))?$/.exec(h);
+  if (m && S.mapas.some((x) => x.id === m[1])) { S.focoTok = m[2] || null; return m[1]; }
   const mesa = (/^mesa\/(.+)$/.exec(h) || [])[1];
   if (mesa) S.foco = mesa;
   const last = store('mapa');
@@ -326,6 +328,8 @@ function zoomAt(p, z) {
   V.z = z; V.ox = p.x - w.x * z; V.oy = p.y - w.y * z;
   draw();
 }
+// escolhe o token e centraliza depois que o painel lateral abrir (ele estreita o mapa)
+function foca(t) { seleciona(t.id); setTimeout(() => { const x = tokenDe(t.id); if (x) centraliza(x); }, 60); }
 function centraliza(t) {
   const cx = (t.x + t.tam / 2) * CELL, cy = (t.y + t.tam / 2) * CELL;
   V.ox = W / 2 - cx * V.z; V.oy = H / 2 - cy * V.z - (W < 900 ? 80 : 0); V.auto = false; draw();
@@ -767,7 +771,12 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'g' && mestre()) { setTool('preencher'); ui(); }
 });
 document.addEventListener('keyup', (e) => { if (e.key === ' ') espaco = false; });
-window.addEventListener('hashchange', () => { const m = /^#mapa\/(.+)$/.exec(location.hash); if (m && (!S.mapa || S.mapa.id !== m[1])) abrir(m[1]); });
+window.addEventListener('hashchange', () => {
+  const m = /^#mapa\/([\w-]+)(?:\/token\/([\w-]+))?$/.exec(location.hash);
+  if (!m) return;
+  if (!S.mapa || S.mapa.id !== m[1]) { S.focoTok = m[2] || null; abrir(m[1]); }
+  else if (m[2]) { const t = tokenDe(m[2]); if (t) foca(t); history.replaceState(null, '', '#mapa/' + m[1]); }
+});
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
 
 // ---------- início ----------
