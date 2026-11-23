@@ -169,14 +169,17 @@ function render(){
   document.body.classList.remove('auth');
   const c=C();document.body.classList.toggle('nochar',!c);
   if(!c){$('nm').textContent='Fichas';$('sub').textContent=S.me.name;$('who2').textContent=S.online?'':'Sem conexão com o servidor.';$('vit').innerHTML='';$('seg').innerHTML='';$('nav').innerHTML='';
-    $('main').innerHTML=`<section class="card empty"><h2>Nenhuma ficha ainda</h2><p class="note">Crie sua primeira ficha, comece pelo exemplo ou entre na mesa do seu mestre com o código de convite.</p><div class="btns" style="justify-content:center"><button class="btn pri" data-a="new">Nova ficha</button><button class="btn" data-a="sample">Começar com exemplo</button><button class="btn" data-a="drawer">Mesas</button></div></section><p class="status" id="st">${esc(statusText())}</p>`;return}
+    $('main').innerHTML=`<section class="card empty"><h2>Nenhuma ficha ainda</h2><p class="note">Crie sua primeira ficha, comece pelo exemplo ou entre na mesa do seu mestre com o código de convite.</p><div class="btns" style="justify-content:center"><button class="btn pri" data-a="new">Nova ficha</button><button class="btn" data-a="sample">Começar com exemplo</button><button class="btn" data-a="drawer">Mesas</button></div></section><p class="status" id="st">${esc(statusText())}</p>`;side();return}
   document.body.classList.toggle('locked',S.locked||RO());document.body.classList.toggle('ro',RO());
   const lk=$('lk');lk.classList.toggle('on',!S.locked);lk.setAttribute('aria-label',S.locked?'Editar ficha':'Concluir edição');
   $('nav').innerHTML=TABS.map(([k,t])=>`<button class="${S.tab===k?'on':''}" data-a="tab" data-v="${k}">${t}</button>`).join('');
   head();const fn={principal:tPrincipal,combate:tCombate,magias:tMagias,itens:tItens,notas:tNotas}[S.tab]||tPrincipal;
-  $('main').innerHTML=fn(c)+`<p class="status" id="st">${esc(statusText())}</p>`}
+  $('main').innerHTML=fn(c)+`<p class="status" id="st">${esc(statusText())}</p>`;side()}
+const wide=matchMedia('(min-width:1200px)');
+function side(){if(wide.matches&&S.me&&!typing($('panel')))drawer()}
+wide.addEventListener('change',()=>{if(wide.matches)side();else $('sheet').classList.remove('on')});
 const typing=root=>{const a=document.activeElement;return a&&root.contains(a)&&/INPUT|TEXTAREA/.test(a.tagName)};
-function softRender(){if(!S.me)return;if(typing($('main')))pendR=true;else render();if($('sheet').classList.contains('on')&&!typing($('panel')))drawer()}
+function softRender(){if(!S.me)return;if(typing($('main')))pendR=true;else render();if($('sheet').classList.contains('on')&&!wide.matches&&!typing($('panel')))drawer()}
 document.addEventListener('focusout',()=>{if(pendR)setTimeout(()=>{if(!typing($('main'))){pendR=false;render()}},60)});
 function derive(){const c=C();document.querySelectorAll('[data-d]').forEach(e=>{e.textContent=calc(e.dataset.d,c)});hpbar();$('nm').textContent=c.name||'Sem nome';$('sub').textContent=subline(c)}
 
@@ -261,6 +264,11 @@ document.addEventListener('input',e=>{const el=e.target;if(!el.dataset||!el.data
 document.addEventListener('change',e=>{const el=e.target;if(el.id==='file'&&el.files[0]){el.files[0].text().then(importTxt);return}
   if(el.dataset&&el.dataset.mesa!==undefined){const m=mesaOf(el.dataset.mesa);if(m&&el.value.trim())act('PATCH','/api/mesas/'+m.id,{nome:el.value.trim()});return}
   if(el.tagName==='SELECT'&&el.dataset.k&&!RO()){const c=C();touch();let v=el.value;if(/^\d+$/.test(v)&&el.dataset.k!=='hd.die')v=+v;setP(c,el.dataset.k,v);if(el.dataset.k==='mesa')c._lib=false;save();render()}});
+document.addEventListener('keydown',e=>{if(!S.me||!C()||e.altKey||/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName))return;
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'){e.preventDefault();undo();return}
+  if(e.ctrlKey||e.metaKey)return;
+  if(e.key==='Escape'&&$('sheet').classList.contains('on')&&!wide.matches){$('sheet').classList.remove('on');return}
+  const t=TABS[+e.key-1];if(t){S.tab=t[0];prefs();history.replaceState(null,'','#'+t[0]);render();scrollTo(0,0)}});
 document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const id=e.target.id;if(id==='jcode')$('panel').querySelector('[data-a=join]').click();if(id==='nmesa')$('panel').querySelector('[data-a=nmesa]').click()});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v,c=C();
   if(a==='close'&&b.id==='sheet'&&e.target!==b)return;
