@@ -1,0 +1,891 @@
+[
+  {
+    "nome": "Bola de Fogo Controlável",
+    "en": "Delayed Blast Fireball",
+    "nivel": 7,
+    "escola": "Evocação",
+    "tempo": "1 ação",
+    "alcance": "45 metros",
+    "componentes": "V, S, M (uma bolinha de guano de morcego e enxofre)",
+    "duracao": "Concentração, até 1 minuto",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Um raio amarelo parte do seu dedo e se condensa numa pequena conta brilhante num ponto à sua escolha dentro do alcance, onde fica parada durante a duração.\n\nQuando a magia termina — porque sua concentração foi quebrada ou porque você decidiu encerrá-la — a conta explode numa **esfera de 6 metros de raio** que contorna esquinas. Cada criatura na área faz uma **salvaguarda de Destreza**: sofre o dano de fogo total se falhar, ou metade se passar.\n\nO dano base é **12d6 de fogo**. Se, ao fim do seu turno, a conta ainda não tiver explodido, o dano aumenta em 1d6.\n\nSe uma criatura tocar a conta antes da explosão, faz uma salvaguarda de Destreza. Se falhar, a conta explode na hora. Se passar, pode arremessá-la a até 12 metros; ela explode ao atingir uma criatura ou objeto sólido.\n\nO fogo danifica objetos na área e incendeia objetos inflamáveis que não estejam sendo vestidos ou carregados.",
+    "superior": "Com um espaço de 8º nível ou maior, o dano base aumenta em 1d6 para cada nível do espaço acima do 7º."
+  },
+  {
+    "nome": "Conjurar Celestial",
+    "en": "Conjure Celestial",
+    "nivel": 7,
+    "escola": "Conjuração",
+    "tempo": "1 minuto",
+    "alcance": "27 metros",
+    "componentes": "V, S",
+    "duracao": "Concentração, até 1 hora",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Clérigo"
+    ],
+    "descricao": "Você invoca um celestial de **nível de desafio 4 ou menor**, que surge num espaço desocupado que você consiga ver dentro do alcance. Ele desaparece quando cai para 0 PV ou quando a magia termina.\n\nO celestial é amigável a você e aos seus companheiros durante a duração. Role a iniciativa dele; ele age no próprio turno e obedece aos comandos verbais que você der (sem gastar ação sua). Sem comandos, ele se defende de criaturas hostis, mas não faz mais nada. O Mestre tem as estatísticas da criatura.",
+    "superior": "Com um espaço de 9º nível ou maior, você invoca um celestial de nível de desafio 5 ou menor."
+  },
+  {
+    "nome": "Dedo da Morte",
+    "en": "Finger of Death",
+    "nivel": 7,
+    "escola": "Necromancia",
+    "tempo": "1 ação",
+    "alcance": "18 metros",
+    "componentes": "V, S",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bruxo",
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Você lança energia negativa contra uma criatura que consiga ver dentro do alcance. O alvo faz uma **salvaguarda de Constituição**: sofre **7d8 + 30 de dano necrótico** se falhar, ou metade se passar.\n\nUm humanoide morto por esta magia se ergue no início do seu próximo turno como um **zumbi** permanentemente sob o seu comando, obedecendo às suas ordens verbais da melhor forma que puder."
+  },
+  {
+    "nome": "Espada Arcana",
+    "en": "Arcane Sword",
+    "nivel": 7,
+    "escola": "Evocação",
+    "tempo": "1 ação",
+    "alcance": "18 metros",
+    "componentes": "V, S, M (uma espada de platina em miniatura, com cabo e pomo de cobre e zinco, que vale 250 PO)",
+    "duracao": "Concentração, até 1 minuto",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Mago"
+    ],
+    "descricao": "Você cria um plano de força em forma de espada, flutuando num ponto dentro do alcance, que dura enquanto a magia durar.\n\nAo conjurar, faça uma jogada de ataque com magia corpo a corpo contra um alvo à sua escolha a até 1,5 metro da espada. Se acertar, o alvo sofre **3d10 de dano de energia**.\n\nAté a magia terminar, você pode usar uma ação bônus em cada um dos seus turnos para mover a espada até 6 metros para um ponto que você consiga ver e repetir esse ataque contra o mesmo alvo ou outro."
+  },
+  {
+    "nome": "Forma Etérea",
+    "en": "Etherealness",
+    "nivel": 7,
+    "escola": "Transmutação",
+    "tempo": "1 ação",
+    "alcance": "Pessoal",
+    "componentes": "V, S",
+    "duracao": "Até 8 horas",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Bruxo",
+      "Clérigo",
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Você entra nas regiões fronteiriças do Plano Etéreo, na área que se sobrepõe ao seu plano atual. Você fica no Etéreo Fronteiriço durante a duração ou até usar uma ação para encerrar a magia.\n\nNesse estado você pode se mover em qualquer direção; subir ou descer custa o dobro de movimento. Você vê e ouve o plano de onde veio, mas tudo parece cinzento e você não enxerga além de 18 metros.\n\nVocê só afeta e só é afetado por criaturas que também estejam no Plano Etéreo. Criaturas fora dele não percebem você nem interagem com você, a menos que tenham alguma habilidade especial para isso. Você ignora objetos e efeitos que não estejam no Etéreo e pode atravessá-los.\n\nQuando a magia termina, você volta ao plano de origem no ponto que ocupa. Se esse ponto estiver ocupado por um objeto sólido ou criatura, você é empurrado para o espaço desocupado mais próximo e sofre **dano de energia igual a 10 para cada 1,5 metro** deslocado.\n\nA magia não tem efeito se for conjurada no Plano Etéreo ou num plano que não faz fronteira com ele, como os Planos Exteriores.",
+    "superior": "Com um espaço de 8º nível ou maior, você pode afetar até três criaturas voluntárias (incluindo você) para cada nível do espaço acima do 7º. Elas precisam estar a até 3 metros de você quando a magia é conjurada."
+  },
+  {
+    "nome": "Inverter a Gravidade",
+    "en": "Reverse Gravity",
+    "nivel": 7,
+    "escola": "Transmutação",
+    "tempo": "1 ação",
+    "alcance": "30 metros",
+    "componentes": "V, S, M (uma magnetita e limalha de ferro)",
+    "duracao": "Concentração, até 1 minuto",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Druida",
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "A gravidade se inverte num **cilindro de 15 metros de raio e 30 metros de altura** centrado num ponto dentro do alcance. Todas as criaturas e objetos na área que não estejam presos ao chão \"caem\" para cima até o topo da área.\n\nUma criatura pode fazer uma **salvaguarda de Destreza** para se agarrar a um objeto fixo ao seu alcance e evitar a queda.\n\nSe houver algo sólido no caminho (como um teto), as criaturas e objetos batem nele como numa queda normal. Quem chega ao topo da área sem bater em nada fica ali, oscilando levemente, durante a duração.\n\nQuando a magia termina, tudo o que foi afetado cai de volta para baixo."
+  },
+  {
+    "nome": "Jaula de Força",
+    "en": "Forcecage",
+    "nivel": 7,
+    "escola": "Evocação",
+    "tempo": "1 ação",
+    "alcance": "30 metros",
+    "componentes": "V, S, M (pó de rubi que vale 1.500 PO, que a magia consome)",
+    "duracao": "1 hora",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Bruxo",
+      "Mago"
+    ],
+    "descricao": "Uma prisão imóvel, invisível e em forma de cubo, feita de força mágica, surge ao redor de uma área à sua escolha dentro do alcance. Escolha a forma:\n\n- **Gaiola:** até 6 metros de lado, feita de barras de pouco mais de 1 cm de espessura, com espaços do mesmo tamanho entre elas.\n- **Caixa:** até 3 metros de lado, com paredes sólidas que impedem a passagem de matéria e bloqueiam magias conjuradas de dentro para fora ou de fora para dentro.\n\nToda criatura que estiver completamente dentro da área ao conjurar fica presa. Criaturas apenas parcialmente dentro, ou grandes demais para caber, são empurradas para longe do centro até ficarem totalmente fora.\n\nUma criatura presa não pode sair por meios não mágicos. Se tentar sair por teletransporte ou viagem interplanar, precisa antes passar numa **salvaguarda de Carisma**; se passar, pode usar a magia para sair; se falhar, não sai e o uso da magia ou efeito é desperdiçado. A prisão também se estende ao Plano Etéreo, impedindo a viagem etérea.\n\nEsta magia não pode ser dissipada por *dissipar magia*."
+  },
+  {
+    "nome": "Mansão Magnífica",
+    "en": "Magnificent Mansion",
+    "nivel": 7,
+    "escola": "Conjuração",
+    "tempo": "1 minuto",
+    "alcance": "90 metros",
+    "componentes": "V, S, M (um portal em miniatura de marfim, um pedaço de mármore polido e uma colherzinha de prata, cada um valendo pelo menos 5 PO)",
+    "duracao": "24 horas",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Mago"
+    ],
+    "descricao": "Você conjura uma moradia extradimensional dentro do alcance. A entrada é um portal cintilante de 1,5 metro de largura por 3 metros de altura. Você e as criaturas que designar ao conjurar podem entrar enquanto o portal estiver aberto. Você pode abri-lo ou fechá-lo estando a até 9 metros dele; fechado, ele é invisível.\n\nDo lado de dentro há um saguão magnífico com vários aposentos. O ar é limpo, fresco e agradável. A planta é como você quiser, mas não pode passar de **50 cubos contíguos de 3 metros**. O lugar é mobiliado e decorado à sua escolha e tem comida suficiente para um banquete de nove pratos para até **100 pessoas**.\n\nUma equipe de **100 servos** quase transparentes atende a todos que entram; você define a aparência e as roupas deles. Eles obedecem às suas ordens e podem fazer qualquer tarefa que um criado humano comum faria, mas não podem atacar nem fazer nada que cause dano direto a outra criatura. Eles não podem sair da mansão.\n\nMóveis e objetos criados pela magia viram fumaça se forem levados para fora. Quando a magia termina, as criaturas lá dentro são expelidas para os espaços abertos mais próximos da entrada."
+  },
+  {
+    "nome": "Miragem Arcana",
+    "en": "Mirage Arcane",
+    "nivel": 7,
+    "escola": "Ilusão",
+    "tempo": "10 minutos",
+    "alcance": "Visão",
+    "componentes": "V, S",
+    "duracao": "10 dias",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Druida",
+      "Mago"
+    ],
+    "descricao": "Você faz o terreno numa área de até **1,5 km de lado** parecer, soar, cheirar e até ter a textura de outro tipo de terreno. O formato geral do terreno continua o mesmo: campos abertos ou uma estrada podem virar pântano, colinas, uma fenda ou outro terreno difícil ou intransponível; um lago pode parecer um campo, um precipício pode parecer uma encosta suave, uma ravina pode parecer uma estrada larga. Você também pode alterar a aparência de estruturas ou adicioná-las onde não existem.\n\nA magia não disfarça, esconde nem adiciona criaturas.\n\nComo a ilusão tem elementos auditivos, visuais, táteis e olfativos, ela pode transformar terreno livre em terreno difícil (ou o contrário) ou atrapalhar o movimento de outra forma. Qualquer parte do terreno ilusório retirada da área desaparece na hora.\n\nCriaturas com visão verdadeira enxergam a forma real do terreno através da ilusão, mas os outros elementos continuam presentes; assim, mesmo sabendo da ilusão, a criatura ainda pode interagir fisicamente com ela."
+  },
+  {
+    "nome": "Palavra Divina",
+    "en": "Divine Word",
+    "nivel": 7,
+    "escola": "Evocação",
+    "tempo": "1 ação bônus",
+    "alcance": "9 metros",
+    "componentes": "V",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Clérigo"
+    ],
+    "descricao": "Você pronuncia uma palavra imbuída do poder que moldou o mundo. Escolha qualquer número de criaturas que você consiga ver dentro do alcance; cada uma que puder ouvi-lo faz uma **salvaguarda de Carisma**. Se falhar, sofre um efeito conforme os PV atuais dela:\n\n- **50 PV ou menos:** surdo por 1 minuto.\n- **40 PV ou menos:** surdo e cego por 10 minutos.\n- **30 PV ou menos:** cego, surdo e atordoado por 1 hora.\n- **20 PV ou menos:** morre instantaneamente.\n\nIndependentemente dos PV, um celestial, elemental, fada ou corruptor que falhe na salvaguarda é forçado a voltar ao seu plano de origem (se já não estiver nele) e não pode retornar ao seu plano atual por 24 horas por nenhum meio, exceto a magia *desejo*."
+  },
+  {
+    "nome": "Projetar Imagem",
+    "en": "Project Image",
+    "nivel": 7,
+    "escola": "Ilusão",
+    "tempo": "1 ação",
+    "alcance": "750 km",
+    "componentes": "V, S, M (uma pequena réplica de você feita de materiais que valem pelo menos 5 PO)",
+    "duracao": "Concentração, até 1 dia",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Mago"
+    ],
+    "descricao": "Você cria uma cópia ilusória de si mesmo em qualquer local dentro do alcance que já tenha visto antes, sem importar obstáculos no caminho. A cópia tem sua aparência e sua voz, mas é intangível. Se sofrer qualquer dano, desaparece e a magia termina.\n\nCom uma ação, você pode mover a imagem até o dobro do seu deslocamento e fazê-la gesticular, falar e se comportar como quiser; ela imita seus trejeitos com perfeição.\n\nVocê pode ver pelos olhos e ouvir pelos ouvidos da imagem como se estivesse no lugar dela. No seu turno, com uma ação bônus, você alterna entre os sentidos dela e os seus. Enquanto usa os sentidos da imagem, você fica cego e surdo em relação ao seu próprio entorno.\n\nInteração física revela a ilusão, pois as coisas a atravessam. Uma criatura que use uma ação para examinar a imagem percebe que é uma ilusão com um teste de Inteligência (Investigação) contra a CD da sua magia. Quem percebe a ilusão enxerga através dela, e qualquer som que ela faça soa oco."
+  },
+  {
+    "nome": "Rajada Prismática",
+    "en": "Prismatic Spray",
+    "nivel": 7,
+    "escola": "Evocação",
+    "tempo": "1 ação",
+    "alcance": "Pessoal (cone de 18 metros)",
+    "componentes": "V, S",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Oito raios de luz multicoloridos saem da sua mão num **cone de 18 metros**. Cada criatura na área faz uma **salvaguarda de Destreza**. Para cada alvo, role 1d8 para saber qual raio o atingiu:\n\n- **1. Vermelho:** 10d6 de dano de fogo se falhar, metade se passar.\n- **2. Laranja:** 10d6 de dano de ácido se falhar, metade se passar.\n- **3. Amarelo:** 10d6 de dano elétrico se falhar, metade se passar.\n- **4. Verde:** 10d6 de dano de veneno se falhar, metade se passar.\n- **5. Azul:** 10d6 de dano de frio se falhar, metade se passar.\n- **6. Anil:** se falhar, fica contido. Ao fim de cada turno dele, faz uma salvaguarda de Constituição. Com três sucessos, a magia termina; com três falhas, ele vira pedra permanentemente e fica petrificado. Os sucessos e falhas não precisam ser consecutivos.\n- **7. Violeta:** se falhar, fica cego. No início do seu próximo turno, ele faz uma salvaguarda de Sabedoria: se passar, a cegueira termina; se falhar, é transportado para outro plano à escolha do Mestre e deixa de estar cego. (Em geral, uma criatura fora do seu plano natal é mandada de volta para casa, e as outras vão para o Plano Astral ou Etéreo.)\n- **8. Especial:** o alvo é atingido por dois raios. Role mais duas vezes, rolando de novo qualquer 8."
+  },
+  {
+    "nome": "Regeneração",
+    "en": "Regenerate",
+    "nivel": 7,
+    "escola": "Transmutação",
+    "tempo": "1 minuto",
+    "alcance": "Toque",
+    "componentes": "V, S, M (uma roda de orações e água benta)",
+    "duracao": "1 hora",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Clérigo",
+      "Druida"
+    ],
+    "descricao": "Você toca uma criatura e estimula sua capacidade natural de cura. Ela recupera **4d8 + 15 PV**. Durante a duração, recupera também **1 PV no início de cada um dos turnos dela** (10 PV por minuto).\n\nMembros decepados (dedos, pernas, caudas etc.) voltam a crescer após 2 minutos. Se a parte decepada estiver disponível e for segurada junto ao toco, a magia a reconecta instantaneamente."
+  },
+  {
+    "nome": "Ressurreição",
+    "en": "Resurrection",
+    "nivel": 7,
+    "escola": "Necromancia",
+    "tempo": "1 hora",
+    "alcance": "Toque",
+    "componentes": "V, S, M (um diamante que vale pelo menos 1.000 PO, que a magia consome)",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Clérigo"
+    ],
+    "descricao": "Você toca uma criatura morta há **no máximo 100 anos**, que não tenha morrido de velhice e não seja morta-viva. Se a alma dela estiver livre e disposta, ela volta à vida com todos os PV.\n\nA magia neutraliza venenos e cura doenças comuns que afligiam a criatura ao morrer, mas não remove doenças mágicas, maldições e efeitos parecidos; se não forem removidos antes, voltam a afetá-la. Ela fecha ferimentos mortais e restaura partes do corpo perdidas.\n\nVoltar dos mortos é uma provação: a criatura sofre **−4 em todas as jogadas de ataque, salvaguardas e testes de atributo**. Cada descanso longo reduz essa penalidade em 1, até sumir.\n\nSe a criatura estava morta havia **um ano ou mais**, o esforço cobra um preço de você: até terminar um descanso longo, você não pode conjurar magias e tem desvantagem em todas as jogadas de ataque, testes de atributo e salvaguardas."
+  },
+  {
+    "nome": "Sequestro",
+    "en": "Sequester",
+    "nivel": 7,
+    "escola": "Transmutação",
+    "tempo": "1 ação",
+    "alcance": "Toque",
+    "componentes": "V, S, M (pó de diamante, esmeralda, rubi e safira que vale pelo menos 5.000 PO, que a magia consome)",
+    "duracao": "Até ser dissipada",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Mago"
+    ],
+    "descricao": "Você esconde uma criatura voluntária ou um objeto, protegendo-o de detecção durante a duração. O alvo fica invisível e não pode ser alvo de magias de adivinhação nem percebido por sensores de vidência criados por magias de adivinhação.\n\nSe o alvo for uma criatura, ela entra em animação suspensa: o tempo para de passar para ela e ela não envelhece.\n\nVocê pode definir uma condição para a magia terminar antes. Pode ser qualquer coisa, desde que aconteça ou seja visível a até 1,5 km do alvo (por exemplo, \"depois de mil anos\" ou \"quando o tarrasque despertar\"). A magia também termina se o alvo sofrer qualquer dano."
+  },
+  {
+    "nome": "Símbolo",
+    "en": "Symbol",
+    "nivel": 7,
+    "escola": "Abjuração",
+    "tempo": "1 minuto",
+    "alcance": "Toque",
+    "componentes": "V, S, M (mercúrio, fósforo e pó de diamante e opala que valem juntos pelo menos 1.000 PO, que a magia consome)",
+    "duracao": "Até ser dissipada ou ativada",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Clérigo",
+      "Mago"
+    ],
+    "descricao": "Você inscreve um glifo nocivo numa superfície (uma mesa, um trecho de chão ou parede) ou dentro de um objeto que possa ser fechado (um livro, um pergaminho, um baú). Numa superfície, o glifo cobre uma área de até **3 metros de diâmetro**. Num objeto, este precisa ficar no lugar: se for movido mais de 3 metros de onde a magia foi conjurada, o glifo se rompe e a magia termina sem ser ativada.\n\nO glifo é quase invisível; encontrá-lo exige um teste de Inteligência (Investigação) contra a CD da sua magia.\n\nVocê define o gatilho ao conjurar: tocar ou pisar no glifo, remover algo que o cubra, aproximar-se a certa distância, abrir o objeto, ver ou ler o glifo etc. Pode refinar o gatilho (só certos tipos de criatura o ativam) ou definir quem não o ativa (por exemplo, quem disser uma senha).\n\nAo ser ativado, o glifo brilha e preenche uma **esfera de 18 metros de raio** com penumbra por 10 minutos; depois disso, a magia termina. Cada criatura na esfera quando ele é ativado é afetada, assim como qualquer criatura que entre na esfera pela primeira vez num turno ou termine o turno nela. Escolha um efeito ao inscrever:\n\n- **Morte:** salvaguarda de Constituição; 10d10 de dano necrótico se falhar, metade se passar.\n- **Discórdia:** salvaguarda de Constituição; se falhar, passa 1 minuto discutindo e brigando com as outras criaturas, sem conseguir se comunicar de forma útil e com desvantagem em jogadas de ataque e testes de atributo.\n- **Medo:** salvaguarda de Sabedoria; se falhar, fica amedrontado por 1 minuto. Enquanto amedrontado, larga o que estiver segurando e precisa se afastar pelo menos 9 metros do glifo em cada turno, se puder.\n- **Desesperança:** salvaguarda de Carisma; se falhar, por 1 minuto não pode atacar nem escolher criaturas como alvo de habilidades, magias ou outros efeitos mágicos nocivos.\n- **Insanidade:** salvaguarda de Inteligência; se falhar, enlouquece por 1 minuto: não pode realizar ações, não entende o que dizem, não consegue ler e só fala coisas sem sentido. O Mestre controla seu movimento, que é errático.\n- **Dor:** salvaguarda de Constituição; se falhar, fica incapacitado de dor por 1 minuto.\n- **Sono:** salvaguarda de Sabedoria; se falhar, fica inconsciente por 10 minutos. Acorda se sofrer dano ou se alguém usar uma ação para sacudi-la.\n- **Atordoamento:** salvaguarda de Sabedoria; se falhar, fica atordoado por 1 minuto."
+  },
+  {
+    "nome": "Simulacro",
+    "en": "Simulacrum",
+    "nivel": 7,
+    "escola": "Ilusão",
+    "tempo": "12 horas",
+    "alcance": "Toque",
+    "componentes": "V, S, M (neve ou gelo suficiente para uma cópia em tamanho real da criatura; cabelo, unhas ou outro pedaço do corpo dela colocado dentro da neve ou gelo; e pó de rubi que vale 1.500 PO, espalhado sobre a cópia, que a magia consome)",
+    "duracao": "Até ser dissipada",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Mago"
+    ],
+    "descricao": "Você molda uma duplicata ilusória de uma **besta ou humanoide** que fique ao seu alcance durante todo o tempo de conjuração. A duplicata é uma criatura parcialmente real, feita de gelo ou neve, que age e é afetada como uma criatura normal.\n\n- Tem a mesma aparência do original, mas **metade do máximo de PV** dele e é formada sem equipamento. Fora isso, usa todas as estatísticas do original, exceto que é um **constructo**.\n- É amigável a você e às criaturas que você designar. Obedece aos seus comandos falados e age no seu turno em combate, conforme sua vontade.\n- Não aprende nem fica mais poderosa: nunca sobe de nível nem melhora suas capacidades, e não recupera espaços de magia gastos.\n- Se sofrer dano, você pode repará-la num laboratório alquímico, gastando ervas e minerais raros que valem **100 PO por PV** recuperado.\n- Dura até cair para 0 PV, quando volta a ser neve e derrete na hora.\n\nSe você conjurar esta magia de novo, qualquer duplicata ativa criada por ela é destruída instantaneamente."
+  },
+  {
+    "nome": "Teletransporte",
+    "en": "Teleport",
+    "nivel": 7,
+    "escola": "Conjuração",
+    "tempo": "1 ação",
+    "alcance": "3 metros",
+    "componentes": "V",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Você transporta instantaneamente você e até **oito criaturas voluntárias** à sua escolha que consiga ver dentro do alcance, ou **um objeto** que consiga ver dentro do alcance, para um destino escolhido. Um objeto precisa caber num cubo de 3 metros e não pode estar sendo segurado ou carregado por uma criatura relutante.\n\nO destino precisa ser conhecido por você e estar no mesmo plano de existência. A familiaridade com ele define a chance de sucesso: o Mestre rola 1d100 e consulta a lista abaixo (faixas de **Desastre / Área Similar / Fora do Alvo / No Alvo**):\n\n- **Círculo permanente** (você conhece a sequência de sigilos) ou **objeto associado** (você tem um objeto retirado do destino nos últimos seis meses): No Alvo 01–100.\n- **Muito familiar** (lugar que você frequenta, estudou com cuidado ou está vendo agora): 01–05 / 06–13 / 14–24 / 25–100.\n- **Visto casualmente** (visto mais de uma vez, sem muita familiaridade): 01–33 / 34–43 / 44–53 / 54–100.\n- **Visto uma vez** (talvez por magia) ou **conhecido por descrição** (só por relato ou mapa): 01–43 / 44–53 / 54–73 / 74–100.\n- **Destino falso** (o lugar não existe, por exemplo, era uma ilusão ou foi destruído): Desastre 01–50 / Área Similar 51–100.\n\nResultados:\n\n- **No Alvo:** vocês aparecem onde queriam.\n- **Fora do Alvo:** vocês aparecem a uma distância aleatória do destino, numa direção aleatória (1d8 para o ponto cardeal). A distância é 1d10 × 1d10 por cento da distância total da viagem.\n- **Área Similar:** vocês chegam a outro lugar visual ou tematicamente parecido com o destino, normalmente o mais próximo, mas que pode estar em qualquer ponto do plano.\n- **Desastre:** cada criatura teletransportada (ou o objeto) sofre **3d10 de dano de energia**, e o Mestre rola de novo na tabela para ver onde vocês vão parar. Vários desastres seguidos podem acontecer, causando dano a cada vez."
+  },
+  {
+    "nome": "Tempestade de Fogo",
+    "en": "Fire Storm",
+    "nivel": 7,
+    "escola": "Evocação",
+    "tempo": "1 ação",
+    "alcance": "45 metros",
+    "componentes": "V, S",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Clérigo",
+      "Druida",
+      "Feiticeiro"
+    ],
+    "descricao": "Uma tempestade de chamas surge num local à sua escolha dentro do alcance. A área é composta por até **dez cubos de 3 metros**, dispostos como você quiser; cada cubo precisa ter pelo menos uma face adjacente à face de outro cubo.\n\nCada criatura na área faz uma **salvaguarda de Destreza**: sofre **7d10 de dano de fogo** se falhar, ou metade se passar.\n\nO fogo danifica objetos na área e incendeia objetos inflamáveis que não estejam sendo vestidos ou carregados. Se quiser, você pode fazer com que a vegetação na área não seja afetada."
+  },
+  {
+    "nome": "Viagem Planar",
+    "en": "Plane Shift",
+    "nivel": 7,
+    "escola": "Conjuração",
+    "tempo": "1 ação",
+    "alcance": "Toque",
+    "componentes": "V, S, M (uma haste de metal bifurcada que vale pelo menos 250 PO, sintonizada com um plano de existência específico)",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bruxo",
+      "Clérigo",
+      "Druida",
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Você e até oito criaturas voluntárias que deem as mãos num círculo são transportados para outro plano de existência. Você pode indicar o destino em termos gerais (por exemplo, uma cidade famosa num plano elemental) e aparece nele ou perto dele; o ponto exato fica a critério do Mestre. Se você conhecer a sequência de sigilos de um círculo de teletransporte em outro plano, pode chegar diretamente a esse círculo; se ele for pequeno demais para todos, os excedentes aparecem nos espaços desocupados mais próximos.\n\nVocê também pode usar a magia para banir uma criatura relutante para outro plano. Escolha uma criatura ao seu alcance e faça uma **jogada de ataque com magia corpo a corpo**. Se acertar, a criatura faz uma **salvaguarda de Carisma**; se falhar, é transportada para um local aleatório no plano que você especificar. Ela precisa encontrar sozinha o caminho de volta."
+  },
+  {
+    "nome": "Antipatia/Simpatia",
+    "en": "Antipathy/Sympathy",
+    "nivel": 8,
+    "escola": "Encantamento",
+    "tempo": "1 hora",
+    "alcance": "18 metros",
+    "componentes": "V, S, M (um pedaço de alume embebido em vinagre para antipatia, ou uma gota de mel para simpatia)",
+    "duracao": "10 dias",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Druida",
+      "Mago"
+    ],
+    "descricao": "Escolha como alvo, dentro do alcance, uma criatura ou objeto Enorme ou menor, ou uma área de até um **cubo de 60 metros**. Depois, especifique um tipo de criatura inteligente (por exemplo, dragões vermelhos, goblins ou vampiros). O alvo ganha uma aura que atrai ou repele essas criaturas durante a duração. Escolha:\n\n- **Antipatia:** quando uma criatura do tipo escolhido vê o alvo ou chega a até 18 metros dele, faz uma **salvaguarda de Sabedoria**; se falhar, fica amedrontada enquanto puder ver o alvo ou estiver a até 18 metros dele. Amedrontada assim, ela usa seu movimento para ir ao lugar seguro mais próximo de onde não veja o alvo. Se ficar a mais de 18 metros e sem ver o alvo, deixa de estar amedrontada, mas volta a ficar se o vir de novo ou se aproximar a até 18 metros.\n- **Simpatia:** quando uma criatura do tipo escolhido vê o alvo ou chega a até 18 metros dele, faz uma **salvaguarda de Sabedoria**; se falhar, usa seu movimento em cada turno para entrar na área ou ficar ao alcance do alvo. Depois disso, não pode se afastar voluntariamente dele. Se o alvo causar dano ou mal à criatura afetada, ela pode fazer uma salvaguarda de Sabedoria para encerrar o efeito.\n\n**Fim do efeito:** se uma criatura afetada terminar o turno a mais de 18 metros do alvo e sem vê-lo, faz uma salvaguarda de Sabedoria; se passar, deixa de ser afetada e percebe que a sensação era mágica. Ela também tem direito a uma nova salvaguarda de Sabedoria a cada 24 horas enquanto a magia durar. Quem passa na salvaguarda fica imune a esse efeito por 1 minuto."
+  },
+  {
+    "nome": "Aura Sagrada",
+    "en": "Holy Aura",
+    "nivel": 8,
+    "escola": "Abjuração",
+    "tempo": "1 ação",
+    "alcance": "Pessoal",
+    "componentes": "V, S, M (um pequeno relicário que vale pelo menos 1.000 PO, contendo uma relíquia sagrada, como um retalho do manto de um santo ou um pedaço de pergaminho de um texto religioso)",
+    "duracao": "Concentração, até 1 minuto",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Clérigo"
+    ],
+    "descricao": "Luz divina emana de você e forma um brilho suave num **raio de 9 metros**. As criaturas à sua escolha nesse raio no momento da conjuração emitem penumbra num raio de 1,5 metro e, até a magia terminar, têm **vantagem em todas as salvaguardas**, e as outras criaturas têm **desvantagem nas jogadas de ataque** contra elas.\n\nAlém disso, quando um corruptor ou morto-vivo atinge uma criatura afetada com um ataque corpo a corpo, a aura lampeja. O atacante faz uma **salvaguarda de Constituição**; se falhar, fica cego até a magia terminar."
+  },
+  {
+    "nome": "Campo Antimagia",
+    "en": "Antimagic Field",
+    "nivel": 8,
+    "escola": "Abjuração",
+    "tempo": "1 ação",
+    "alcance": "Pessoal (esfera de 3 metros de raio)",
+    "componentes": "V, S, M (uma pitada de pó de ferro ou limalha de ferro)",
+    "duracao": "Concentração, até 1 hora",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Clérigo",
+      "Mago"
+    ],
+    "descricao": "Uma esfera invisível de antimagia de **3 metros de raio** surge ao seu redor e se move com você, centrada em você, durante a duração. Dentro dela, magias e outros efeitos mágicos ficam suprimidos e não podem invadi-la, exceto os criados por um artefato ou divindade. Um espaço de magia gasto para conjurar uma magia suprimida é perdido. O tempo que um efeito passa suprimido conta para a duração dele.\n\n- **Efeitos com alvo:** magias e efeitos que escolhem como alvo uma criatura ou objeto dentro da esfera não têm efeito sobre ele.\n- **Áreas mágicas:** a área de outra magia ou efeito não entra na esfera; a parte sobreposta fica suprimida (por exemplo, abrindo uma brecha numa muralha de fogo).\n- **Magias ativas:** magias e efeitos ativos sobre criaturas ou objetos dentro da esfera ficam suprimidos enquanto eles estiverem lá.\n- **Itens mágicos:** as propriedades de itens mágicos ficam suprimidas na esfera (uma espada +1 funciona como uma espada comum). Uma arma mágica perde as propriedades se for usada contra um alvo na esfera ou empunhada por alguém na esfera; munição ou arma arremessada recupera a magia assim que sai da esfera.\n- **Viagem mágica:** teletransporte e viagem planar falham se a esfera for o ponto de partida ou de chegada. Portais e aberturas para espaços extradimensionais se fecham temporariamente dentro dela.\n- **Criaturas e objetos mágicos:** criaturas ou objetos invocados ou criados por magia somem temporariamente dentro da esfera e reaparecem assim que o espaço deles deixa de estar nela.\n- **Dissipar magia:** magias como *dissipar magia* não afetam a esfera, e esferas de *campo antimagia* diferentes não se anulam."
+  },
+  {
+    "nome": "Clone",
+    "en": "Clone",
+    "nivel": 8,
+    "escola": "Necromancia",
+    "tempo": "1 hora",
+    "alcance": "Toque",
+    "componentes": "V, S, M (um diamante que vale pelo menos 1.000 PO e pelo menos 16 cm³ de carne da criatura a ser clonada, que a magia consome, e um recipiente que vale pelo menos 2.000 PO, com tampa vedável e grande o bastante para uma criatura Média)",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Mago"
+    ],
+    "descricao": "Você faz crescer uma cópia inerte de uma criatura viva, como garantia contra a morte. O clone se forma dentro do recipiente lacrado (uma urna, um caixão, um cisto de lama no chão, um recipiente de cristal com água salgada etc.) e atinge o tamanho e a maturidade completos em **120 dias**; você pode escolher que ele seja uma versão mais jovem da mesma criatura. Ele permanece inerte indefinidamente enquanto o recipiente não for perturbado.\n\nA qualquer momento depois que o clone amadurecer, se a criatura original morrer, a alma dela passa para o clone, desde que esteja livre e disposta a voltar. O clone é fisicamente idêntico ao original, com a mesma personalidade, memórias e capacidades, mas sem nenhum equipamento.\n\nOs restos mortais da criatura original, se existirem, ficam inertes e não podem mais ser trazidos de volta à vida, pois a alma está em outro lugar."
+  },
+  {
+    "nome": "Controlar o Clima",
+    "en": "Control Weather",
+    "nivel": 8,
+    "escola": "Transmutação",
+    "tempo": "10 minutos",
+    "alcance": "Pessoal (raio de 7,5 km)",
+    "componentes": "V, S, M (incenso aceso e pedaços de terra e madeira misturados em água)",
+    "duracao": "Concentração, até 8 horas",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Clérigo",
+      "Druida",
+      "Mago"
+    ],
+    "descricao": "Você controla o clima num raio de **7,5 km** ao seu redor durante a duração. Precisa estar ao ar livre para conjurar; se for para um lugar sem visão direta do céu, a magia termina.\n\nAo conjurar, você altera as condições atuais (definidas pelo Mestre conforme o clima e a estação) de precipitação, temperatura e vento. As mudanças levam **1d4 × 10 minutos** para fazer efeito; depois disso, você pode mudá-las de novo. Quando a magia termina, o clima volta gradualmente ao normal.\n\nCada mudança move a condição **um estágio** para cima ou para baixo na escala correspondente. Ao mudar o vento, você também pode mudar a direção dele.\n\n- **Precipitação:** 1 céu limpo; 2 nuvens leves; 3 nublado ou neblina; 4 chuva, granizo ou neve; 5 chuva torrencial, granizo forte ou nevasca.\n- **Temperatura:** 1 calor insuportável; 2 quente; 3 morno; 4 fresco; 5 frio; 6 frio ártico.\n- **Vento:** 1 calmo; 2 vento moderado; 3 vento forte; 4 ventania; 5 tempestade."
+  },
+  {
+    "nome": "Debilidade Mental",
+    "en": "Feeblemind",
+    "nivel": 8,
+    "escola": "Encantamento",
+    "tempo": "1 ação",
+    "alcance": "45 metros",
+    "componentes": "V, S, M (um punhado de esferas de argila, cristal, vidro ou mineral)",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Bruxo",
+      "Druida",
+      "Mago"
+    ],
+    "descricao": "Você ataca a mente de uma criatura que consiga ver dentro do alcance, tentando destruir seu intelecto e personalidade. O alvo sofre **4d6 de dano psíquico** e faz uma **salvaguarda de Inteligência**.\n\nSe falhar, os valores de Inteligência e Carisma dele passam a ser **1**. Ele não pode conjurar magias, ativar itens mágicos, entender idiomas nem se comunicar de forma inteligível. Ainda consegue reconhecer os amigos, segui-los e até protegê-los.\n\nAo fim de cada período de 30 dias, a criatura repete a salvaguarda; se passar, a magia termina. O efeito também pode ser encerrado por *restauração maior*, *cura completa* ou *desejo*."
+  },
+  {
+    "nome": "Dominar Monstro",
+    "en": "Dominate Monster",
+    "nivel": 8,
+    "escola": "Encantamento",
+    "tempo": "1 ação",
+    "alcance": "18 metros",
+    "componentes": "V, S",
+    "duracao": "Concentração, até 1 hora",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Bruxo",
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Você tenta dominar uma criatura que consiga ver dentro do alcance. Ela faz uma **salvaguarda de Sabedoria** ou fica **enfeitiçada** por você durante a duração. Se você ou criaturas amigáveis a você estiverem lutando contra ela, ela tem vantagem na salvaguarda.\n\nEnquanto ela estiver enfeitiçada, vocês têm um elo telepático, desde que estejam no mesmo plano. Por ele, você pode dar comandos enquanto estiver consciente (sem gastar ação), e ela faz o possível para obedecer. Os comandos podem ser simples e gerais, como \"ataque aquela criatura\", \"corra até lá\" ou \"pegue aquele objeto\". Se ela cumprir a ordem e não receber outra, defende-se e se preserva da melhor forma que puder.\n\nVocê pode usar sua ação para assumir controle total e preciso do alvo. Até o fim do seu próximo turno, ele só faz as ações que você escolher e nada que você não permita. Nesse período, você também pode fazê-lo usar uma reação, mas isso gasta a sua reação também.\n\nCada vez que o alvo sofrer dano, ele faz uma nova salvaguarda de Sabedoria; se passar, a magia termina.",
+    "superior": "Com um espaço de 9º nível ou maior, a duração passa a ser concentração, até 8 horas."
+  },
+  {
+    "nome": "Explosão Solar",
+    "en": "Sunburst",
+    "nivel": 8,
+    "escola": "Evocação",
+    "tempo": "1 ação",
+    "alcance": "45 metros",
+    "componentes": "V, S, M (fogo e um pedaço de pedra-do-sol)",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Druida",
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Uma luz solar intensa brilha num **raio de 18 metros** centrado num ponto dentro do alcance. Cada criatura na área faz uma **salvaguarda de Constituição**: se falhar, sofre **12d6 de dano radiante** e fica **cega por 1 minuto**; se passar, sofre metade do dano e não fica cega. Mortos-vivos e limos têm desvantagem nessa salvaguarda.\n\nUma criatura cega por esta magia faz uma salvaguarda de Constituição ao fim de cada turno dela; se passar, deixa de estar cega.\n\nA magia dissipa qualquer escuridão criada por magia na área."
+  },
+  {
+    "nome": "Formas Animais",
+    "en": "Animal Shapes",
+    "nivel": 8,
+    "escola": "Transmutação",
+    "tempo": "1 ação",
+    "alcance": "9 metros",
+    "componentes": "V, S",
+    "duracao": "Concentração, até 24 horas",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Druida"
+    ],
+    "descricao": "Escolha qualquer número de criaturas voluntárias que você consiga ver dentro do alcance. Cada uma se transforma numa **besta Grande ou menor de nível de desafio 4 ou menor**, que você escolhe (pode ser uma forma diferente para cada alvo). Em turnos seguintes, você pode usar uma ação para transformar as criaturas afetadas em novas formas.\n\nA transformação dura até a magia terminar para aquele alvo, ou até ele cair para 0 PV ou morrer.\n\nAs estatísticas de jogo do alvo são substituídas pelas da besta, mas ele mantém a tendência e os valores de Inteligência, Sabedoria e Carisma. Ele assume os PV da nova forma; ao voltar ao normal, retorna aos PV que tinha antes. Se voltar por ter caído a 0 PV, o dano excedente passa para a forma normal; se esse excesso não reduzir a forma normal a 0 PV, ela não fica inconsciente.\n\nO alvo fica limitado às ações que a nova forma permite e não pode falar nem conjurar magias. O equipamento se funde à nova forma; ele não pode ativar, empunhar ou se beneficiar de nenhum item."
+  },
+  {
+    "nome": "Lábia",
+    "en": "Glibness",
+    "nivel": 8,
+    "escola": "Transmutação",
+    "tempo": "1 ação",
+    "alcance": "Pessoal",
+    "componentes": "V",
+    "duracao": "1 hora",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Bruxo"
+    ],
+    "descricao": "Até a magia terminar, sempre que fizer um teste de Carisma, você pode trocar o número rolado no d20 por um **15**.\n\nAlém disso, não importa o que você diga, magias que determinam se você está dizendo a verdade indicam que você está sendo sincero."
+  },
+  {
+    "nome": "Labirinto",
+    "en": "Maze",
+    "nivel": 8,
+    "escola": "Conjuração",
+    "tempo": "1 ação",
+    "alcance": "18 metros",
+    "componentes": "V, S",
+    "duracao": "Concentração, até 10 minutos",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Mago"
+    ],
+    "descricao": "Você bane uma criatura que consiga ver dentro do alcance para um semiplano labiríntico (sem salvaguarda). Ela fica lá durante a duração ou até escapar.\n\nO alvo pode usar sua ação para tentar escapar com um **teste de Inteligência CD 20**; se passar, escapa e a magia termina. Minotauros e demônios goristro passam automaticamente.\n\nQuando a magia termina, o alvo reaparece no espaço que ocupava ou, se estiver ocupado, no espaço desocupado mais próximo."
+  },
+  {
+    "nome": "Limpar a Mente",
+    "en": "Mind Blank",
+    "nivel": 8,
+    "escola": "Abjuração",
+    "tempo": "1 ação",
+    "alcance": "Toque",
+    "componentes": "V, S",
+    "duracao": "24 horas",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Mago"
+    ],
+    "descricao": "Até a magia terminar, uma criatura voluntária que você toca fica imune a **dano psíquico**, a qualquer efeito que perceba suas emoções ou leia seus pensamentos, a **magias de adivinhação** e à condição **enfeitiçado**.\n\nA proteção vale até contra *desejo* e magias ou efeitos de poder semelhante usados para afetar a mente do alvo ou obter informações sobre ele."
+  },
+  {
+    "nome": "Nuvem Incendiária",
+    "en": "Incendiary Cloud",
+    "nivel": 8,
+    "escola": "Conjuração",
+    "tempo": "1 ação",
+    "alcance": "45 metros",
+    "componentes": "V, S",
+    "duracao": "Concentração, até 1 minuto",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Uma nuvem de fumaça cheia de brasas incandescentes surge numa **esfera de 6 metros de raio** centrada num ponto dentro do alcance. Ela contorna esquinas e a área fica **muito obscurecida**. Dura até a magia terminar ou até um vento forte (pelo menos 30 km/h) dispersá-la.\n\nQuando a nuvem surge, cada criatura nela faz uma **salvaguarda de Destreza**: sofre **10d8 de dano de fogo** se falhar, ou metade se passar. Uma criatura também faz essa salvaguarda quando entra na área pela primeira vez num turno ou termina o turno nela.\n\nNo início de cada um dos seus turnos, a nuvem se move **3 metros** diretamente para longe de você, na direção que você escolher."
+  },
+  {
+    "nome": "Palavra de Poder Atordoar",
+    "en": "Power Word Stun",
+    "nivel": 8,
+    "escola": "Encantamento",
+    "tempo": "1 ação",
+    "alcance": "18 metros",
+    "componentes": "V",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Bruxo",
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Você pronuncia uma palavra de poder contra uma criatura que consiga ver dentro do alcance. Se ela tiver **150 PV ou menos**, fica **atordoada** (sem salvaguarda); caso contrário, a magia não tem efeito.\n\nAo fim de cada turno dela, a criatura atordoada faz uma **salvaguarda de Constituição**; se passar, o atordoamento termina."
+  },
+  {
+    "nome": "Semiplano",
+    "en": "Demiplane",
+    "nivel": 8,
+    "escola": "Conjuração",
+    "tempo": "1 ação",
+    "alcance": "18 metros",
+    "componentes": "S",
+    "duracao": "1 hora",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bruxo",
+      "Mago"
+    ],
+    "descricao": "Você cria uma porta sombria numa superfície plana e sólida que consiga ver dentro do alcance. Ela é grande o bastante para criaturas Médias passarem sem dificuldade. Aberta, leva a um semiplano que parece uma sala vazia de **9 metros em cada dimensão**, feita de madeira ou pedra.\n\nQuando a magia termina, a porta desaparece, e qualquer criatura ou objeto dentro do semiplano fica preso lá, pois a porta também some do outro lado.\n\nA cada conjuração, você pode criar um semiplano novo ou ligar a porta a um semiplano que tenha criado antes com esta magia. Além disso, se conhecer a natureza e o conteúdo de um semiplano criado por outra criatura com esta magia, pode ligar a porta a ele."
+  },
+  {
+    "nome": "Terremoto",
+    "en": "Earthquake",
+    "nivel": 8,
+    "escola": "Evocação",
+    "tempo": "1 ação",
+    "alcance": "150 metros",
+    "componentes": "V, S, M (uma pitada de terra, um pedaço de rocha e um torrão de argila)",
+    "duracao": "Concentração, até 1 minuto",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Clérigo",
+      "Druida",
+      "Feiticeiro"
+    ],
+    "descricao": "Você escolhe um ponto no chão dentro do alcance e cria um tremor violento num **círculo de 30 metros de raio** centrado nele. Ele afeta criaturas e estruturas em contato com o chão na área durante a duração.\n\n- O chão da área vira **terreno difícil**.\n- Cada criatura no chão que esteja se concentrando faz uma **salvaguarda de Constituição**; se falhar, perde a concentração.\n- Ao conjurar e ao fim de cada turno em que você mantiver a concentração, cada criatura no chão na área faz uma **salvaguarda de Destreza**; se falhar, fica caída.\n\nO Mestre pode acrescentar efeitos conforme o terreno:\n\n- **Fissuras:** no início do seu turno seguinte à conjuração, abrem-se 1d6 fissuras em locais escolhidos pelo Mestre. Cada uma tem 1d10 × 3 metros de profundidade e 3 metros de largura, e atravessa a área de um lado ao outro. Uma criatura no lugar onde uma fissura se abre faz uma salvaguarda de Destreza; se falhar, cai nela; se passar, se move junto com a borda. Uma fissura que se abre sob uma estrutura faz com que ela desabe automaticamente.\n- **Estruturas:** o tremor causa **50 de dano de concussão** a cada estrutura em contato com o chão na área ao conjurar e no início de cada um dos seus turnos até a magia terminar. Uma estrutura que chega a 0 PV desaba. Criaturas a uma distância da estrutura de até metade da altura dela fazem uma salvaguarda de Destreza: se falharem, sofrem **5d6 de dano de concussão**, ficam caídas e soterradas, precisando de uma ação e um teste de Força (Atletismo) CD 20 para sair; se passarem, sofrem metade do dano e não ficam caídas nem soterradas."
+  },
+  {
+    "nome": "Aprisionamento",
+    "en": "Imprisonment",
+    "nivel": 9,
+    "escola": "Abjuração",
+    "tempo": "1 minuto",
+    "alcance": "9 metros",
+    "componentes": "V, S, M (uma imagem em pergaminho ou estatueta esculpida à semelhança do alvo, e um componente especial que varia conforme a versão escolhida, valendo pelo menos 500 PO por Dado de Vida do alvo)",
+    "duracao": "Até ser dissipada",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bruxo",
+      "Mago"
+    ],
+    "descricao": "Você cria uma contenção mágica para prender uma criatura que consiga ver dentro do alcance. O alvo faz uma **salvaguarda de Sabedoria**; se passar, fica imune a esta magia caso você a conjure de novo. Se falhar, fica preso. Enquanto estiver preso, não precisa respirar, comer nem beber, não envelhece, e magias de adivinhação não conseguem localizá-lo nem percebê-lo. Escolha uma forma:\n\n- **Sepultamento:** o alvo é enterrado nas profundezas da terra, numa esfera de força mágica do tamanho exato para contê-lo. Nada atravessa a esfera, e nenhuma criatura entra ou sai dela por teletransporte ou viagem planar. Componente: um pequeno orbe de mithral.\n- **Acorrentamento:** correntes pesadas, presas firmemente ao chão, mantêm o alvo no lugar. Ele fica contido e não pode se mover nem ser movido por nenhum meio. Componente: uma corrente fina de metal precioso.\n- **Prisão cercada:** o alvo é levado para um pequeno semiplano protegido contra teletransporte e viagem planar (um labirinto, uma jaula, uma torre ou estrutura parecida). Componente: uma miniatura da prisão feita de jade.\n- **Contenção mínima:** o alvo encolhe até cerca de 2,5 cm de altura e fica preso dentro de uma gema ou objeto semelhante. A luz atravessa a gema (ele vê para fora e pode ser visto), mas nada mais passa, nem por teletransporte ou viagem planar. A gema não pode ser cortada nem quebrada enquanto a magia durar. Componente: uma gema grande e transparente, como coríndon, diamante ou rubi.\n- **Sono:** o alvo adormece e não pode ser acordado. Componente: ervas soporíferas raras.\n\n**Fim da magia:** ao conjurar, você pode definir uma condição que encerra a magia e liberta o alvo. Ela pode ser tão específica quanto quiser, mas o Mestre precisa concordar que é razoável e tem chance de acontecer. Pode se basear no nome, identidade ou divindade da criatura, mas fora isso deve depender de ações ou qualidades observáveis, não de coisas intangíveis como nível, classe ou PV.\n\n*Dissipar magia* só encerra esta magia se for conjurada como magia de 9º nível, tendo como alvo a prisão ou o componente especial. Cada componente especial só sustenta uma prisão por vez; se você conjurar a magia de novo com o mesmo componente, o alvo anterior é libertado."
+  },
+  {
+    "nome": "Chuva de Meteoros",
+    "en": "Meteor Swarm",
+    "nivel": 9,
+    "escola": "Evocação",
+    "tempo": "1 ação",
+    "alcance": "1,5 km",
+    "componentes": "V, S",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Esferas de fogo despencam do céu em **quatro pontos diferentes** que você consiga ver dentro do alcance. Cada criatura numa **esfera de 12 metros de raio** centrada em cada ponto faz uma **salvaguarda de Destreza**; a esfera contorna esquinas. Quem falhar sofre **20d6 de dano de fogo e 20d6 de dano de concussão**; quem passar sofre metade.\n\nUma criatura na área de mais de uma explosão só é afetada uma vez.\n\nA magia danifica objetos na área e incendeia objetos inflamáveis que não estejam sendo vestidos ou carregados."
+  },
+  {
+    "nome": "Cura Completa em Massa",
+    "en": "Mass Heal",
+    "nivel": 9,
+    "escola": "Evocação",
+    "tempo": "1 ação",
+    "alcance": "18 metros",
+    "componentes": "V, S",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Clérigo"
+    ],
+    "descricao": "Uma onda de energia curativa sai de você. Você restaura até **700 PV**, divididos como quiser entre qualquer número de criaturas que consiga ver dentro do alcance. As criaturas curadas também se livram de todas as doenças e de qualquer efeito que as deixe **cegas** ou **surdas**.\n\nA magia não tem efeito em mortos-vivos nem em constructos."
+  },
+  {
+    "nome": "Desejo",
+    "en": "Wish",
+    "nivel": 9,
+    "escola": "Conjuração",
+    "tempo": "1 ação",
+    "alcance": "Pessoal",
+    "componentes": "V",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "A magia mais poderosa que um mortal pode conjurar. Basta falar em voz alta para alterar a própria realidade.\n\n**Uso básico:** reproduzir qualquer outra magia de **8º nível ou menor**. Você não precisa cumprir nenhum requisito dela, nem fornecer componentes caros; a magia simplesmente acontece.\n\nEm vez disso, você pode criar um dos efeitos abaixo:\n\n- Criar um objeto **não mágico** que valha até **25.000 PO**, com no máximo 90 metros em qualquer dimensão, que surge num espaço desocupado no chão que você consiga ver.\n- Fazer até **vinte criaturas** que você consiga ver recuperarem todos os PV e encerrar nelas todos os efeitos descritos em *restauração maior*.\n- Dar a até **dez criaturas** que você consiga ver **resistência** a um tipo de dano à sua escolha.\n- Dar a até **dez criaturas** que você consiga ver **imunidade** a uma única magia ou efeito mágico por 8 horas.\n- Desfazer um acontecimento recente, forçando a rolar de novo qualquer rolagem feita na última rodada (incluindo seu último turno). A realidade se ajusta ao novo resultado. Você pode exigir que a nova rolagem seja feita com vantagem ou desvantagem e escolher se vale a nova ou a original.\n\nVocê pode tentar algo além desses exemplos, descrevendo o desejo ao Mestre da forma mais precisa possível. O Mestre tem ampla liberdade para decidir o que acontece: quanto maior o desejo, maior a chance de algo dar errado. A magia pode simplesmente falhar, funcionar só em parte ou trazer consequências imprevistas pela forma como o desejo foi formulado.\n\n**O preço:** usar *desejo* para qualquer coisa além de reproduzir outra magia desgasta você. Depois disso:\n\n- Até terminar um descanso longo, cada vez que conjurar uma magia você sofre **1d10 de dano necrótico por nível da magia**. Esse dano não pode ser reduzido nem evitado.\n- Sua Força cai para **3** (se já não for 3 ou menos) por **2d4 dias**. Cada dia que você passa descansando e fazendo só atividades leves reduz em 2 dias o tempo restante.\n- Há **33% de chance** de você nunca mais conseguir conjurar *desejo*."
+  },
+  {
+    "nome": "Metamorfose Verdadeira",
+    "en": "True Polymorph",
+    "nivel": 9,
+    "escola": "Transmutação",
+    "tempo": "1 ação",
+    "alcance": "9 metros",
+    "componentes": "V, S, M (uma gota de mercúrio, um pouco de goma-arábica e um fio de fumaça)",
+    "duracao": "Concentração, até 1 hora",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Bruxo",
+      "Mago"
+    ],
+    "descricao": "Escolha uma criatura ou um objeto não mágico que você consiga ver dentro do alcance. Você transforma uma criatura em outra criatura, uma criatura num objeto não mágico, ou um objeto (que não esteja sendo vestido nem carregado por outra criatura) numa criatura. A transformação dura até a magia terminar ou até o alvo cair a 0 PV ou morrer. **Se você mantiver a concentração pela duração inteira, a transformação passa a durar até ser dissipada.**\n\nA magia não afeta metamorfos nem criaturas com 0 PV. Uma criatura relutante faz uma **salvaguarda de Sabedoria**; se passar, não é afetada.\n\n- **Criatura em criatura:** a nova forma pode ser de qualquer tipo, com **nível de desafio igual ou menor** que o do alvo (ou que o nível dele, se não tiver ND). Todas as estatísticas, inclusive os atributos mentais, são substituídas pelas da nova forma; ele mantém a tendência e a personalidade. Assume os PV da nova forma e, ao voltar, retorna aos PV que tinha antes; se voltar por cair a 0 PV, o excesso de dano passa para a forma normal (sem deixá-lo inconsciente, se não chegar a 0 PV). Só pode fazer o que a nova forma permite: não fala, não conjura magias nem faz nada que exija mãos ou fala, a menos que a forma seja capaz. O equipamento se funde à nova forma e não pode ser usado.\n- **Objeto em criatura:** o objeto pode virar qualquer criatura de tamanho não maior que o dele e com **nível de desafio 9 ou menor**. Ela é amigável a você e aos seus companheiros e age em cada um dos seus turnos; você decide suas ações e movimento, e o Mestre tem as estatísticas dela. Se a magia se tornar permanente, você perde o controle sobre a criatura, que pode continuar amigável ou não, conforme você a tratou.\n- **Criatura em objeto:** a criatura vira o objeto junto com tudo o que veste e carrega. O objeto não pode ser maior que a criatura. As estatísticas dela passam a ser as do objeto, e ela não guarda nenhuma lembrança do tempo passado nessa forma quando voltar ao normal."
+  },
+  {
+    "nome": "Mudança de Forma",
+    "en": "Shapechange",
+    "nivel": 9,
+    "escola": "Transmutação",
+    "tempo": "1 ação",
+    "alcance": "Pessoal",
+    "componentes": "V, S, M (um diadema de jade que vale pelo menos 1.500 PO, que você precisa pôr na cabeça antes de conjurar)",
+    "duracao": "Concentração, até 1 hora",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Druida",
+      "Mago"
+    ],
+    "descricao": "Você assume a forma de outra criatura durante a duração. A nova forma pode ser de qualquer criatura com **nível de desafio igual ou menor que o seu nível**. Não pode ser constructo nem morto-vivo, e você precisa já ter visto esse tipo de criatura pelo menos uma vez. Você vira um exemplar comum dela, sem níveis de classe nem o traço Conjuração.\n\n- Suas estatísticas são substituídas pelas da criatura, mas você mantém a tendência e os valores de Inteligência, Sabedoria e Carisma. Mantém também suas proficiências em perícias e salvaguardas e ganha as da criatura; se ambos tiverem a mesma proficiência e o bônus dela for maior, use o dela. Você não pode usar ações lendárias nem ações de covil da nova forma.\n- Você assume os PV e Dados de Vida da nova forma. Ao voltar ao normal, retorna aos PV que tinha antes. Se voltar por ter caído a 0 PV, o dano excedente passa para a forma normal; se esse excesso não reduzir a forma normal a 0 PV, você não fica inconsciente.\n- Você mantém os benefícios de características de classe, raça ou outras fontes e pode usá-las se a nova forma for fisicamente capaz. Não pode usar sentidos especiais seus (como visão no escuro) se a nova forma não os tiver. Só pode falar se a criatura normalmente puder.\n- Ao se transformar, você escolhe se o equipamento cai no chão, se funde à nova forma ou é vestido por ela. O equipamento vestido funciona normalmente; o Mestre decide o que a nova forma consegue usar. O equipamento não muda de tamanho, e o que não couber cai ou se funde. Equipamento fundido não tem efeito.\n\nDurante a duração, você pode usar sua ação para assumir outra forma, seguindo as mesmas regras, com uma exceção: se a nova forma tiver mais PV que a atual, seus PV continuam no valor atual."
+  },
+  {
+    "nome": "Muralha Prismática",
+    "en": "Prismatic Wall",
+    "nivel": 9,
+    "escola": "Abjuração",
+    "tempo": "1 ação",
+    "alcance": "18 metros",
+    "componentes": "V, S",
+    "duracao": "10 minutos",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Mago"
+    ],
+    "descricao": "Um plano de luz multicolorida forma uma muralha vertical opaca de até **27 metros de comprimento, 9 metros de altura e 2,5 cm de espessura**, centrada num ponto que você consiga ver dentro do alcance. Em vez disso, você pode moldá-la numa **esfera de até 9 metros de diâmetro**. Se a muralha passar pelo espaço de uma criatura, a magia falha e a ação e o espaço de magia são perdidos.\n\nA muralha emite luz plena num raio de 30 metros e penumbra por mais 30 metros. Você e as criaturas que designar ao conjurar podem atravessá-la e ficar perto dela sem sofrer nada. Qualquer outra criatura que consiga ver a muralha e se aproxime a até **6 metros** dela ou comece o turno ali faz uma **salvaguarda de Constituição**; se falhar, fica **cega por 1 minuto**.\n\nA muralha tem sete camadas. Quem tenta atravessá-la ou enfiar algo nela passa pelas camadas uma por vez, fazendo uma **salvaguarda de Destreza** para cada uma; se falhar, sofre o efeito daquela camada. A muralha pode ser destruída camada por camada, na ordem do vermelho ao violeta, pelos meios indicados. Uma camada destruída fica assim pelo resto da duração. *Campo antimagia* não afeta a muralha, e *dissipar magia* só afeta a camada violeta.\n\n- **1. Vermelha:** 10d6 de dano de fogo (metade se passar). Bloqueia ataques à distância não mágicos. Destruída com pelo menos 25 de dano de frio.\n- **2. Laranja:** 10d6 de dano de ácido (metade se passar). Bloqueia ataques à distância mágicos. Destruída por um vento forte.\n- **3. Amarela:** 10d6 de dano elétrico (metade se passar). Destruída com pelo menos 60 de dano de energia.\n- **4. Verde:** 10d6 de dano de veneno (metade se passar). Destruída por *criar passagem* ou outra magia de nível igual ou maior que abra uma passagem numa superfície sólida.\n- **5. Azul:** 10d6 de dano de frio (metade se passar). Destruída com pelo menos 25 de dano de fogo.\n- **6. Anil:** se falhar, fica contido; ao fim de cada turno dele, faz uma salvaguarda de Constituição. Três sucessos encerram o efeito; três falhas o transformam em pedra permanentemente (petrificado). Enquanto esta camada existir, não é possível conjurar magias através da muralha. Destruída pela luz plena de *luz do dia* ou magia semelhante de nível igual ou maior.\n- **7. Violeta:** se falhar, fica cego. No início do seu próximo turno, faz uma salvaguarda de Sabedoria: se passar, a cegueira termina; se falhar, é levado para outro plano à escolha do Mestre e deixa de estar cego (em geral, quem está fora do plano natal volta para casa; os demais vão para o Plano Astral ou Etéreo). Destruída por *dissipar magia* ou magia semelhante de nível igual ou maior capaz de encerrar magias e efeitos mágicos."
+  },
+  {
+    "nome": "Palavra de Poder Matar",
+    "en": "Power Word Kill",
+    "nivel": 9,
+    "escola": "Encantamento",
+    "tempo": "1 ação",
+    "alcance": "18 metros",
+    "componentes": "V",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Bruxo",
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Você pronuncia uma palavra de poder contra uma criatura que consiga ver dentro do alcance. Se ela tiver **100 PV ou menos**, morre instantaneamente (sem salvaguarda). Caso contrário, a magia não tem efeito."
+  },
+  {
+    "nome": "Parar o Tempo",
+    "en": "Time Stop",
+    "nivel": 9,
+    "escola": "Transmutação",
+    "tempo": "1 ação",
+    "alcance": "Pessoal",
+    "componentes": "V",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Você para brevemente o fluxo do tempo para todos menos você. Nenhum tempo passa para as outras criaturas, enquanto você realiza **1d4 + 1 turnos seguidos**, nos quais pode usar ações e se mover normalmente.\n\nA magia termina se alguma ação sua nesse período, ou algum efeito que você criar nele, afetar uma criatura que não seja você ou um objeto vestido ou carregado por outra pessoa. Ela também termina se você se afastar mais de **300 metros** do local onde a conjurou."
+  },
+  {
+    "nome": "Portal",
+    "en": "Gate",
+    "nivel": 9,
+    "escola": "Conjuração",
+    "tempo": "1 ação",
+    "alcance": "18 metros",
+    "componentes": "V, S, M (um diamante que vale pelo menos 5.000 PO)",
+    "duracao": "Concentração, até 1 minuto",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Clérigo",
+      "Feiticeiro",
+      "Mago"
+    ],
+    "descricao": "Você conjura um portal que liga um espaço desocupado que consiga ver dentro do alcance a um local preciso em outro plano de existência. O portal é uma abertura circular de **1,5 a 6 metros de diâmetro**, que você pode orientar em qualquer direção, e dura enquanto a magia durar.\n\nO portal tem frente e verso em cada plano. Só é possível atravessá-lo pela frente; quem fizer isso é transportado instantaneamente para o outro plano, surgindo no espaço desocupado mais próximo do portal.\n\nDivindades e outros governantes planares podem impedir que portais desta magia se abram na presença deles ou em qualquer lugar dos seus domínios.\n\nAo conjurar, você pode dizer o nome de uma criatura específica (pseudônimos, títulos e apelidos não funcionam). Se ela estiver em outro plano, o portal se abre perto dela e a puxa para o espaço desocupado mais próximo do seu lado. Você não ganha nenhum poder especial sobre a criatura: ela age como o Mestre achar adequado — pode ir embora, atacar você ou ajudá-lo."
+  },
+  {
+    "nome": "Presciência",
+    "en": "Foresight",
+    "nivel": 9,
+    "escola": "Adivinhação",
+    "tempo": "1 minuto",
+    "alcance": "Toque",
+    "componentes": "V, S, M (uma pena de beija-flor)",
+    "duracao": "8 horas",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bardo",
+      "Bruxo",
+      "Druida",
+      "Mago"
+    ],
+    "descricao": "Você toca uma criatura voluntária e lhe dá a capacidade limitada de ver o futuro imediato. Durante a duração, ela **não pode ser surpreendida** e tem **vantagem em jogadas de ataque, testes de atributo e salvaguardas**. Além disso, as outras criaturas têm **desvantagem nas jogadas de ataque** contra ela.\n\nA magia termina imediatamente se você a conjurar de novo antes do fim da duração."
+  },
+  {
+    "nome": "Projeção Astral",
+    "en": "Astral Projection",
+    "nivel": 9,
+    "escola": "Necromancia",
+    "tempo": "1 hora",
+    "alcance": "3 metros",
+    "componentes": "V, S, M (para cada criatura afetada, um jacinto que vale pelo menos 1.000 PO e uma barra de prata ornamentada que vale pelo menos 100 PO, que a magia consome)",
+    "duracao": "Especial",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Bruxo",
+      "Clérigo",
+      "Mago"
+    ],
+    "descricao": "Você e até oito criaturas voluntárias dentro do alcance projetam seus corpos astrais no **Plano Astral** (a magia falha e a conjuração é perdida se você já estiver nesse plano). O corpo material fica para trás, inconsciente e em animação suspensa: não precisa de comida nem de ar e não envelhece.\n\nO corpo astral é quase idêntico à forma mortal, com as mesmas estatísticas e pertences. A diferença é um **cordão prateado** que sai das costas e some de vista a cerca de 30 cm. Enquanto o cordão estiver intacto, você consegue voltar para casa. Se ele for cortado — o que só acontece quando um efeito diz isso explicitamente — alma e corpo se separam e você morre na hora.\n\nA forma astral viaja livremente pelo Plano Astral e pode atravessar portais para qualquer outro plano. Ao entrar num novo plano ou voltar ao plano onde conjurou, seu corpo e seus pertences são trazidos pelo cordão, e você volta a ocupar seu corpo ao entrar no plano.\n\nDano e outros efeitos sofridos pela forma astral não afetam o corpo físico nem persistem quando você volta a ele.\n\n**Fim da magia:** a magia termina para você e seus companheiros quando você usa uma ação para encerrá-la; cada um volta ao próprio corpo e acorda. Ela também termina para uma criatura se *dissipar magia* for usada com sucesso no corpo astral ou físico dela, ou se o corpo original ou a forma astral cair a 0 PV. Se a magia terminar com o cordão intacto, ele puxa a forma astral de volta ao corpo. Se você voltar antes, seus companheiros continuam em forma astral e precisam achar sozinhos o caminho de volta, geralmente caindo a 0 PV."
+  },
+  {
+    "nome": "Ressurreição Verdadeira",
+    "en": "True Resurrection",
+    "nivel": 9,
+    "escola": "Necromancia",
+    "tempo": "1 hora",
+    "alcance": "Toque",
+    "componentes": "V, S, M (um borrifo de água benta e diamantes que valem pelo menos 25.000 PO, que a magia consome)",
+    "duracao": "Instantânea",
+    "conc": false,
+    "ritual": false,
+    "classes": [
+      "Clérigo",
+      "Druida"
+    ],
+    "descricao": "Você toca uma criatura morta há **no máximo 200 anos**, que tenha morrido por qualquer motivo exceto velhice. Se a alma dela estiver livre e disposta, ela volta à vida com todos os PV.\n\nA magia fecha todos os ferimentos, neutraliza venenos, cura todas as doenças e remove todas as maldições que afetavam a criatura ao morrer. Ela substitui órgãos e membros danificados ou perdidos. Se a criatura era morta-viva, volta à forma não morta-viva.\n\nA magia pode até criar um corpo novo se o original não existir mais; nesse caso, você precisa dizer o nome da criatura, e ela surge num espaço desocupado à sua escolha a até 3 metros de você. Não há penalidade por ter voltado dos mortos."
+  },
+  {
+    "nome": "Sinistro",
+    "en": "Weird",
+    "nivel": 9,
+    "escola": "Ilusão",
+    "tempo": "1 ação",
+    "alcance": "36 metros",
+    "componentes": "V, S",
+    "duracao": "Concentração, até 1 minuto",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Mago"
+    ],
+    "descricao": "Usando os medos mais profundos de um grupo de criaturas, você cria criaturas ilusórias na mente delas, visíveis só para elas. Cada criatura numa **esfera de 9 metros de raio** centrada num ponto à sua escolha dentro do alcance faz uma **salvaguarda de Sabedoria**; se falhar, fica **amedrontada** durante a duração. A ilusão materializa os piores pesadelos da criatura como uma ameaça implacável.\n\nAo fim de cada turno da criatura amedrontada, ela faz uma salvaguarda de Sabedoria; se falhar, sofre **4d10 de dano psíquico**. Se passar, a magia termina para ela."
+  },
+  {
+    "nome": "Tempestade da Vingança",
+    "en": "Storm of Vengeance",
+    "nivel": 9,
+    "escola": "Conjuração",
+    "tempo": "1 ação",
+    "alcance": "Visão",
+    "componentes": "V, S",
+    "duracao": "Concentração, até 1 minuto",
+    "conc": true,
+    "ritual": false,
+    "classes": [
+      "Druida"
+    ],
+    "descricao": "Uma nuvem de tempestade se forma, centrada num ponto que você consiga ver, e se espalha num **raio de 108 metros**. Relâmpagos, trovões e ventos fortes tomam a área. Cada criatura sob a nuvem (até 1.500 metros abaixo dela) quando ela surge faz uma **salvaguarda de Constituição**; se falhar, sofre **2d6 de dano trovejante** e fica **surda por 5 minutos**.\n\nA cada rodada em que você mantém a concentração, a tempestade produz efeitos adicionais no seu turno:\n\n- **Rodada 2:** chove ácido. Cada criatura e objeto sob a nuvem sofre **1d6 de dano de ácido**.\n- **Rodada 3:** você chama seis relâmpagos contra seis criaturas ou objetos à sua escolha sob a nuvem (no máximo um relâmpago por alvo). Cada alvo faz uma **salvaguarda de Destreza**: sofre **10d6 de dano elétrico** se falhar, ou metade se passar.\n- **Rodada 4:** cai granizo. Cada criatura sob a nuvem sofre **2d6 de dano de concussão**.\n- **Rodadas 5 a 10:** rajadas de vento e chuva congelante castigam a área sob a nuvem, que vira **terreno difícil** e fica **muito obscurecida**. Cada criatura ali sofre **1d6 de dano de frio**. Ataques à distância com armas são impossíveis na área. O vento e a chuva contam como distração severa para manter a concentração em magias. Os ventos fortes também dispersam automaticamente névoas, neblinas e fenômenos parecidos na área, mágicos ou não."
+  }
+]

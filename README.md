@@ -4,13 +4,14 @@ Suíte de D&D 5e feita para o celular, para jogar com os amigos na rede de casa.
 
 | App | Onde | O que faz |
 |---|---|---|
-| **Fichas** | `apps/fichas`, porta 3000 | Contas, mesas e fichas. É a porta de entrada da suíte. |
+| **Fichas** | `apps/fichas`, porta 3000 | Contas, mesas, fichas e a wiki. É a porta de entrada da suíte. |
 | **Mapas** | `apps/mapas`, porta 3001 | Editor e visualizador de mapas quadriculados com os tokens das fichas. Aparece embutido na aba **Mapas** de cada mesa. |
 | **MCP** | `apps/mcp` | Servidor [MCP](https://modelcontextprotocol.io) para o Claude ler e mexer nas fichas, nas mesas e nos mapas, e mestrar com a skill `mestre-dnd`. |
 
 - **Ficha completa:** atributos, perícias, salvaguardas, PV, ataques, magias, inventário e notas, com os cálculos feitos sozinhos e rolagem de dados (com vantagem e desvantagem) ao tocar.
 - **Mesas:** quem cria uma mesa é o mestre dela e recebe um código de convite. Os jogadores entram com esse código e trazem um personagem para a mesa.
-- **Navegação:** o app abre no **Início**, com as mesas e os personagens. No computador, uma barra de ícones à esquerda leva ao Início, aos Personagens, à ficha aberta, a cada mesa, aos mapas e às Configurações; no celular, a mesma coisa fica numa barra embaixo.
+- **Wiki:** as regras de D&D 5e para consulta durante o jogo e as páginas que o mestre escreve para a mesa (cenário, lugares, NPCs, regras da casa). A ficha leva direto à regra de cada cartão.
+- **Navegação:** o app abre no **Início**, com as mesas e os personagens. No computador, uma barra de ícones à esquerda leva ao Início, aos Personagens, à ficha aberta, a cada mesa, aos mapas, à wiki e às Configurações; no celular, a mesma coisa fica numa barra embaixo.
 - **Privacidade:** cada jogador vê só as próprias fichas. O mestre vê todas as fichas da mesa e decide quais ficam **liberadas** para os outros jogadores, que só podem lê-las. A regra é aplicada pelo servidor, não só pela tela.
 - **Ao vivo:** quando alguém muda uma ficha ou mexe no mapa, quem estiver vendo recebe a mudança na hora.
 
@@ -120,9 +121,25 @@ A página de cada mesa tem as abas **Mesa** e **Mapas**. A aba Mapas mostra o ap
 
 Atalhos no computador: `V` mover, `R` régua, `B` pintar, `G` preencher, setas movem o token escolhido, `Delete` tira do mapa, `Ctrl+Z` desfaz a pintura, `+`, `-` e `0` controlam o zoom, e a roda do mouse aproxima. No celular, um dedo arrasta e dois dedos movem e aproximam o mapa.
 
+## Wiki
+
+O botão **Wiki** abre a wiki da suíte, com busca no topo. Ela junta duas coisas:
+
+- **Regras do jogo:** um resumo das regras de D&D 5e escrito para a suíte, com base no SRD 5.1 (licença CC BY 4.0): como se joga, testes, atributos, perícias, salvaguardas, combate, dano e morte, condições, movimento e mapa, magia (com as tabelas de espaços por classe), descanso, criação de personagem, níveis, classes, raças e antecedentes. São arquivos Markdown em `apps/fichas/wiki/`, que vêm com a suíte e ninguém edita pelo app.
+- **Listas:** a **Lista de magias** (categoria Magia) e, na categoria **Itens**, armas, armaduras, **Equipamento de aventura** (com preço e peso) e **Itens mágicos**. As listas têm busca e filtros (classe, nível e escola das magias; tipo, raridade e sintonia dos itens) e cada entrada abre a descrição. Os dados ficam em JSON em `apps/fichas/wiki/dados/`. As magias e os itens mágicos que o mestre cria na wiki da mesa, com a categoria **Magias** ou **Itens mágicos**, aparecem no começo dessas listas.
+- **Wiki da mesa:** cada mesa ganha a aba **Wiki**, ao lado de Mesa e Mapas (`#mesa/<mesa>/wiki`). O mestre escreve as páginas e os jogadores leem as que ele liberar.
+
+Na ficha, cada cartão tem um **?** que abre a regra dele (Atributos, Perícias, Condições, Espaços de magia...), e as condições marcadas na aba Combate aparecem com o efeito de cada uma. Nas abas Magias e Itens, as magias e os itens com o nome de uma entrada das listas ganham um **?** que abre a descrição; ao digitar, a ficha sugere os nomes, acerta o nível da magia e preenche o peso do equipamento.
+
+- **Escrever:** o mestre cria uma página na aba Wiki da mesa, com título, categoria e texto em Markdown simples (`## seções`, `**negrito**`, listas, tabelas, imagens e `[[links]]` para outras páginas ou regras, como `[[condicoes#caido]]`). O editor tem a opção **Ver como fica** e a página **Escrevendo na wiki** explica tudo.
+- **Liberar:** a página nasce oculta e o mestre toca em **Oculta/Liberada**, como nas fichas. Trechos entre `:::mestre` e `:::` só o mestre vê, mesmo numa página liberada: o servidor tira esses trechos antes de mandar a página aos jogadores. `:::leitura` marca texto para ler em voz alta e `:::nota` um quadro lateral.
+- **Importar:** **Importar documento** aceita HTML e Markdown. Selecione o documento junto com as imagens que ele usa e elas entram na página. Quadros laterais viram blocos de nota, quadros do mestre (classes como `sidebar-gm`) viram trechos só do mestre e texto para ler em voz alta (`read-aloud`) vira bloco de leitura.
+- **Imagens:** PNG, JPEG, WebP ou GIF até 8 MB, guardadas em `data/wiki-img/`. Só quem participa da mesa abre as imagens dela.
+- **Ao vivo:** quando o mestre salva ou libera uma página, quem estiver com a wiki aberta vê na hora.
+
 ## Backup e senhas
 
-- Tudo fica em `data/db.json`, e os mapas em `data/mapas.json` e `data/mapas-img/`. Para fazer backup, copie esses arquivos com a suíte parada. Cada jogador também pode exportar as próprias fichas em Personagens › Exportar e importar.
+- Tudo fica em `data/db.json` (inclusive o texto da wiki), as imagens da wiki em `data/wiki-img/`, e os mapas em `data/mapas.json` e `data/mapas-img/`. Para fazer backup, copie esses arquivos com a suíte parada. Cada jogador também pode exportar as próprias fichas em Personagens › Exportar e importar.
 - As senhas são guardadas com hash (scrypt), nunca em texto.
 - Se alguém esquecer a senha, quem roda a suíte pode redefinir:
 
@@ -169,6 +186,8 @@ Na mesma tela você pausa um token (as chamadas passam a ser recusadas até reto
 | `pintar_mapa` | Mestre pinta o terreno em retângulos (com a opção de só o contorno, para paredes) |
 | `colocar_token` / `mover_token` / `editar_token` | Põe um token de ficha ou livre, move (dizendo quanto andou), revela, oculta, renomeia ou tira do mapa |
 | `medir` | Distância entre tokens ou quadrados pelas regras do quadriculado (diagonal conta 1, 1,5 m por quadrado) |
+| `wiki` | Lista, lê (a página inteira, uma seção, ou uma magia ou item pelo nome) e busca nas regras, nas listas e nas páginas das mesas; filtra magias (classe, nível, escola) e itens (tipo, raridade) |
+| `escrever_wiki` | Mestre cria, edita (ou acrescenta ao fim), libera, oculta e apaga páginas da wiki da mesa |
 
 Fichas, mesas, mapas e tokens podem ser indicados pelo nome, e posições no mapa são coluna e linha (C7). As rolagens feitas pelo assistente não aparecem nos celulares, só as mudanças na ficha e no mapa.
 
@@ -178,7 +197,7 @@ As ferramentas de mapa falam com o app de mapas usando o mesmo token. O endereç
 
 A skill [`mestre-dnd`](.claude/skills/mestre-dnd/SKILL.md) faz o Claude conduzir a sessão no chat: narra, interpreta NPCs, pede testes, roda o combate com iniciativa e aplica dano, cura e condições nas fichas, que mudam ao vivo nos celulares. Se a mesa usa mapa, ele monta o lugar, põe os monstros ocultos, revela quando aparecem, move os tokens nos turnos e mede alcance e áreas de efeito, e os jogadores veem o mapa mudar na tela. Ela já vem com o repositório: abra o Claude Code nesta pasta, com o MCP ligado, e peça algo como "vamos jogar, mestra pra gente na mesa A Mina Perdida".
 
-O token usado pelo MCP precisa ser de uma conta **mestre da mesa**, porque só o mestre pode mudar as fichas dos jogadores. Os monstros viram fichas ocultas dessa conta, e o resumo da campanha fica numa ficha "Diário: nome da mesa", para a próxima sessão continuar de onde parou.
+O token usado pelo MCP precisa ser de uma conta **mestre da mesa**, porque só o mestre pode mudar as fichas dos jogadores. Os monstros viram fichas ocultas dessa conta, e o resumo da campanha fica na página "Diário da campanha" da wiki da mesa, para a próxima sessão continuar de onde parou. Na dúvida sobre uma regra, ele consulta a wiki.
 
 ## Limites
 
@@ -192,13 +211,14 @@ O token usado pelo MCP precisa ser de uma conta **mestre da mesa**, porque só o
 npm test
 ```
 
-Os testes cobrem as regras de acesso: cadastro, mesas, código de convite, fichas ocultas e liberadas, edição pelo mestre, tokens de conta (pausar, remover e auditoria), preferências da conta, configurações da mesa e persistência. Também cobrem o app de mapas junto com o de fichas (conta, mapas ocultos, quem move qual token, saúde dos monstros, imagem de fundo, localizações e quem pode embutir os mapas) e o servidor MCP de ponta a ponta, inclusive um encontro montado e jogado no mapa.
+Os testes cobrem as regras de acesso: cadastro, mesas, código de convite, fichas ocultas e liberadas, edição pelo mestre, tokens de conta (pausar, remover e auditoria), preferências da conta, configurações da mesa e persistência. Também cobrem a wiki (páginas ocultas e liberadas, trechos do mestre, imagens e limites), o app de mapas junto com o de fichas (conta, mapas ocultos, quem move qual token, saúde dos monstros, imagem de fundo, localizações e quem pode embutir os mapas) e o servidor MCP de ponta a ponta, inclusive um encontro montado e jogado no mapa.
 
 ## Estrutura
 
 ```
 suite.js              liga fichas e mapas num processo só (npm start)
-apps/fichas/          app de fichas: server.js (API, regras de acesso, eventos ao vivo) e public/ (página, ficha, mesas)
+apps/fichas/          app de fichas: server.js (API, regras de acesso, eventos ao vivo) e public/ (página, ficha, mesas, wiki.js)
+apps/fichas/wiki/     páginas de regras da wiki (Markdown, baseadas no SRD 5.1)
 apps/mapas/           app de mapas: server.js (API, regras de acesso, eventos ao vivo) e public/ (editor em canvas)
 apps/mcp/server.js    servidor MCP para assistentes (fala com as APIs de fichas e mapas)
 .claude/skills/       skill mestre-dnd para o Claude mestrar

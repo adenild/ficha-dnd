@@ -1,0 +1,514 @@
+[
+  {
+    "nome": "Adaga Venenosa",
+    "en": "Dagger of Venom",
+    "tipo": "Arma (adaga)",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Você recebe +1 nas jogadas de ataque e de dano com esta arma.\n\nCom uma ação, você cobre a lâmina de um veneno negro e espesso, que dura 1 minuto ou até um ataque com a adaga acertar uma criatura. Essa criatura faz uma salvaguarda de Constituição CD 15 ou sofre 2d10 de dano de veneno e fica envenenada por 1 minuto. Esse uso só pode ser repetido a partir do amanhecer seguinte."
+  },
+  {
+    "nome": "Algemas Dimensionais",
+    "en": "Dimensional Shackles",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Com uma ação, você prende estas algemas numa criatura incapacitada; elas se ajustam a criaturas de tamanho Pequeno a Grande. Além de servirem como algemas comuns, impedem a criatura presa de usar qualquer forma de movimento extradimensional, incluindo teletransporte e viagem a outro plano. Não impedem que ela atravesse um portal interdimensional.\n\nVocê e qualquer criatura que você designar ao colocá-las podem usar uma ação para removê-las. Uma vez a cada 30 dias, a criatura presa pode fazer um teste de Força (Atletismo) CD 30; se passar, liberta-se e destrói as algemas."
+  },
+  {
+    "nome": "Amuleto à Prova de Detecção e Localização",
+    "en": "Amulet of Proof against Detection and Location",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Enquanto usa este amuleto, você fica oculto da magia de adivinhação: não pode ser alvo desse tipo de magia nem ser percebido por sensores mágicos de observação à distância (como os de *vidência*)."
+  },
+  {
+    "nome": "Amuleto da Saúde",
+    "en": "Amulet of Health",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Enquanto usa este amuleto, seu valor de Constituição passa a ser 19. Não tem efeito se sua Constituição já for 19 ou mais."
+  },
+  {
+    "nome": "Amuleto dos Planos",
+    "en": "Amulet of the Planes",
+    "tipo": "Item maravilhoso",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Com uma ação, você nomeia um lugar que conhece em outro plano de existência e faz um teste de Inteligência CD 15. Se passar, conjura a magia *viagem planar*. Se falhar, você e cada criatura e objeto a até 4,5 m de você vão parar num destino aleatório: role 1d100; com 1–60, um lugar aleatório do plano que você nomeou; com 61–100, um plano de existência determinado aleatoriamente."
+  },
+  {
+    "nome": "Aparato do Caranguejo",
+    "en": "Apparatus of the Crab",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": false,
+    "descricao": "Parece um grande barril de ferro selado, de 250 kg. Achar a trava escondida que abre a escotilha exige um teste de Inteligência (Investigação) CD 20; lá dentro cabem até duas criaturas Médias ou menores, com dez alavancas.\n\nO aparato é um objeto Grande com CA 20, 200 PV, deslocamento 9 m, natação 9 m (0 se as pernas e a cauda estiverem recolhidas) e imunidade a dano psíquico e de veneno. Funciona como veículo e precisa de um piloto. Com a escotilha fechada, é estanque e tem ar para 10 horas de respiração, divididas pelo número de criaturas que respiram lá dentro. Flutua na água e aguenta até 270 m de profundidade; abaixo disso sofre 2d6 de dano de concussão por minuto devido à pressão.\n\nUma criatura no compartimento pode usar uma ação para mover até duas alavancas (para cima ou para baixo); depois de cada uso, a alavanca volta ao neutro.\n\n| Alavanca | Para cima | Para baixo |\n|---|---|---|\n| 1 | Estende pernas e cauda (anda e nada) | Recolhe pernas e cauda (deslocamento 0, sem bônus de deslocamento) |\n| 2 | Abre a janela da frente | Fecha a janela da frente |\n| 3 | Abre as janelas laterais (duas de cada lado) | Fecha as janelas laterais |\n| 4 | Estende duas pinças na frente | Recolhe as pinças |\n| 5 | Cada pinça estendida faz um ataque corpo a corpo: +8 para acertar, alcance 1,5 m, 2d6 de dano de concussão | Cada pinça estendida faz um ataque corpo a corpo: +8 para acertar, alcance 1,5 m; o alvo fica agarrado (CD 15 para escapar) |\n| 6 | Anda ou nada para a frente | Anda ou nada para trás |\n| 7 | Vira 90° à esquerda | Vira 90° à direita |\n| 8 | Os olhos emitem luz plena num raio de 9 m e penumbra por mais 9 m | Apaga a luz |\n| 9 | Afunda até 6 m num líquido | Sobe até 6 m num líquido |\n| 10 | Destrava e abre a escotilha traseira | Fecha e trava a escotilha traseira |"
+  },
+  {
+    "nome": "Armadura +1, +2 ou +3",
+    "en": "Armor, +1, +2, or +3",
+    "tipo": "Armadura (leve, média ou pesada)",
+    "raridade": "varia",
+    "sintonia": false,
+    "descricao": "Enquanto veste esta armadura, você recebe o bônus na CA, além da CA normal da armadura.\n\n| Bônus | Raridade |\n|---|---|\n| +1 | raro |\n| +2 | muito raro |\n| +3 | lendário |"
+  },
+  {
+    "nome": "Armadura da Invulnerabilidade",
+    "en": "Armor of Invulnerability",
+    "tipo": "Armadura (placas)",
+    "raridade": "lendário",
+    "sintonia": true,
+    "descricao": "Enquanto a veste, você tem resistência a dano não mágico. Além disso, com uma ação você fica imune a dano não mágico por 10 minutos ou até tirar a armadura. Esse uso especial só pode ser repetido a partir do amanhecer seguinte."
+  },
+  {
+    "nome": "Armadura de Adamante",
+    "en": "Adamantine Armor",
+    "tipo": "Armadura (média ou pesada, exceto gibão de peles)",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Reforçada com adamante, uma das substâncias mais duras que existem. Enquanto você a veste, qualquer acerto crítico contra você se torna um acerto normal."
+  },
+  {
+    "nome": "Armadura de Escamas de Dragão",
+    "en": "Dragon Scale Mail",
+    "tipo": "Armadura (brunea)",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Feita das escamas de um tipo de dragão. Enquanto a veste, você recebe +1 na CA, tem vantagem em salvaguardas contra a Presença Aterradora e as armas de sopro de dragões, e tem resistência a um tipo de dano conforme o dragão.\n\nAlém disso, com uma ação você concentra os sentidos e descobre a distância e a direção do dragão mais próximo, a até 48 km, do mesmo tipo da armadura. Esse uso só pode ser repetido a partir do amanhecer seguinte.\n\n| Dragão | Resistência |\n|---|---|\n| Azul | Elétrico |\n| Branco | Frio |\n| Bronze | Elétrico |\n| Cobre | Ácido |\n| Latão | Fogo |\n| Negro | Ácido |\n| Ouro | Fogo |\n| Prata | Frio |\n| Verde | Veneno |\n| Vermelho | Fogo |"
+  },
+  {
+    "nome": "Armadura de Placas Anã",
+    "en": "Dwarven Plate",
+    "tipo": "Armadura (placas)",
+    "raridade": "muito raro",
+    "sintonia": false,
+    "descricao": "Enquanto a veste, você recebe +2 na CA. Além disso, se um efeito o mover contra a sua vontade pelo chão, você pode usar sua reação para reduzir essa distância em até 3 m."
+  },
+  {
+    "nome": "Armadura de Resistência",
+    "en": "Armor of Resistance",
+    "tipo": "Armadura (leve, média ou pesada)",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Enquanto a veste, você tem resistência a um tipo de dano, escolhido pelo Mestre ou sorteado:\n\n| d10 | Tipo de dano |\n|---|---|\n| 1 | Ácido |\n| 2 | Frio |\n| 3 | Fogo |\n| 4 | Energia |\n| 5 | Elétrico |\n| 6 | Necrótico |\n| 7 | Veneno |\n| 8 | Psíquico |\n| 9 | Radiante |\n| 10 | Trovejante |"
+  },
+  {
+    "nome": "Armadura de Vulnerabilidade",
+    "en": "Armor of Vulnerability",
+    "tipo": "Armadura (placas)",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Enquanto a veste, você tem resistência a um dos tipos de dano concussão, cortante ou perfurante (escolhido pelo Mestre ou sorteado).\n\n**Maldição.** A armadura é amaldiçoada, o que só se revela quando *identificar* é usada nela ou quando você se sintoniza com ela. Uma vez sintonizado, você não consegue desfazer a sintonia nem tirar a armadura, a não ser que seja alvo de *remover maldição* ou magia similar. Enquanto amaldiçoado, você tem vulnerabilidade aos outros dois tipos de dano dessa lista."
+  },
+  {
+    "nome": "Armadura Demoníaca",
+    "en": "Demon Armor",
+    "tipo": "Armadura (placas)",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Enquanto a veste, você recebe +1 na CA e entende e fala abissal. As manoplas com garras tornam seus ataques desarmados com as mãos armas mágicas que causam dano cortante, com +1 nas jogadas de ataque e de dano e dado de dano d8.\n\n**Maldição.** Uma vez vestida, você não consegue tirá-la a menos que seja alvo de *remover maldição* ou magia similar. Enquanto a veste, você tem desvantagem em jogadas de ataque contra demônios e em salvaguardas contra as magias e habilidades especiais deles."
+  },
+  {
+    "nome": "Baralho das Ilusões",
+    "en": "Deck of Illusions",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Caixa com um baralho de cartas de pergaminho. Completo, tem 34 cartas; encontrado como tesouro, costuma faltar 1d20 − 1 cartas. A magia só funciona se as cartas forem tiradas ao acaso.\n\nCom uma ação, você tira uma carta aleatória e a joga no chão num ponto a até 9 m. Sobre ela surge a ilusão de uma ou mais criaturas, de tamanho certo e comportamento realista, mas incapaz de causar dano. Enquanto estiver a até 36 m da ilusão e puder vê-la, você pode usar uma ação para movê-la para qualquer ponto a até 9 m da carta. Qualquer interação física revela a ilusão, pois objetos a atravessam; quem usar uma ação para examiná-la percebe a ilusão com um teste de Inteligência (Investigação) CD 15, e ela passa a parecer translúcida para essa criatura. A ilusão dura até a carta ser movida ou a ilusão ser dissipada; então a imagem some da carta, que não pode mais ser usada.\n\n| Carta | Ilusão |\n|---|---|\n| Ás de copas | Dragão vermelho |\n| Rei de copas | Cavaleiro e quatro guardas |\n| Dama de copas | Súcubo ou íncubo |\n| Valete de copas | Druida |\n| Dez de copas | Gigante das nuvens |\n| Nove de copas | Ettin |\n| Oito de copas | Bugbear |\n| Dois de copas | Goblin |\n| Ás de ouros | Observador |\n| Rei de ouros | Arquimago e aprendiz de mago |\n| Dama de ouros | Bruxa noturna |\n| Valete de ouros | Assassino |\n| Dez de ouros | Gigante do fogo |\n| Nove de ouros | Oni |\n| Oito de ouros | Gnoll |\n| Dois de ouros | Kobold |\n| Ás de espadas | Lich |\n| Rei de espadas | Sacerdote e dois acólitos |\n| Dama de espadas | Medusa |\n| Valete de espadas | Veterano |\n| Dez de espadas | Gigante do gelo |\n| Nove de espadas | Troll |\n| Oito de espadas | Hobgoblin |\n| Dois de espadas | Goblin |\n| Ás de paus | Golem de ferro |\n| Rei de paus | Capitão bandido e três bandidos |\n| Dama de paus | Erínia |\n| Valete de paus | Berserker |\n| Dez de paus | Gigante da colina |\n| Nove de paus | Ogro |\n| Oito de paus | Orc |\n| Dois de paus | Kobold |\n| Coringas (2) | Você (o dono do baralho) |"
+  },
+  {
+    "nome": "Baralho das Muitas Coisas",
+    "en": "Deck of Many Things",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": false,
+    "descricao": "Caixa ou bolsa com cartas de marfim ou pergaminho. A maioria (75%) tem só 13 cartas; as demais têm 22.\n\nAntes de tirar, você declara quantas cartas vai tirar e as tira ao acaso; cartas além desse número não têm efeito. Cada carta faz efeito assim que é tirada, e você deve tirar a próxima no máximo 1 hora depois da anterior; se não tirar todas as declaradas, as restantes saltam do baralho sozinhas e fazem efeito todas de uma vez. A carta tirada some e, exceto o Tolo e o Bobo da Corte, reaparece no baralho (é possível tirar a mesma carta de novo).\n\nCartas marcadas com * só existem no baralho de 22.\n\n| Carta | Efeito |\n|---|---|\n| Sol (rei de ouros) | Você ganha 50.000 XP e um item maravilhoso (sorteado pelo Mestre) aparece em suas mãos. |\n| Lua (dama de ouros) | Você pode conjurar *desejo* 1d3 vezes. |\n| Estrela (valete de ouros) | Aumente um valor de atributo em 2; pode passar de 20, mas não de 24. |\n| Cometa* (dois de ouros) | Se você derrotar sozinho o próximo monstro ou grupo hostil que encontrar, ganha XP suficiente para subir um nível. |\n| Vizir* (ás de ouros) | Dentro de um ano, você pode fazer uma pergunta em meditação e receber uma resposta verdadeira, com a sabedoria para aplicá-la. |\n| Trono (rei de copas) | Você ganha proficiência em Persuasão com o dobro do bônus de proficiência e se torna dono legítimo de uma pequena fortaleza, hoje ocupada por monstros que você precisa expulsar. |\n| Chave (dama de copas) | Uma arma mágica rara ou melhor, com a qual você tem proficiência, aparece em suas mãos (o Mestre escolhe). |\n| Cavaleiro (valete de copas) | Um guerreiro de 4º nível da sua raça surge a até 9 m e serve você lealmente até a morte. Você o controla. |\n| Gema* (dois de copas) | Aparecem aos seus pés 25 joias de 2.000 po cada ou 50 gemas de 1.000 po cada. |\n| Destino* (ás de copas) | Você pode desfazer um acontecimento como se nunca tivesse ocorrido, na hora ou a qualquer momento antes de morrer. |\n| Vazio (rei de paus) | Sua alma é arrancada e presa num objeto num lugar escolhido pelo Mestre, guardado por seres poderosos; seu corpo fica incapacitado. *Desejo* não restaura a alma, mas revela onde está o objeto. Você não tira mais cartas. |\n| Chamas (dama de paus) | Um diabo poderoso se torna seu inimigo e busca sua ruína até um de vocês morrer. |\n| Caveira (valete de paus) | Surge a até 3 m um avatar da morte que ataca você; você deve lutar sozinho. Quem tentar ajudar invoca seu próprio avatar. Quem for morto pelo avatar não pode ser trazido de volta à vida. |\n| Garras* (ás de paus) | Todo item mágico que você veste ou carrega se desintegra; artefatos não são destruídos, mas desaparecem. |\n| Idiota* (dois de paus) | Sua Inteligência diminui 1d4 + 1 permanentemente (mínimo 1). Você pode tirar uma carta a mais além das declaradas. |\n| Ruína (rei de espadas) | Você perde toda a riqueza que tem, exceto itens mágicos: bens portáteis somem; terras, prédios e negócios se perdem e os documentos de posse desaparecem. |\n| Euríale (dama de espadas) | Uma maldição impõe −2 em todas as suas salvaguardas. Só um deus ou a carta Destino a remove. |\n| Ladino (valete de espadas) | Um PdM escolhido pelo Mestre se torna seu inimigo secreto. Só *desejo* ou intervenção divina acaba com essa hostilidade. |\n| Masmorra* (ás de espadas) | Você some, preso em animação suspensa numa esfera extradimensional; seus pertences ficam para trás. Nenhuma adivinhação o localiza, mas *desejo* revela onde está a prisão. Você não tira mais cartas. |\n| Equilíbrio* (dois de espadas) | Sua tendência se inverte: leal vira caótico, bom vira mau e vice-versa. Sem efeito se você for neutro ou sem tendência. |\n| Bobo da Corte (coringa) | Você ganha 10.000 XP ou pode tirar duas cartas a mais além das declaradas. |\n| Tolo* (coringa) | Você perde 10.000 XP (sem perder nível), descarta esta carta e tira outra; as duas contam como uma das declaradas. |\n\nO avatar da morte é um esqueleto espectral de manto negro com uma foice; luta até você morrer ou ele chegar a 0 PV."
+  },
+  {
+    "nome": "Bola de Cristal",
+    "en": "Crystal Ball",
+    "tipo": "Item maravilhoso",
+    "raridade": "varia",
+    "sintonia": true,
+    "descricao": "Esfera de cristal de uns 15 cm de diâmetro. Enquanto a toca, você pode conjurar *vidência* (CD 17) com ela. A bola comum é **muito rara**. Existem variantes **lendárias**, que somam um poder enquanto a *vidência* estiver ativa:\n\n- **de Leitura Mental:** com uma ação, você conjura *detectar pensamentos* (CD 17) em criaturas que você veja a até 9 m do sensor. Não precisa de concentração, mas termina quando a *vidência* termina.\n- **de Telepatia:** você se comunica telepaticamente com criaturas que veja a até 9 m do sensor. Também pode usar uma ação para conjurar *sugestão* (CD 17) numa delas através do sensor (sem concentração, termina com a *vidência*); esse uso só pode ser repetido a partir do amanhecer seguinte.\n- **da Visão Verdadeira:** você tem visão verdadeira num raio de 36 m centrado no sensor."
+  },
+  {
+    "nome": "Bolsa de Truques",
+    "en": "Bag of Tricks",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Bolsa de pano que parece vazia, mas tem pequenas bolinhas felpudas no fundo. Existem três cores: cinza, ferrugem e castanha.\n\nCom uma ação, você tira uma bolinha e a arremessa a até 6 m; ao tocar o chão ela vira um animal, sorteado com 1d8 na tabela da cor da bolsa. A criatura some no amanhecer seguinte ou quando chega a 0 PV. Ela é amistosa com você e seus companheiros e age no seu turno. Com uma ação bônus, você decide como ela se move e qual ação ela faz no próximo turno, ou dá ordens gerais; sem ordens, ela só se defende. Depois de tirar três bolinhas, a bolsa só volta a funcionar no amanhecer seguinte.\n\n| d8 | Cinza | Ferrugem | Castanha |\n|---|---|---|---|\n| 1 | Doninha | Rato | Chacal |\n| 2 | Rato gigante | Coruja | Macaco |\n| 3 | Texugo | Mastim | Babuíno |\n| 4 | Javali | Bode | Bico-de-machado |\n| 5 | Pantera | Bode gigante | Urso-negro |\n| 6 | Texugo gigante | Javali gigante | Doninha gigante |\n| 7 | Urso-pardo | Leão | Hiena gigante |\n| 8 | Alce gigante | Urso-pardo | Tigre |"
+  },
+  {
+    "nome": "Bolsa Devoradora",
+    "en": "Bag of Devouring",
+    "tipo": "Item maravilhoso",
+    "raridade": "muito raro",
+    "sintonia": false,
+    "descricao": "Parece uma bolsa guarda-tudo, mas é a boca de uma criatura extradimensional. Virar a bolsa do avesso fecha essa boca. A criatura percebe tudo o que entra na bolsa.\n\nMatéria animal ou vegetal colocada inteira lá dentro é devorada e perdida para sempre. Quando parte de uma criatura viva entra na bolsa (como ao enfiar a mão), há 50% de chance de a criatura ser puxada para dentro. Quem está dentro pode usar uma ação para tentar escapar com um teste de Força CD 15; outra criatura pode usar uma ação para enfiar a mão e puxá-la, com um teste de Força CD 20 (se não for puxada também). Qualquer criatura que comece o turno dentro da bolsa é devorada e seu corpo é destruído.\n\nObjetos inanimados podem ser guardados (cabe cerca de 30 litros), mas uma vez por dia a bolsa engole tudo o que tem dentro e cospe em outro plano de existência, à escolha do Mestre. Se a bolsa for perfurada ou rasgada, é destruída e o conteúdo vai para um lugar aleatório do Plano Astral."
+  },
+  {
+    "nome": "Bolsa Guarda-Tudo",
+    "en": "Bag of Holding",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "O interior é um espaço extradimensional bem maior que a bolsa: cerca de 1,8 m³, até 250 kg. A bolsa pesa sempre 7,5 kg, não importa o que tenha dentro. Pegar um item lá de dentro exige uma ação.\n\nSe for sobrecarregada, perfurada ou rasgada, ela se rompe e é destruída, e o conteúdo se espalha pelo Plano Astral. Se for virada do avesso, o conteúdo cai intacto, mas é preciso desvirá-la antes de usá-la de novo. Uma criatura que respira, colocada lá dentro, sobrevive por um número de minutos igual a 10 dividido pelo número de criaturas lá dentro (mínimo 1 minuto); depois começa a sufocar.\n\nColocar a bolsa dentro de outro espaço extradimensional (mochila prática, buraco portátil ou similar), ou vice-versa, destrói os dois itens na hora e abre um portal para o Plano Astral naquele ponto. Toda criatura a até 3 m é sugada para um lugar aleatório do Plano Astral, e o portal se fecha. Ele é de mão única e não pode ser reaberto."
+  },
+  {
+    "nome": "Botas da Levitação",
+    "en": "Boots of Levitation",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Enquanto calça estas botas, você pode conjurar *levitação* em si mesmo à vontade."
+  },
+  {
+    "nome": "Botas da Velocidade",
+    "en": "Boots of Speed",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Com uma ação bônus, você bate os calcanhares para ativar ou desativar as botas. Ativas, elas dobram seu deslocamento de caminhada, e qualquer criatura que fizer um ataque de oportunidade contra você tem desvantagem.\n\nDepois de ficarem ativas por um total de 10 minutos, a magia para de funcionar até você terminar um descanso longo."
+  },
+  {
+    "nome": "Botas das Terras Invernais",
+    "en": "Boots of the Winterlands",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Botas forradas de pele. Enquanto as calça, você tem resistência a dano de frio, ignora terreno difícil criado por gelo ou neve e tolera temperaturas de até −45 °C sem proteção extra. Com roupas pesadas, tolera até −73 °C."
+  },
+  {
+    "nome": "Botas de Caminhar e Saltar",
+    "en": "Boots of Striding and Springing",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Enquanto calça estas botas, seu deslocamento de caminhada passa a ser 9 m (se não for maior) e não é reduzido por carga nem por armadura pesada. Além disso, você salta três vezes a distância normal, mas não além do movimento que lhe resta."
+  },
+  {
+    "nome": "Botas Élficas",
+    "en": "Boots of Elvenkind",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Enquanto calça estas botas, seus passos não fazem barulho, seja qual for a superfície. Você tem vantagem em testes de Destreza (Furtividade) que dependam de se mover em silêncio."
+  },
+  {
+    "nome": "Braçadeiras de Arquearia",
+    "en": "Bracers of Archery",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Enquanto usa estas braçadeiras, você tem proficiência com arco longo e arco curto e recebe +2 nas jogadas de dano de ataques à distância feitos com essas armas."
+  },
+  {
+    "nome": "Braçadeiras de Defesa",
+    "en": "Bracers of Defense",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Enquanto usa estas braçadeiras, você recebe +2 na CA se não estiver vestindo armadura nem usando escudo."
+  },
+  {
+    "nome": "Braseiro de Comandar Elementais do Fogo",
+    "en": "Brazier of Commanding Fire Elementals",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Braseiro de 2,5 kg. Enquanto há fogo aceso nele, você pode usar uma ação e dizer a palavra de comando para invocar um elemental do fogo, como na magia *conjurar elemental*. O braseiro só pode ser usado de novo a partir do amanhecer seguinte."
+  },
+  {
+    "nome": "Broche do Escudo",
+    "en": "Brooch of Shielding",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Enquanto usa este broche, você tem resistência a dano de energia e imunidade ao dano da magia *mísseis mágicos*."
+  },
+  {
+    "nome": "Capa do Charlatão",
+    "en": "Cape of the Mountebank",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Capa com leve cheiro de enxofre. Enquanto a veste, você pode usar uma ação para conjurar *porta dimensional* com ela; só pode fazer isso de novo a partir do amanhecer seguinte.\n\nAo sumir, você deixa uma nuvem de fumaça e reaparece em outra nuvem no destino. A fumaça deixa de escuridão leve os dois espaços e se dissipa no fim do seu próximo turno; um vento leve ou mais forte a dispersa antes."
+  },
+  {
+    "nome": "Cinto de Força do Gigante",
+    "en": "Belt of Giant Strength",
+    "tipo": "Item maravilhoso",
+    "raridade": "varia",
+    "sintonia": true,
+    "descricao": "Enquanto usa este cinto, seu valor de Força passa a ser o valor dado pelo cinto. Não tem efeito se sua Força já for igual ou maior.\n\n| Tipo | Força | Raridade |\n|---|---|---|\n| Gigante da colina | 21 | raro |\n| Gigante de pedra ou do gelo | 23 | muito raro |\n| Gigante do fogo | 25 | muito raro |\n| Gigante das nuvens | 27 | lendário |\n| Gigante da tempestade | 29 | lendário |"
+  },
+  {
+    "nome": "Cinto dos Anões",
+    "en": "Belt of Dwarvenkind",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Enquanto usa este cinto:\n\n- sua Constituição aumenta 2, até o máximo de 20;\n- você tem vantagem em testes de Carisma (Persuasão) para interagir com anões;\n- você tem vantagem em salvaguardas contra veneno e resistência a dano de veneno;\n- você tem visão no escuro de 18 m;\n- você fala, lê e escreve anão.\n\nAlém disso, enquanto estiver sintonizado, a cada amanhecer há 50% de chance de crescer em você uma barba cheia (se puder ter barba) ou de a sua ficar visivelmente mais espessa."
+  },
+  {
+    "nome": "Conta de Força",
+    "en": "Bead of Force",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Pequena esfera negra (2 cm, 30 g). Com uma ação, você a arremessa a até 18 m. Ao atingir algo, ela explode e é destruída: cada criatura num raio de 3 m faz uma salvaguarda de Destreza CD 15 ou sofre 5d4 de dano de energia.\n\nEm seguida, uma esfera de energia transparente envolve a área por 1 minuto. Criaturas que falharam e estão inteiramente dentro da área ficam presas; as que passaram ou estão parcialmente dentro são empurradas para fora. Só ar respirável atravessa a parede; nenhum ataque ou efeito passa. Uma criatura presa pode usar uma ação para empurrar a parede, rolando a esfera até metade do seu deslocamento. A esfera pode ser carregada e pesa só 0,5 kg, qualquer que seja o conteúdo."
+  },
+  {
+    "nome": "Cubo de Força",
+    "en": "Cube of Force",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Cubo de uns 2,5 cm, com uma marca diferente em cada face. Tem 36 cargas e recupera 1d20 cargas gastas a cada amanhecer.\n\nCom uma ação, você pressiona uma face e gasta as cargas indicadas; se não houver cargas suficientes, nada acontece. Surge uma barreira de energia invisível em forma de cubo com 4,5 m de lado, centrada em você e que se move com você. Ela dura 1 minuto, até você pressionar a sexta face ou até o cubo ficar sem cargas. Pressionar outra face (pagando as cargas) troca o efeito e reinicia a duração. Se a barreira encostar num objeto sólido que não possa atravessá-la, você não consegue se aproximar mais dele.\n\n| Face | Cargas | Efeito |\n|---|---|---|\n| 1 | 1 | Gases, vento e névoa não atravessam a barreira. |\n| 2 | 2 | Matéria inanimada não atravessa; paredes, pisos e tetos atravessam se você quiser. |\n| 3 | 3 | Matéria viva não atravessa. |\n| 4 | 4 | Efeitos de magia não atravessam. |\n| 5 | 5 | Nada atravessa; paredes, pisos e tetos atravessam se você quiser. |\n| 6 | 0 | Desativa a barreira. |\n\nO cubo perde cargas extras quando a barreira é alvo de certas magias ou toca certos efeitos: *desintegrar* 1d12, trompa da destruição 1d10, *criar passagem* 1d6, *rajada prismática* 1d20, *muralha de fogo* 1d4."
+  },
+  {
+    "nome": "Decantador de Água Infinita",
+    "en": "Decanter of Endless Water",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Frasco tampado de 1 kg que parece cheio de água ao ser sacudido. Com uma ação, você tira a tampa e diz uma das três palavras de comando; sai água doce ou salgada (à sua escolha), que para de jorrar no início do seu próximo turno.\n\n- **Riacho:** cerca de 4 litros.\n- **Fonte:** cerca de 19 litros.\n- **Gêiser:** cerca de 115 litros, num jato de 9 m de comprimento por 30 cm de largura. Com uma ação bônus, enquanto segura o decantador, você pode mirar o jato numa criatura que veja a até 9 m: ela faz uma salvaguarda de Força CD 13 ou sofre 1d4 de dano de concussão e fica caída. Em vez de uma criatura, pode mirar num objeto de até 100 kg que ninguém esteja vestindo ou carregando: ele é derrubado ou empurrado até 4,5 m para longe de você."
+  },
+  {
+    "nome": "Defensora",
+    "en": "Defender",
+    "tipo": "Arma (qualquer espada)",
+    "raridade": "lendário",
+    "sintonia": true,
+    "descricao": "Você recebe +3 nas jogadas de ataque e de dano com esta arma.\n\nNa primeira vez em que atacar com a espada em cada um dos seus turnos, você pode transferir parte ou todo o bônus da arma para a sua CA, em vez de usá-lo nos ataques daquele turno. Por exemplo, pode reduzir o bônus de ataque e dano para +1 e ganhar +2 na CA. Os valores ajustados duram até o início do seu próximo turno, e você precisa estar segurando a espada para ganhar o bônus na CA."
+  },
+  {
+    "nome": "Diadema Explosivo",
+    "en": "Circlet of Blasting",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Enquanto usa este diadema, você pode usar uma ação para conjurar *raio ardente* com ele, com bônus de +5 nas jogadas de ataque da magia. Só pode ser usado de novo a partir do amanhecer seguinte."
+  },
+  {
+    "nome": "Escudo Animado",
+    "en": "Animated Shield",
+    "tipo": "Armadura (escudo)",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Enquanto empunha o escudo, você pode usar uma ação bônus e dizer a palavra de comando para animá-lo. Ele salta e flutua no seu espaço, protegendo você como se você o empunhasse e deixando suas mãos livres. Dura 1 minuto, até você encerrar com uma ação bônus ou até você ficar incapacitado ou morrer; então o escudo cai no chão, ou na sua mão se houver uma livre."
+  },
+  {
+    "nome": "Escudo Apanhador de Flechas",
+    "en": "Arrow-Catching Shield",
+    "tipo": "Armadura (escudo)",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Enquanto empunha este escudo, você recebe +2 na CA contra ataques à distância, além do bônus normal do escudo. Além disso, quando um atacante faz um ataque à distância contra um alvo a até 1,5 m de você, você pode usar sua reação para se tornar o alvo do ataque no lugar dele."
+  },
+  {
+    "nome": "Espada Dançante",
+    "en": "Dancing Sword",
+    "tipo": "Arma (qualquer espada)",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Com uma ação bônus, você joga a espada para o alto e diz a palavra de comando. Ela flutua, voa até 9 m e ataca uma criatura à sua escolha a até 1,5 m dela, usando sua jogada de ataque e seu modificador de atributo no dano.\n\nEnquanto ela flutua, você pode usar uma ação bônus para fazê-la voar até 9 m para outro ponto a até 9 m de você e, na mesma ação bônus, atacar uma criatura a até 1,5 m dela.\n\nDepois do quarto ataque, ela voa até 9 m e tenta voltar à sua mão; se você não tiver mão livre, ela cai aos seus pés, e se não tiver caminho livre até você, chega o mais perto que puder e cai. Ela também para de flutuar se você a pegar ou se afastar mais de 9 m dela."
+  },
+  {
+    "nome": "Flecha Assassina",
+    "en": "Arrow of Slaying",
+    "tipo": "Arma (flecha)",
+    "raridade": "muito raro",
+    "sintonia": false,
+    "descricao": "Cada flecha assassina é feita para matar um tipo de criatura ou um grupo específico (ex.: dragões, gigantes, ou até um único indivíduo). Quando uma criatura desse tipo sofre dano da flecha, ela faz uma salvaguarda de Constituição CD 17: sofre 6d10 de dano perfurante extra se falhar, ou metade se passar. Depois de causar o dano extra, a flecha deixa de ser mágica.\n\nExistem outras munições assassinas (virotes, balas de funda) que funcionam da mesma forma."
+  },
+  {
+    "nome": "Gorro de Respirar na Água",
+    "en": "Cap of Water Breathing",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Enquanto usa este gorro debaixo d'água, você pode usar uma ação e dizer a palavra de comando para criar uma bolha de ar ao redor da cabeça, que permite respirar normalmente. A bolha dura até você repetir a palavra de comando, tirar o gorro ou sair da água."
+  },
+  {
+    "nome": "Incensário de Controlar Elementais do Ar",
+    "en": "Censer of Controlling Air Elementals",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Incensário de 0,5 kg. Enquanto há incenso queimando nele, você pode usar uma ação e dizer a palavra de comando para invocar um elemental do ar, como na magia *conjurar elemental*. O incensário só pode ser usado de novo a partir do amanhecer seguinte."
+  },
+  {
+    "nome": "Jarro Alquímico",
+    "en": "Alchemy Jug",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Jarro de cerâmica que parece capaz de conter uns 4 litros e pesa 6 kg. Com uma ação, você nomeia um dos líquidos da tabela e o jarro passa a produzi-lo; depois, você pode destampá-lo com uma ação e despejar até uns 8 litros por minuto. A quantidade máxima abaixo vale por dia: depois de produzir um líquido, o jarro só produz outro (ou mais do mesmo além do máximo) a partir do amanhecer seguinte.\n\n| Líquido | Máximo |\n|---|---|\n| Ácido | 240 ml |\n| Veneno básico | 15 ml |\n| Cerveja | 15 litros |\n| Mel | 4 litros |\n| Maionese | 8 litros |\n| Óleo | 1 litro |\n| Vinagre | 8 litros |\n| Água doce | 30 litros |\n| Água salgada | 45 litros |\n| Vinho | 4 litros |"
+  },
+  {
+    "nome": "Machado do Berserker",
+    "en": "Berserker Axe",
+    "tipo": "Arma (qualquer machado)",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Você recebe +1 nas jogadas de ataque e de dano com esta arma. Enquanto estiver sintonizado, seu máximo de PV aumenta 1 por nível que você tiver.\n\n**Maldição.** Sintonizar-se com o machado amaldiçoa você até ser alvo de *remover maldição* ou magia similar; enquanto isso, você não quer se separar dele e o mantém sempre ao alcance. Você tem desvantagem em jogadas de ataque com outras armas, a menos que não haja inimigos a até 18 m que você veja ou ouça.\n\nSempre que uma criatura hostil causar dano a você com o machado em sua posse, faça uma salvaguarda de Sabedoria CD 15 ou entre em fúria. Na fúria, você usa sua ação em cada turno para atacar com o machado a criatura mais próxima (usando ataques extras, se tiver, e indo para a próxima quando derrubar o alvo; se houver várias, escolha uma aleatoriamente). A fúria dura até o início de um turno seu em que não haja criaturas a até 18 m que você veja ou ouça."
+  },
+  {
+    "nome": "Manto Aracnídeo",
+    "en": "Cloak of Arachnida",
+    "tipo": "Item maravilhoso",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Enquanto veste este manto:\n\n- você tem resistência a dano de veneno;\n- você tem deslocamento de escalada igual ao de caminhada e pode andar em paredes e de cabeça para baixo no teto com as mãos livres;\n- você não fica preso em teias de nenhum tipo e atravessa teias como se fossem terreno difícil.\n\nCom uma ação, você pode conjurar *teia* (CD 13); a teia cobre o dobro da área normal. Esse uso só pode ser repetido a partir do amanhecer seguinte."
+  },
+  {
+    "nome": "Manto da Arraia",
+    "en": "Cloak of the Manta Ray",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Enquanto veste este manto com o capuz levantado, você respira debaixo d'água e tem deslocamento de natação de 18 m. Levantar ou abaixar o capuz exige uma ação."
+  },
+  {
+    "nome": "Manto da Proteção",
+    "en": "Cloak of Protection",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Enquanto veste este manto, você recebe +1 na CA e nas salvaguardas."
+  },
+  {
+    "nome": "Manto do Deslocamento",
+    "en": "Cloak of Displacement",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Enquanto veste este manto, uma ilusão faz você parecer estar num ponto próximo de onde realmente está, e as criaturas têm desvantagem nas jogadas de ataque contra você. Se você sofrer dano, o efeito para até o início do seu próximo turno. O efeito também fica suprimido enquanto você estiver incapacitado, contido ou impedido de se mover."
+  },
+  {
+    "nome": "Manto do Morcego",
+    "en": "Cloak of the Bat",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Enquanto veste este manto, você tem vantagem em testes de Destreza (Furtividade).\n\nEm área de penumbra ou escuridão, segurando as bordas do manto com as duas mãos, você tem deslocamento de voo de 12 m. Se soltar as bordas enquanto voa assim, ou se sair da penumbra ou escuridão, você perde o voo.\n\nTambém em penumbra ou escuridão, você pode usar uma ação para conjurar *metamorfose* em si mesmo, virando um morcego; nessa forma você mantém seus valores de Inteligência, Sabedoria e Carisma. Esse uso só pode ser repetido a partir do amanhecer seguinte."
+  },
+  {
+    "nome": "Manto Élfico",
+    "en": "Cloak of Elvenkind",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Enquanto veste este manto com o capuz levantado, testes de Sabedoria (Percepção) para ver você têm desvantagem, e você tem vantagem em testes de Destreza (Furtividade) para se esconder, pois a cor do manto muda para camuflá-lo. Levantar ou abaixar o capuz exige uma ação."
+  },
+  {
+    "nome": "Martelo Arremessador Anão",
+    "en": "Dwarven Thrower",
+    "tipo": "Arma (martelo de guerra)",
+    "raridade": "muito raro",
+    "sintonia": "por um anão",
+    "descricao": "Você recebe +3 nas jogadas de ataque e de dano com esta arma. Ela tem a propriedade arremesso, com distância normal de 6 m e longa de 18 m. Quando você acerta um ataque à distância com ela, causa 1d8 de dano extra, ou 2d8 se o alvo for um gigante. Logo depois do ataque, a arma volta voando para a sua mão."
+  },
+  {
+    "nome": "Matadora de Dragões",
+    "en": "Dragon Slayer",
+    "tipo": "Arma (qualquer espada)",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Você recebe +1 nas jogadas de ataque e de dano com esta arma. Quando você acerta um dragão com ela, ele sofre 3d6 de dano extra do tipo da arma. Aqui, dragão é qualquer criatura do tipo dragão, incluindo tartarugas-dragão e serpes."
+  },
+  {
+    "nome": "Munição +1, +2 ou +3",
+    "en": "Ammunition, +1, +2, or +3",
+    "tipo": "Arma (qualquer munição)",
+    "raridade": "varia",
+    "sintonia": false,
+    "descricao": "Você recebe o bônus nas jogadas de ataque e de dano feitas com esta munição mágica. Depois de atingir um alvo, a peça de munição deixa de ser mágica.\n\n| Bônus | Raridade |\n|---|---|\n| +1 | incomum |\n| +2 | raro |\n| +3 | muito raro |"
+  },
+  {
+    "nome": "Pó da Secura",
+    "en": "Dust of Dryness",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Pequeno pacote com 1d6 + 4 pitadas de pó. Com uma ação, você espalha uma pitada sobre a água: um cubo de água de até 4,5 m de lado vira uma pastilha do tamanho de uma bola de gude, de peso desprezível, que flutua ou fica perto do ponto onde o pó caiu. Com uma ação, alguém pode quebrar a pastilha numa superfície dura, liberando toda a água absorvida e encerrando a magia daquela pastilha.\n\nUm elemental feito principalmente de água atingido por uma pitada faz uma salvaguarda de Constituição CD 13, sofrendo 10d6 de dano necrótico se falhar ou metade se passar."
+  },
+  {
+    "nome": "Pó de Espirrar e Engasgar",
+    "en": "Dust of Sneezing and Choking",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Pó num pequeno recipiente, idêntico ao pó do desaparecimento; nem *identificar* revela o que é. Com uma ação, você joga um punhado para o alto: você e cada criatura que respira a até 9 m fazem uma salvaguarda de Constituição CD 15 ou passam a espirrar sem parar e não conseguem respirar. Quem falha fica incapacitado e sufocando. Enquanto estiver consciente, a criatura repete a salvaguarda no fim de cada turno dela, encerrando o efeito se passar. *Restauração menor* também encerra o efeito."
+  },
+  {
+    "nome": "Pó do Desaparecimento",
+    "en": "Dust of Disappearance",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Pó guardado num pequeno pacote. Com uma ação, você o joga para o alto: você e cada criatura e objeto a até 3 m de você ficam invisíveis por 2d4 minutos (a mesma duração para todos). O pó é consumido. A invisibilidade de uma criatura termina se ela atacar ou conjurar uma magia."
+  },
+  {
+    "nome": "Portal Cúbico",
+    "en": "Cubic Gate",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": false,
+    "descricao": "Cubo de uns 7,5 cm que pulsa com energia mágica. Cada uma das seis faces está ligada a um plano de existência diferente; uma delas é o Plano Material, e as outras o Mestre define.\n\nO cubo tem 3 cargas e recupera 1d3 cargas gastas a cada amanhecer. Com uma ação, gastando 1 carga, você pode:\n\n- pressionar uma face uma vez para conjurar *portal*, abrindo uma passagem para o plano daquela face; ou\n- pressionar uma face duas vezes para conjurar *viagem planar* (CD 17), levando os alvos para o plano daquela face."
+  },
+  {
+    "nome": "Saco de Feijões",
+    "en": "Bag of Beans",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Saco de pano com 3d4 feijões secos; pesa 250 g mais cerca de 125 g por feijão.\n\nSe você despejar o conteúdo no chão, os feijões explodem num raio de 3 m: cada criatura na área, inclusive você, faz uma salvaguarda de Destreza CD 15, sofrendo 5d4 de dano de fogo se falhar ou metade se passar. O fogo incendeia objetos inflamáveis que não estejam sendo vestidos ou carregados.\n\nSe você tirar um feijão, plantá-lo em terra ou areia e regá-lo, ele produz um efeito 1 minuto depois, a partir do ponto onde foi plantado. O Mestre escolhe ou sorteia:\n\n| d100 | Efeito |\n|---|---|\n| 01 | Brotam 5d4 cogumelos. Quem come um rola um dado: se ímpar, faz salvaguarda de Constituição CD 15 ou sofre 5d6 de dano de veneno e fica envenenado por 1 hora; se par, ganha 5d6 PV temporários por 1 hora. |\n| 02–10 | Um gêiser jorra água, cerveja, suco, chá, vinagre, vinho ou óleo (à escolha do Mestre) a 9 m de altura por 1d12 rodadas. |\n| 11–20 | Brota um ente. Há 50% de chance de ele ser caótico e mau e atacar. |\n| 21–30 | Surge uma estátua de pedra animada, imóvel, com a sua aparência, que faz ameaças a você. Se você a deixar, ela descreve você como um vilão terrível para quem chegar e indica onde você está (ela sempre sabe, se estiver no mesmo plano). Fica inerte após 24 horas. |\n| 31–40 | Surge uma fogueira de chamas azuis que arde por 24 horas ou até ser apagada. |\n| 41–50 | Brotam 1d6 + 6 fungos guinchadores. |\n| 51–60 | Saem 1d4 + 8 sapos cor-de-rosa. Um sapo tocado vira um monstro Grande ou menor à escolha do Mestre, que dura 1 minuto e some numa nuvem de fumaça rosa. |\n| 61–70 | Um bulette faminto sai da terra e ataca. |\n| 71–80 | Cresce uma árvore com 1d10 + 20 frutos: 1d8 deles funcionam como poções mágicas aleatórias e um como veneno ingerido à escolha do Mestre. A árvore some após 1 hora; frutos colhidos mantêm a magia por 30 dias. |\n| 81–90 | Surge um ninho com 1d4 + 3 ovos. Quem come um ovo faz salvaguarda de Constituição CD 20: se passar, seu menor valor de atributo aumenta 1 permanentemente (sorteie entre empatados); se falhar, sofre 10d6 de dano de energia. |\n| 91–99 | Ergue-se uma pirâmide de base quadrada com 18 m de lado. Dentro há um sarcófago com um senhor das múmias; a pirâmide é o covil dele, e o sarcófago guarda um tesouro à escolha do Mestre. |\n| 100 | Brota um pé de feijão gigante, da altura que o Mestre quiser, levando aonde o Mestre decidir (uma vista incrível, o castelo de um gigante das nuvens, outro plano...). |"
+  },
+  {
+    "nome": "Sino da Abertura",
+    "en": "Chime of Opening",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Tubo de metal oco de uns 30 cm (0,5 kg). Com uma ação, você o golpeia apontando para um objeto a até 36 m que possa ser aberto (porta, tampa, cadeado etc.). O sino soa e uma fechadura ou trava do objeto se abre, desde que o som consiga alcançá-lo. Se não houver mais fechaduras ou travas, o próprio objeto se abre.\n\nPode ser usado dez vezes; depois do décimo uso, racha e fica inútil."
+  },
+  {
+    "nome": "Tapete Voador",
+    "en": "Carpet of Flying",
+    "tipo": "Item maravilhoso",
+    "raridade": "muito raro",
+    "sintonia": false,
+    "descricao": "Dizendo a palavra de comando, você faz o tapete flutuar e voar. Ele se move conforme suas ordens faladas, desde que você esteja a até 9 m dele. Existem quatro tamanhos (o Mestre escolhe ou sorteia). O tapete pode carregar até o dobro da capacidade da tabela, mas voa com metade do deslocamento se passar da capacidade normal.\n\n| d100 | Tamanho | Capacidade | Voo |\n|---|---|---|---|\n| 01–20 | 0,9 × 1,5 m | 100 kg | 24 m |\n| 21–55 | 1,2 × 1,8 m | 200 kg | 18 m |\n| 56–80 | 1,5 × 2,1 m | 300 kg | 12 m |\n| 81–100 | 1,8 × 2,7 m | 400 kg | 9 m |"
+  },
+  {
+    "nome": "Tigela de Comandar Elementais da Água",
+    "en": "Bowl of Commanding Water Elementals",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Tigela de uns 30 cm de diâmetro (1,5 kg, cerca de 11 litros de capacidade). Enquanto ela está cheia de água, você pode usar uma ação e dizer a palavra de comando para invocar um elemental da água, como na magia *conjurar elemental*. A tigela só pode ser usada de novo a partir do amanhecer seguinte."
+  },
+  {
+    "nome": "Vassoura Voadora",
+    "en": "Broom of Flying",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Vassoura de 1,5 kg que funciona como uma vassoura comum até você montar nela e dizer a palavra de comando. Então ela flutua e pode ser montada no ar, com deslocamento de voo de 15 m. Carrega até 200 kg, mas o voo cai para 9 m se levar mais de 100 kg. Ela para de flutuar quando você pousa.\n\nVocê também pode mandá-la sozinha a um lugar a até 1,5 km que você conheça, dizendo a palavra de comando e o nome do lugar. Ela volta quando você diz outra palavra de comando, se ainda estiver a até 1,5 km de você."
+  },
+  {
+    "nome": "Vela da Invocação",
+    "en": "Candle of Invocation",
+    "tipo": "Item maravilhoso",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Vela dedicada a uma divindade, cuja tendência ela compartilha (detectável com *detectar o bem e o mal*). O Mestre escolhe o deus ou sorteia a tendência: 1–2 caótico e mau, 3–4 caótico e neutro, 5–7 caótico e bom, 8–9 neutro e mau, 10–11 neutro, 12–13 neutro e bom, 14–15 leal e mau, 16–17 leal e neutro, 18–20 leal e bom (1d20).\n\nAcender a vela exige uma ação. Ela queima por até 4 horas no total e então é destruída; você pode apagá-la antes, descontando o tempo usado em incrementos de 1 minuto. Acesa, ela emite penumbra num raio de 9 m. Qualquer criatura nessa luz com a mesma tendência da vela tem vantagem em jogadas de ataque, salvaguardas e testes de atributo. Um clérigo ou druida na luz, com a mesma tendência, pode conjurar magias de 1º nível que tenha preparadas sem gastar espaços de magia (o efeito é sempre o de 1º nível).\n\nAlternativamente, ao acendê-la pela primeira vez, você pode conjurar *portal* com ela, o que destrói a vela."
+  }
+]

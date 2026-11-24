@@ -1,0 +1,938 @@
+[
+  {
+    "nome": "Anel da Ação Livre",
+    "en": "Ring of Free Action",
+    "tipo": "Anel",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Enquanto usa este anel, terreno difícil não custa movimento extra. Além disso, magia não pode reduzir seu deslocamento nem deixá-lo paralisado ou contido."
+  },
+  {
+    "nome": "Anel da Evasão",
+    "en": "Ring of Evasion",
+    "tipo": "Anel",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "O anel tem 3 cargas e recupera 1d3 cargas gastas todo dia ao amanhecer. Quando você falha em uma salvaguarda de Destreza usando o anel, pode usar sua reação e gastar 1 carga para transformar a falha em sucesso."
+  },
+  {
+    "nome": "Anel da Invisibilidade",
+    "en": "Ring of Invisibility",
+    "tipo": "Anel",
+    "raridade": "lendário",
+    "sintonia": true,
+    "descricao": "Usando o anel, você pode gastar uma ação para ficar invisível. Você continua invisível até remover o anel, atacar, conjurar uma magia ou usar uma ação bônus para voltar a ficar visível."
+  },
+  {
+    "nome": "Anel da Natação",
+    "en": "Ring of Swimming",
+    "tipo": "Anel",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Você tem deslocamento de natação de 12 m enquanto usa este anel."
+  },
+  {
+    "nome": "Anel da Regeneração",
+    "en": "Ring of Regeneration",
+    "tipo": "Anel",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Enquanto usa o anel, você recupera 1d6 PV a cada 10 minutos, desde que tenha pelo menos 1 PV. Se perder uma parte do corpo, ela volta a crescer e fica plenamente funcional após 1d6 + 1 dias, contanto que você mantenha pelo menos 1 PV durante todo esse período."
+  },
+  {
+    "nome": "Anel da Telecinésia",
+    "en": "Ring of Telekinesis",
+    "tipo": "Anel",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Usando o anel, você pode conjurar a magia **telecinésia** à vontade, mas só pode afetar objetos que não estejam sendo vestidos ou carregados."
+  },
+  {
+    "nome": "Anel da Visão de Raio X",
+    "en": "Ring of X-ray Vision",
+    "tipo": "Anel",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Usando o anel, você pode gastar uma ação e dizer a palavra de comando para enxergar dentro e através de matéria sólida por 1 minuto, num raio de 9 m. Objetos sólidos nesse raio parecem transparentes e não bloqueiam a luz. A visão atravessa até 30 cm de pedra, 2,5 cm de metal comum ou 90 cm de madeira ou terra; materiais mais espessos ou uma fina folha de chumbo a bloqueiam.\n\nSe usar o anel de novo antes de terminar um descanso longo, você precisa passar em uma salvaguarda de Constituição CD 15 ou ganha um nível de exaustão."
+  },
+  {
+    "nome": "Anel das Estrelas Cadentes",
+    "en": "Ring of Shooting Stars",
+    "tipo": "Anel",
+    "raridade": "muito raro",
+    "sintonia": "ao ar livre, à noite",
+    "descricao": "Usando o anel em penumbra ou escuridão, você pode conjurar **luzes dançantes** e **luz** à vontade (cada uma exige uma ação). O anel tem 6 cargas e recupera 1d6 cargas gastas ao amanhecer.\n\n- **Fogo das fadas.** Ação e 1 carga: conjura a magia **fogo das fadas**.\n- **Relâmpago globular.** Ação e 2 cargas: cria de uma a quatro esferas elétricas de 90 cm de diâmetro em espaços desocupados que você possa ver a até 36 m. Elas duram enquanto você mantiver a concentração (como em uma magia), por até 1 minuto, e emitem penumbra num raio de 9 m. Com uma ação bônus, você move cada esfera até 9 m, sem afastá-la mais de 36 m de você. Quando uma criatura que não seja você chega a até 1,5 m de uma esfera, ela descarrega e some; a criatura faz uma salvaguarda de Destreza CD 15 e, se falhar, sofre dano elétrico conforme o número de esferas criadas: 4 esferas, 2d4; 3 esferas, 2d6; 2 esferas, 5d4; 1 esfera, 4d12.\n- **Estrelas cadentes.** Ação e 1 a 3 cargas: para cada carga, uma centelha voa até um ponto que você possa ver a até 18 m. Cada criatura num cubo de 4,5 m a partir desse ponto faz uma salvaguarda de Destreza CD 15, sofrendo 5d4 de dano de fogo se falhar, ou metade se passar."
+  },
+  {
+    "nome": "Anel de Armazenar Magias",
+    "en": "Ring of Spell Storing",
+    "tipo": "Anel",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "O anel guarda magias conjuradas nele, até um total de 5 níveis. Quando encontrado, contém 1d6 − 1 níveis de magias armazenadas, à escolha do Mestre.\n\nQualquer criatura pode conjurar uma magia de 1º a 5º nível no anel tocando-o durante a conjuração; a magia não produz efeito e fica armazenada, ocupando níveis iguais ao do espaço usado. Se não houver espaço suficiente, a magia é gasta sem efeito.\n\nUsando o anel, você pode conjurar qualquer magia guardada nele. Ela usa o nível do espaço, a CD de salvaguarda, o bônus de ataque e o atributo de conjuração de quem a armazenou, mas fora isso é tratada como se você a conjurasse. Depois de conjurada, a magia libera o espaço no anel."
+  },
+  {
+    "nome": "Anel de Caminhar na Água",
+    "en": "Ring of Water Walking",
+    "tipo": "Anel",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Enquanto usa este anel, você pode ficar de pé e se mover sobre qualquer superfície líquida como se fosse chão firme."
+  },
+  {
+    "nome": "Anel de Comando Elemental",
+    "en": "Ring of Elemental Command",
+    "tipo": "Anel",
+    "raridade": "lendário",
+    "sintonia": true,
+    "descricao": "O anel está ligado a um dos quatro Planos Elementais (escolha do Mestre). Usando-o, você tem vantagem nas jogadas de ataque contra elementais desse plano, e eles têm desvantagem nas jogadas de ataque contra você. O anel tem 5 cargas e recupera 1d4 + 1 cargas gastas ao amanhecer. As magias conjuradas com ele têm CD 17.\n\nEm todas as versões, você pode gastar 2 cargas para conjurar **dominar monstro** em um elemental do plano ligado. Se ajudar a matar um elemental desse plano enquanto estiver sintonizado, você destrava propriedades extras.\n\n**Ar.** Ao cair, você desce 18 m por rodada e não sofre dano de queda; fala e entende auran. *Extras:* resistência a dano elétrico; deslocamento de voo igual ao de caminhada, podendo pairar; magias: **corrente de relâmpagos** (3 cargas), **lufada de vento** (2) e **muralha de vento** (1).\n\n**Terra.** Terreno difícil de entulho, pedras ou terra não custa movimento extra; fala e entende terran. *Extras:* resistência a dano de ácido; você atravessa terra ou rocha sólida como se fosse terreno difícil (se terminar o turno lá dentro, é expelido para o último espaço desocupado que ocupou); magias: **terremoto** (5 cargas), **moldar rochas** (2) e **muralha de pedra** (3).\n\n**Fogo.** Resistência a dano de fogo; fala e entende ignan. *Extras:* imunidade a dano de fogo; magias: **mãos flamejantes** (1 carga), **bola de fogo** (2) e **muralha de fogo** (3).\n\n**Água.** Você pode ficar de pé e andar sobre líquidos como se fossem chão firme; fala e entende aquan. *Extras:* respira debaixo d'água e tem deslocamento de natação igual ao de caminhada; magias: **criar ou destruir água** (1 carga), **controlar a água** (3), **tempestade de gelo** (2) e **muralha de gelo** (3)."
+  },
+  {
+    "nome": "Anel de Influência Animal",
+    "en": "Ring of Animal Influence",
+    "tipo": "Anel",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "O anel tem 3 cargas e recupera 1d3 cargas gastas todo dia ao amanhecer. Enquanto o usa, você pode gastar 1 carga para conjurar uma destas magias:\n\n- **amizade animal** (CD 13);\n- **medo** (CD 13), afetando apenas feras com Inteligência 3 ou menor;\n- **falar com animais**."
+  },
+  {
+    "nome": "Anel de Invocação de Djinni",
+    "en": "Ring of Djinni Summoning",
+    "tipo": "Anel",
+    "raridade": "lendário",
+    "sintonia": true,
+    "descricao": "Usando o anel, você pode gastar uma ação e dizer a palavra de comando para invocar um djinni específico do Plano Elemental do Ar. Ele surge em um espaço desocupado à sua escolha a até 36 m e permanece enquanto você mantiver a concentração (como em uma magia), por até 1 hora, ou até cair a 0 PV.\n\nO djinni é amigável a você e seus companheiros e obedece aos seus comandos; sem ordens, apenas se defende. Depois que ele parte, não pode ser invocado de novo por 24 horas. Se o djinni morrer, o anel perde a magia."
+  },
+  {
+    "nome": "Anel de Proteção",
+    "en": "Ring of Protection",
+    "tipo": "Anel",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Você recebe +1 de bônus na CA e nas salvaguardas enquanto usa este anel."
+  },
+  {
+    "nome": "Anel de Proteção Mental",
+    "en": "Ring of Mind Shielding",
+    "tipo": "Anel",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Usando o anel, você é imune a magias que permitam a outras criaturas ler seus pensamentos, saber se você está mentindo, descobrir sua tendência ou seu tipo de criatura. Criaturas só se comunicam telepaticamente com você se você permitir.\n\nCom uma ação, você pode deixar o anel invisível até usar outra ação para torná-lo visível, removê-lo ou morrer.\n\nSe morrer usando o anel, sua alma entra nele, a menos que ele já abrigue outra. Você pode ficar no anel ou seguir para a vida após a morte. Enquanto estiver ali, você pode se comunicar telepaticamente com quem usar o anel, e o usuário não pode impedir essa comunicação."
+  },
+  {
+    "nome": "Anel de Queda Suave",
+    "en": "Ring of Feather Falling",
+    "tipo": "Anel",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Quando você cai usando este anel, desce 18 m por rodada e não sofre dano de queda."
+  },
+  {
+    "nome": "Anel de Refletir Magias",
+    "en": "Ring of Spell Turning",
+    "tipo": "Anel",
+    "raridade": "lendário",
+    "sintonia": true,
+    "descricao": "Usando o anel, você tem vantagem em salvaguardas contra magias que tenham apenas você como alvo (não magias de área). Além disso, se tirar 20 na salvaguarda e a magia for de 7º nível ou menor, ela não o afeta e passa a ter como alvo o próprio conjurador, usando o nível do espaço, a CD, o bônus de ataque e o atributo de conjuração dele."
+  },
+  {
+    "nome": "Anel de Resistência",
+    "en": "Ring of Resistance",
+    "tipo": "Anel",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Você tem resistência a um tipo de dano enquanto usa este anel. A gema do anel indica o tipo, escolhido pelo Mestre ou rolado na tabela.\n\n| d10 | Tipo de dano | Gema |\n|---|---|---|\n| 1 | ácido | pérola |\n| 2 | frio | turmalina |\n| 3 | fogo | granada |\n| 4 | energia | safira |\n| 5 | elétrico | citrino |\n| 6 | necrótico | azeviche |\n| 7 | veneno | ametista |\n| 8 | psíquico | jade |\n| 9 | radiante | topázio |\n| 10 | trovejante | espinélio |"
+  },
+  {
+    "nome": "Anel do Calor",
+    "en": "Ring of Warmth",
+    "tipo": "Anel",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Enquanto usa este anel, você tem resistência a dano de frio. Além disso, você e tudo o que veste ou carrega não sofrem mal algum com temperaturas de até cerca de −45 °C."
+  },
+  {
+    "nome": "Anel do Carneiro",
+    "en": "Ring of the Ram",
+    "tipo": "Anel",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "O anel tem 3 cargas e recupera 1d3 cargas gastas ao amanhecer.\n\nCom uma ação, você gasta de 1 a 3 cargas para atacar uma criatura que possa ver a até 18 m: uma cabeça de carneiro espectral faz um ataque mágico à distância com bônus de +7. Se acertar, para cada carga gasta o alvo sofre 2d10 de dano de energia e é empurrado 1,5 m para longe de você.\n\nAlternativamente, com uma ação, você gasta de 1 a 3 cargas para tentar quebrar um objeto que possa ver a até 18 m e que não esteja sendo vestido ou carregado. O anel faz um teste de Força com bônus de +5 por carga gasta."
+  },
+  {
+    "nome": "Anel do Salto",
+    "en": "Ring of Jumping",
+    "tipo": "Anel",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Usando o anel, você pode conjurar a magia **salto** à vontade com uma ação bônus, mas apenas em si mesmo."
+  },
+  {
+    "nome": "Anel dos Três Desejos",
+    "en": "Ring of Three Wishes",
+    "tipo": "Anel",
+    "raridade": "lendário",
+    "sintonia": false,
+    "descricao": "O anel tem 3 cargas. Usando-o, você pode gastar uma ação e 1 carga para conjurar a magia **desejo**. O anel perde a magia quando a última carga é gasta."
+  },
+  {
+    "nome": "Arma +1, +2 ou +3",
+    "en": "Weapon, +1, +2, or +3",
+    "tipo": "Arma (qualquer)",
+    "raridade": "varia",
+    "sintonia": false,
+    "descricao": "Você recebe um bônus nas jogadas de ataque e de dano feitas com esta arma mágica. O bônus depende da raridade:\n\n| Bônus | Raridade |\n|---|---|\n| +1 | incomum |\n| +2 | raro |\n| +3 | muito raro |"
+  },
+  {
+    "nome": "Arma Cruel",
+    "en": "Vicious Weapon",
+    "tipo": "Arma (qualquer)",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Quando você tira 20 na jogada de ataque com esta arma mágica, o alvo sofre 7 de dano extra do mesmo tipo da arma."
+  },
+  {
+    "nome": "Armadura de Placas da Etereidade",
+    "en": "Plate Armor of Etherealness",
+    "tipo": "Armadura (placas)",
+    "raridade": "lendário",
+    "sintonia": true,
+    "descricao": "Enquanto veste esta armadura, você pode usar uma ação e dizer a palavra de comando para receber o efeito da magia **forma etérea**. O efeito dura 10 minutos ou até você remover a armadura ou usar uma ação para dizer a palavra de comando de novo. Depois de usada, essa propriedade só volta no próximo amanhecer."
+  },
+  {
+    "nome": "Asas de Voo",
+    "en": "Wings of Flying",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Usando esta capa, você pode gastar uma ação e dizer a palavra de comando para transformá-la em um par de asas de morcego ou de pássaro nas suas costas por 1 hora, ou até repetir a palavra de comando com uma ação. As asas dão deslocamento de voo de 18 m. Depois que somem, só podem ser usadas de novo após 1d12 horas."
+  },
+  {
+    "nome": "Bastão da Absorção",
+    "en": "Rod of Absorption",
+    "tipo": "Bastão",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Enquanto segura o bastão, você pode usar sua reação para absorver uma magia que tenha apenas você como alvo e não tenha área de efeito. O efeito da magia é anulado, e a energia dela (não a magia em si) fica armazenada no bastão, com o mesmo nível da magia. Ao longo de toda a sua existência, o bastão pode absorver até 50 níveis; depois disso, não absorve mais. Se você for alvo de uma magia que o bastão não pode armazenar, ele não tem efeito sobre ela.\n\nAo se sintonizar, você sabe quantos níveis o bastão já absorveu e quantos ainda guarda. Se for conjurador, pode converter a energia guardada em espaços de magia para conjurar magias que conheça ou tenha preparadas, criando espaços de nível que você já possua, até no máximo o 5º; os níveis usados saem do estoque do bastão. Um bastão que não pode mais absorver e não tem energia sobrando perde a magia."
+  },
+  {
+    "nome": "Bastão da Segurança",
+    "en": "Rod of Security",
+    "tipo": "Bastão",
+    "raridade": "muito raro",
+    "sintonia": false,
+    "descricao": "Com uma ação, você ativa o bastão e é transportado, junto com até 199 criaturas voluntárias que possa ver, para um paraíso num espaço extraplanar. Você escolhe a aparência (um jardim tranquilo, uma taverna animada, um palácio imenso, uma ilha tropical etc.); sempre há comida e água suficientes para todos, e nada dali pode ser levado para fora.\n\nCada criatura pode ficar no paraíso por um número de dias igual a 200 dividido pelo número de criaturas presentes (arredondado para baixo). Lá dentro ninguém envelhece, embora o tempo passe normalmente. Quando o tempo acaba, ou se você usar uma ação para encerrar o efeito, todos reaparecem onde estavam ao ativar o bastão, ou no espaço desocupado mais próximo. O bastão só pode ser usado de novo depois de 10 dias."
+  },
+  {
+    "nome": "Bastão do Alerta",
+    "en": "Rod of Alertness",
+    "tipo": "Bastão",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Enquanto segura o bastão, você tem vantagem em testes de Sabedoria (Percepção) e nas jogadas de iniciativa. Com uma ação, pode conjurar à vontade **detectar o bem e o mal**, **detectar magia**, **detectar veneno e doença** ou **ver o invisível**.\n\n**Aura protetora.** Com uma ação, você finca o cabo do bastão no chão; a cabeça emite luz plena num raio de 18 m e penumbra por mais 18 m. Você e as criaturas amigáveis na luz plena recebem +1 de bônus na CA e nas salvaguardas e percebem a localização de qualquer criatura hostil invisível que também esteja na luz plena. O efeito dura 10 minutos ou até uma criatura usar uma ação para arrancar o bastão do chão. Depois de usada, essa propriedade só volta no próximo amanhecer."
+  },
+  {
+    "nome": "Bastão do Domínio",
+    "en": "Rod of Rulership",
+    "tipo": "Bastão",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Com uma ação, você ergue o bastão e exige obediência de cada criatura à sua escolha que possa ver a até 36 m. Cada alvo deve passar em uma salvaguarda de Sabedoria CD 15 ou fica enfeitiçado por você por 8 horas, tratando-o como um líder de confiança. O efeito termina se você ou seus companheiros ferirem o alvo ou ordenarem algo contrário à natureza dele. Depois de usado, o bastão só funciona de novo no próximo amanhecer."
+  },
+  {
+    "nome": "Bastão do Poder Senhorial",
+    "en": "Rod of Lordly Might",
+    "tipo": "Bastão",
+    "raridade": "lendário",
+    "sintonia": true,
+    "descricao": "Na forma normal, o bastão é uma maça mágica que concede +3 nas jogadas de ataque e de dano. Ele tem seis botões; apertar um deles é uma ação bônus, e o efeito dura até você apertar outro botão ou o mesmo de novo (o que o devolve à forma normal).\n\n- **Botão 1:** surge uma lâmina de fogo e o bastão funciona como uma espada longa Língua de Fogo.\n- **Botão 2:** vira um machado de batalha mágico com +3 nas jogadas de ataque e de dano.\n- **Botão 3:** vira uma lança mágica de 1,8 m com +3 nas jogadas de ataque e de dano.\n- **Botão 4:** vira uma vara de escalada de até 15 m, que se ancora em superfícies tão duras quanto granito e abre degraus a cada 30 cm; aguenta até 2.000 kg.\n- **Botão 5:** vira um aríete de mão que dá +10 nos testes de Força para arrombar portas, barricadas e outras barreiras.\n- **Botão 6:** volta à forma normal e aponta o norte magnético; também revela a profundidade aproximada abaixo do solo ou a altura acima dele.\n\nAs propriedades a seguir podem ser usadas uma vez cada, recuperando no próximo amanhecer:\n\n- **Drenar vida.** Ao acertar uma criatura com ataque corpo a corpo usando o bastão, você a força a fazer uma salvaguarda de Constituição CD 17. Se falhar, ela sofre 4d6 de dano necrótico extra e você recupera PV iguais à metade desse dano.\n- **Paralisar.** Ao acertar uma criatura com ataque corpo a corpo, você a força a fazer uma salvaguarda de Força CD 17. Se falhar, ela fica paralisada por 1 minuto, repetindo a salvaguarda no fim de cada turno dela.\n- **Aterrorizar.** Com uma ação, cada criatura que você possa ver a até 9 m faz uma salvaguarda de Sabedoria CD 17 ou fica amedrontada por você por 1 minuto, repetindo a salvaguarda no fim de cada turno dela."
+  },
+  {
+    "nome": "Botas Aladas",
+    "en": "Winged Boots",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Enquanto calça estas botas, você tem deslocamento de voo igual ao de caminhada. Elas permitem voar por até 4 horas, de uma vez ou em vários voos menores, cada um gastando no mínimo 1 minuto da duração. Se estiver voando quando o tempo acabar, você desce 9 m por rodada até pousar. As botas recuperam 2 horas de voo para cada 12 horas sem uso."
+  },
+  {
+    "nome": "Buraco Portátil",
+    "en": "Portable Hole",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Este pano preto e fino, macio como seda, dobra-se até o tamanho de um lenço e, aberto, forma um círculo de 1,8 m de diâmetro.\n\nCom uma ação, você o abre e o coloca sobre uma superfície sólida, criando um buraco extradimensional cilíndrico de 3 m de profundidade. Como o espaço fica em outro plano, o buraco não pode ser usado para abrir passagens. Quem estiver dentro do buraco aberto pode sair escalando. Com uma ação, você o fecha segurando as bordas e dobrando o pano; o conteúdo fica guardado e o item continua não pesando quase nada.\n\nCriaturas dentro do buraco fechado têm ar para 10 minutos e depois começam a sufocar.\n\nColocar o buraco portátil dentro de um espaço extradimensional (como o de uma Bolsa Guarda-Tudo ou de uma Mochila Prática), ou vice-versa, destrói os dois itens e abre um portal para o Plano Astral. Toda criatura a até 3 m do portal é sugada para um ponto aleatório do Plano Astral, e o portal se fecha; ele é de mão única e não pode ser reaberto."
+  },
+  {
+    "nome": "Cajado da Cura",
+    "en": "Staff of Healing",
+    "tipo": "Cajado",
+    "raridade": "raro",
+    "sintonia": "por um bardo, clérigo ou druida",
+    "descricao": "O cajado tem 10 cargas e recupera 1d6 + 4 cargas gastas ao amanhecer. Se você gastar a última carga, role um d20; com 1, ele some num clarão e se perde para sempre.\n\nCom uma ação, você gasta cargas para conjurar uma destas magias, usando seu atributo de conjuração: **curar ferimentos** (1 carga por nível da magia, até o 4º), **restauração menor** (2 cargas) ou **curar ferimentos em massa** (5 cargas)."
+  },
+  {
+    "nome": "Cajado da Píton",
+    "en": "Staff of the Python",
+    "tipo": "Cajado",
+    "raridade": "incomum",
+    "sintonia": "por um clérigo, druida ou bruxo",
+    "descricao": "Com uma ação, você diz a palavra de comando e joga o cajado no chão a até 3 m: ele vira uma cobra constritora gigante sob seu controle, que age na própria iniciativa. Com uma ação bônus, você diz a palavra de comando de novo e ela volta a ser cajado no espaço que ocupava.\n\nNo seu turno, você pode comandar a cobra mentalmente se ela estiver a até 18 m e você não estiver incapacitado; você decide o que ela faz e para onde vai. Se a cobra cair a 0 PV, ela morre, volta à forma de cajado e o cajado se despedaça. Se voltar a ser cajado antes disso, recupera todos os PV."
+  },
+  {
+    "nome": "Cajado da Víbora",
+    "en": "Staff of the Adder",
+    "tipo": "Cajado",
+    "raridade": "incomum",
+    "sintonia": "por um clérigo, druida ou bruxo",
+    "descricao": "Com uma ação bônus, você diz a palavra de comando e a ponta do cajado vira a cabeça de uma serpente venenosa viva por 1 minuto; outra ação bônus a faz voltar ao normal.\n\nEnquanto animada, você pode atacar corpo a corpo com a cabeça de serpente (alcance de 1,5 m), somando seu bônus de proficiência. Se acertar, o alvo sofre 1d6 de dano perfurante e deve passar em uma salvaguarda de Constituição CD 15 ou sofre 3d6 de dano de veneno.\n\nA cabeça de serpente pode ser atacada enquanto está animada: tem CA 15 e 20 PV. Se cair a 0 PV, o cajado é destruído; se não for destruído, recupera todos os PV ao voltar à forma inanimada."
+  },
+  {
+    "nome": "Cajado do Definhamento",
+    "en": "Staff of Withering",
+    "tipo": "Cajado",
+    "raridade": "raro",
+    "sintonia": "por um clérigo, druida ou bruxo",
+    "descricao": "Este cajado pode ser usado como bordão mágico. Ele tem 3 cargas e recupera 1d3 cargas gastas ao amanhecer.\n\nAo acertar um ataque corpo a corpo com ele, você pode gastar 1 carga para causar 2d10 de dano necrótico extra. Além disso, o alvo deve passar em uma salvaguarda de Constituição CD 15 ou tem desvantagem, por 1 hora, em testes de atributo e salvaguardas de Força ou Constituição."
+  },
+  {
+    "nome": "Cajado do Enfeitiçamento",
+    "en": "Staff of Charming",
+    "tipo": "Cajado",
+    "raridade": "raro",
+    "sintonia": "por um bardo, clérigo, druida, feiticeiro, bruxo ou mago",
+    "descricao": "O cajado tem 10 cargas e recupera 1d8 + 2 cargas gastas ao amanhecer. Se você gastar a última carga, role um d20; com 1, ele vira um bordão comum.\n\nCom uma ação, você gasta 1 carga para conjurar **enfeitiçar pessoa**, **comando** ou **compreender idiomas**, usando sua CD de salvaguarda.\n\nSe falhar em uma salvaguarda contra uma magia de encantamento que tenha só você como alvo, você pode transformar a falha em sucesso; essa propriedade volta no próximo amanhecer. Se passar em uma salvaguarda contra uma magia de encantamento que tenha só você como alvo (com ou sem a ajuda do cajado), pode usar sua reação e gastar 1 carga para devolver a magia ao conjurador, como se você a tivesse conjurado."
+  },
+  {
+    "nome": "Cajado do Enxame de Insetos",
+    "en": "Staff of Swarming Insects",
+    "tipo": "Cajado",
+    "raridade": "raro",
+    "sintonia": "por um bardo, clérigo, druida, feiticeiro, bruxo ou mago",
+    "descricao": "O cajado tem 10 cargas e recupera 1d6 + 4 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, um enxame de insetos devora o cajado e depois se dispersa.\n\n**Magias.** Com uma ação, você gasta cargas para conjurar, usando sua CD: **inseto gigante** (4 cargas) ou **praga de insetos** (5 cargas).\n\n**Nuvem de insetos.** Com uma ação e 1 carga, um enxame de insetos voadores inofensivos se espalha num raio de 9 m ao seu redor por 10 minutos, deixando a área com escuridão densa para todos menos você. O enxame se move com você, sempre centrado em você. Um vento de pelo menos 16 km/h dispersa o enxame e encerra o efeito."
+  },
+  {
+    "nome": "Cajado do Fogo",
+    "en": "Staff of Fire",
+    "tipo": "Cajado",
+    "raridade": "muito raro",
+    "sintonia": "por um druida, feiticeiro, bruxo ou mago",
+    "descricao": "Enquanto segura o cajado, você tem resistência a dano de fogo. Ele tem 10 cargas e recupera 1d6 + 4 cargas gastas ao amanhecer. Se você gastar a última carga, role um d20; com 1, o cajado escurece, vira cinzas e é destruído.\n\nCom uma ação, você gasta cargas para conjurar, usando sua CD de salvaguarda: **mãos flamejantes** (1 carga), **bola de fogo** (3 cargas) ou **muralha de fogo** (4 cargas)."
+  },
+  {
+    "nome": "Cajado do Gelo",
+    "en": "Staff of Frost",
+    "tipo": "Cajado",
+    "raridade": "muito raro",
+    "sintonia": "por um druida, feiticeiro, bruxo ou mago",
+    "descricao": "Enquanto segura o cajado, você tem resistência a dano de frio. Ele tem 10 cargas e recupera 1d6 + 4 cargas gastas ao amanhecer. Se você gastar a última carga, role um d20; com 1, o cajado vira água e é destruído.\n\nCom uma ação, você gasta cargas para conjurar, usando sua CD de salvaguarda: **cone de frio** (5 cargas), **nuvem de névoa** (1 carga), **tempestade de gelo** (4 cargas) ou **muralha de gelo** (4 cargas)."
+  },
+  {
+    "nome": "Cajado do Golpe",
+    "en": "Staff of Striking",
+    "tipo": "Cajado",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Este cajado é um bordão mágico com +3 nas jogadas de ataque e de dano. Ele tem 10 cargas e recupera 1d6 + 4 cargas gastas ao amanhecer; se gastar a última carga, role um d20 e, com 1, ele vira um bordão comum.\n\nAo acertar um ataque corpo a corpo com o cajado, você pode gastar até 3 cargas; para cada carga gasta, o alvo sofre 1d6 de dano de energia extra."
+  },
+  {
+    "nome": "Cajado do Poder",
+    "en": "Staff of Power",
+    "tipo": "Cajado",
+    "raridade": "muito raro",
+    "sintonia": "por um feiticeiro, bruxo ou mago",
+    "descricao": "Este cajado é um bordão mágico com +2 nas jogadas de ataque e de dano. Enquanto o segura, você recebe +2 na CA, nas salvaguardas e nas jogadas de ataque com magia.\n\nO cajado tem 20 cargas e recupera 2d8 + 4 cargas gastas ao amanhecer. Se gastar a última carga, role um d20: com 1, ele mantém o bônus de +2 nos ataques e no dano mas perde as outras propriedades; com 20, recupera 1d8 + 2 cargas.\n\n**Golpe de poder.** Ao acertar um ataque corpo a corpo com o cajado, você pode gastar 1 carga para causar 1d6 de dano de energia extra.\n\n**Magias.** Com uma ação, você gasta cargas para conjurar, usando sua CD e seu bônus de ataque com magia: **cone de frio** (5), **bola de fogo** (versão de 5º nível, 5), **globo de invulnerabilidade** (6), **imobilizar monstro** (5), **levitação** (2), **relâmpago** (versão de 5º nível, 5), **mísseis mágicos** (1), **raio do enfraquecimento** (1) ou **muralha de energia** (5).\n\n**Golpe retributivo.** Com uma ação, você quebra o cajado, que explode numa esfera de 9 m de raio centrada nele. Você tem 50% de chance de ser levado na hora para um plano aleatório, escapando da explosão; senão, sofre dano de energia igual a 16 × as cargas restantes. Cada outra criatura na área faz uma salvaguarda de Destreza CD 17; se falhar, sofre dano de energia conforme a distância (até 3 m: 8 × cargas; 3 a 6 m: 6 × cargas; 6 a 9 m: 4 × cargas), ou metade se passar."
+  },
+  {
+    "nome": "Cajado do Trovão e Relâmpago",
+    "en": "Staff of Thunder and Lightning",
+    "tipo": "Cajado",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Este cajado é um bordão mágico com +2 nas jogadas de ataque e de dano. Ele tem as propriedades abaixo; cada uma pode ser usada uma vez e volta no próximo amanhecer.\n\n- **Relâmpago.** Ao acertar um ataque corpo a corpo com o cajado, o alvo sofre 2d6 de dano elétrico extra.\n- **Trovão.** Ao acertar um ataque corpo a corpo, o cajado solta um estrondo audível a 90 m; o alvo deve passar em uma salvaguarda de Constituição CD 17 ou fica atordoado até o fim do seu próximo turno.\n- **Descarga elétrica.** Com uma ação, um raio sai da ponta do cajado numa linha de 1,5 m de largura por 36 m de comprimento. Cada criatura na linha faz uma salvaguarda de Destreza CD 17, sofrendo 9d6 de dano elétrico se falhar, ou metade se passar.\n- **Trovoada.** Com uma ação, o cajado solta um trovão ensurdecedor audível a 180 m. Cada criatura a até 18 m de você (exceto você) faz uma salvaguarda de Constituição CD 17; se falhar, sofre 2d6 de dano trovejante e fica surda por 1 minuto; se passar, sofre metade e não fica surda.\n- **Trovão e relâmpago.** Com uma ação, você usa a descarga elétrica e a trovoada ao mesmo tempo, sem gastar os usos diários delas, apenas o desta propriedade."
+  },
+  {
+    "nome": "Cajado dos Bosques",
+    "en": "Staff of the Woodlands",
+    "tipo": "Cajado",
+    "raridade": "raro",
+    "sintonia": "por um druida",
+    "descricao": "Este cajado é um bordão mágico com +2 nas jogadas de ataque e de dano. Enquanto o segura, você recebe +2 nas jogadas de ataque com magia.\n\nO cajado tem 10 cargas e recupera 1d6 + 4 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, ele perde as propriedades e vira um bordão comum.\n\n**Magias.** Com uma ação, gastando cargas e usando sua CD: **amizade animal** (1), **despertar** (5), **pele de árvore** (2), **localizar animais ou plantas** (2), **falar com animais** (1), **falar com plantas** (3) ou **muralha de espinhos** (6). Você também pode conjurar **passos sem pegadas** à vontade, sem gastar cargas.\n\n**Forma de árvore.** Com uma ação, você finca uma ponta do cajado em solo fértil e gasta 1 carga para transformá-lo em uma árvore saudável de 18 m de altura, com tronco de 1,5 m de diâmetro e copa de 6 m de raio. A árvore parece comum, mas **detectar magia** revela uma leve aura de transmutação. Tocando a árvore e usando outra ação para dizer a palavra de comando, você a devolve à forma de cajado; quem estiver na árvore cai."
+  },
+  {
+    "nome": "Cajado dos Magos",
+    "en": "Staff of the Magi",
+    "tipo": "Cajado",
+    "raridade": "lendário",
+    "sintonia": "por um feiticeiro, bruxo ou mago",
+    "descricao": "Este cajado é um bordão mágico com +2 nas jogadas de ataque e de dano. Enquanto o segura, você recebe +2 nas jogadas de ataque com magia.\n\nO cajado tem 50 cargas e recupera 4d6 + 2 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 20, ele recupera 1d12 + 1 cargas.\n\n**Absorver magia.** Enquanto segura o cajado, você tem vantagem em salvaguardas contra magias. Além disso, pode usar sua reação quando outra criatura conjurar uma magia que tenha apenas você como alvo: o cajado absorve a magia, anulando o efeito, e ganha cargas iguais ao nível dela. Se isso levar o total acima de 50, o cajado explode como no golpe retributivo.\n\n**Magias.** Com uma ação, gastando cargas e usando sua CD e seu atributo de conjuração: **conjurar elemental** (7), **dissipar magia** (3), **bola de fogo** (versão de 7º nível, 7), **esfera flamejante** (2), **tempestade de gelo** (4), **invisibilidade** (2), **arrombar** (2), **relâmpago** (versão de 7º nível, 7), **criar passagem** (5), **viagem planar** (7), **telecinésia** (5), **muralha de fogo** (4) ou **teia** (2). À vontade, sem gastar cargas: **tranca arcana**, **detectar magia**, **aumentar/reduzir**, **luz**, **mão mágica** e **proteção contra o bem e o mal**.\n\n**Golpe retributivo.** Com uma ação, você quebra o cajado, que explode numa esfera de 9 m de raio centrada nele. Você tem 50% de chance de ser levado na hora para um plano aleatório, escapando da explosão; senão, sofre dano de energia igual a 16 × as cargas restantes. Cada outra criatura na área faz uma salvaguarda de Destreza CD 17; se falhar, sofre dano de energia conforme a distância (até 3 m: 8 × cargas; 3 a 6 m: 6 × cargas; 6 a 9 m: 4 × cargas), ou metade se passar."
+  },
+  {
+    "nome": "Cimitarra da Velocidade",
+    "en": "Scimitar of Speed",
+    "tipo": "Arma (cimitarra)",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Você recebe +2 nas jogadas de ataque e de dano feitas com esta arma mágica. Além disso, em cada um dos seus turnos, pode fazer um ataque com ela usando uma ação bônus."
+  },
+  {
+    "nome": "Cola Soberana",
+    "en": "Sovereign Glue",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": false,
+    "descricao": "Esta substância branca e viscosa cria uma ligação permanente entre dois objetos quaisquer. Precisa ser guardada em um pote ou frasco revestido por dentro com Óleo Escorregadio. Quando encontrado, o recipiente tem 1d6 + 1 onças (cerca de 30 g cada).\n\nCada onça cobre uma área de cerca de 30 cm × 30 cm. A cola leva 1 minuto para endurecer; depois disso, a ligação só pode ser desfeita com Solvente Universal, Óleo da Etereidade ou a magia **desejo**."
+  },
+  {
+    "nome": "Corda de Escalada",
+    "en": "Rope of Climbing",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Esta corda de seda tem 18 m de comprimento, pesa 1,5 kg e aguenta até 1.500 kg. Segurando uma ponta, você usa uma ação para dizer a palavra de comando e animá-la. Com uma ação bônus, você manda a outra ponta seguir até um destino escolhido; ela avança 3 m no turno da ordem e 3 m em cada um dos seus turnos seguintes, até chegar, atingir o comprimento máximo ou você mandá-la parar. Você também pode mandá-la se prender firmemente a um objeto, se soltar, se enrolar para ser carregada, ou dar ou desfazer nós.\n\nCom nós (um a cada 30 cm), a corda encolhe para 15 m e dá vantagem nos testes para escalá-la. A corda tem CA 20 e 20 PV, recupera 1 PV a cada 5 minutos enquanto tiver pelo menos 1 PV e é destruída se cair a 0 PV."
+  },
+  {
+    "nome": "Corda do Enredamento",
+    "en": "Rope of Entanglement",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Esta corda tem 9 m de comprimento e pesa 1,5 kg. Segurando uma ponta, você usa uma ação para dizer a palavra de comando, e a outra ponta dispara para enrolar uma criatura que você possa ver a até 6 m. O alvo deve passar em uma salvaguarda de Destreza CD 15 ou fica contido. Você o solta com uma ação bônus, dizendo uma segunda palavra de comando.\n\nO alvo contido pode usar uma ação para fazer um teste de Força ou Destreza (à escolha dele) CD 15, libertando-se com um sucesso. A corda tem CA 20 e 20 PV, recupera 1 PV a cada 5 minutos enquanto tiver pelo menos 1 PV e é destruída se cair a 0 PV."
+  },
+  {
+    "nome": "Escaravelho de Proteção",
+    "en": "Scarab of Protection",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": true,
+    "descricao": "Se você segurar este medalhão em forma de escaravelho por 1 rodada, uma inscrição surge revelando sua natureza mágica. Enquanto o escaravelho estiver com você, você tem vantagem em salvaguardas contra magias.\n\nEle tem 12 cargas. Se você falhar em uma salvaguarda contra uma magia de necromancia ou contra um efeito nocivo vindo de um morto-vivo, pode usar sua reação e gastar 1 carga para transformar a falha em sucesso. O escaravelho vira pó quando a última carga é gasta."
+  },
+  {
+    "nome": "Escudo +1, +2 ou +3",
+    "en": "Shield, +1, +2, or +3",
+    "tipo": "Armadura (escudo)",
+    "raridade": "varia",
+    "sintonia": false,
+    "descricao": "Enquanto empunha este escudo, você recebe um bônus na CA além do bônus normal do escudo. O bônus depende da raridade:\n\n| Bônus | Raridade |\n|---|---|\n| +1 | incomum |\n| +2 | raro |\n| +3 | muito raro |"
+  },
+  {
+    "nome": "Escudo de Atração de Projéteis",
+    "en": "Shield of Missile Attraction",
+    "tipo": "Armadura (escudo)",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Enquanto empunha este escudo, você tem resistência a dano de ataques com armas à distância.\n\n**Maldição.** O escudo é amaldiçoado: sintonizar-se com ele amaldiçoa você até ser alvo de **remover maldição** ou magia parecida, e tirar o escudo não acaba com a maldição. Sempre que um ataque com arma à distância for feito contra um alvo a até 3 m de você, a maldição faz você se tornar o alvo no lugar dele."
+  },
+  {
+    "nome": "Escudo Guarda-Magia",
+    "en": "Spellguard Shield",
+    "tipo": "Armadura (escudo)",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Enquanto empunha este escudo, você tem vantagem em salvaguardas contra magias e outros efeitos mágicos, e ataques com magia têm desvantagem contra você."
+  },
+  {
+    "nome": "Escudo Sentinela",
+    "en": "Sentinel Shield",
+    "tipo": "Armadura (escudo)",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Enquanto empunha este escudo, você tem vantagem nas jogadas de iniciativa e em testes de Sabedoria (Percepção). O escudo é adornado com o símbolo de um olho."
+  },
+  {
+    "nome": "Esfera da Aniquilação",
+    "en": "Sphere of Annihilation",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": false,
+    "descricao": "Esta esfera negra de 60 cm de diâmetro é um buraco no multiverso, flutuando parada. Toda matéria que passa por ela é aniquilada por completo; apenas artefatos e deuses não são afetados. Qualquer outra coisa que a toque sem ser totalmente engolida sofre 4d10 de dano de energia.\n\nA esfera fica parada até alguém controlá-la. Se estiver a até 18 m de uma esfera sem controle, você pode usar uma ação para fazer um teste de Inteligência (Arcanismo) CD 25. Com sucesso, você a faz levitar em uma direção escolhida por uma distância de 1,5 m × seu modificador de Inteligência (mínimo 1,5 m). Com falha, ela se move 3 m na sua direção. Uma criatura cujo espaço for invadido pela esfera deve passar em uma salvaguarda de Destreza CD 13 ou é tocada por ela, sofrendo 4d10 de dano de energia.\n\nPara tomar o controle de uma esfera controlada por outra criatura, faça um teste de Inteligência (Arcanismo) resistido pelo dela; o vencedor passa a controlá-la.\n\nSe a esfera entrar em contato com um portal planar (como o de **portal**) ou um espaço extradimensional (como um Buraco Portátil), role d100: 01–50, a esfera é destruída; 51–85, ela atravessa o portal ou entra no espaço; 86–00, uma fenda espacial envia toda criatura e objeto a até 54 m, incluindo a esfera, para um plano aleatório."
+  },
+  {
+    "nome": "Espada Afiada",
+    "en": "Sword of Sharpness",
+    "tipo": "Arma (qualquer espada que cause dano cortante)",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Quando você ataca um objeto com esta arma mágica e acerta, os dados de dano da arma contam como o valor máximo.\n\nQuando você ataca uma criatura e tira 20 na jogada de ataque, o alvo sofre 4d6 de dano cortante extra. Role então outro d20: se tirar 20, você decepa um membro do alvo (o efeito fica a critério do Mestre); se a criatura não tiver membros, decepa outra parte do corpo.\n\nVocê também pode dizer a palavra de comando para a lâmina emitir luz plena num raio de 3 m e penumbra por mais 3 m. Repetir a palavra ou embainhar a espada apaga a luz."
+  },
+  {
+    "nome": "Espada do Ferimento",
+    "en": "Sword of Wounding",
+    "tipo": "Arma (qualquer espada)",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "PV perdidos por dano desta arma só podem ser recuperados com descanso curto ou longo, não com regeneração, magia ou outros meios.\n\nUma vez por turno, ao acertar uma criatura com esta arma mágica, você pode feri-la. No início de cada turno da criatura ferida, ela sofre 1d4 de dano necrótico para cada ferimento que você causou e depois pode fazer uma salvaguarda de Constituição CD 15, encerrando todos esses ferimentos com um sucesso. Alternativamente, a própria criatura ou outra a até 1,5 m dela pode usar uma ação para fazer um teste de Sabedoria (Medicina) CD 15, encerrando os ferimentos com um sucesso."
+  },
+  {
+    "nome": "Espada Ladra de Vida",
+    "en": "Sword of Life Stealing",
+    "tipo": "Arma (qualquer espada)",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Quando você tira 20 na jogada de ataque com esta arma mágica e o alvo não é um constructo nem um morto-vivo, ele sofre 10 de dano necrótico extra e você ganha 10 PV temporários."
+  },
+  {
+    "nome": "Espada Vorpal",
+    "en": "Vorpal Sword",
+    "tipo": "Arma (qualquer espada que cause dano cortante)",
+    "raridade": "lendário",
+    "sintonia": true,
+    "descricao": "Você recebe +3 nas jogadas de ataque e de dano com esta arma mágica, e ela ignora resistência a dano cortante.\n\nQuando você ataca uma criatura com pelo menos uma cabeça e tira 20 na jogada de ataque, decepa uma das cabeças dela; a criatura morre se não puder sobreviver sem ela. Se o alvo for imune a dano cortante, não tiver ou não precisar de cabeça, tiver ações lendárias ou for grande demais na opinião do Mestre, ele sofre 6d8 de dano cortante extra em vez disso."
+  },
+  {
+    "nome": "Filtro do Amor",
+    "en": "Philter of Love",
+    "tipo": "Poção",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "A próxima criatura que você vir até 10 minutos depois de beber este filtro deixa você enfeitiçado por ela durante 1 hora. Se for de uma espécie e gênero pelos quais você normalmente se atrai, você a considera seu verdadeiro amor enquanto durar o efeito."
+  },
+  {
+    "nome": "Flauta do Assombro",
+    "en": "Pipes of Haunting",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "É preciso ter proficiência com instrumentos de sopro para usar esta flauta. Ela tem 3 cargas e recupera 1d3 cargas gastas todo dia ao amanhecer.\n\nCom uma ação, você toca a flauta e gasta 1 carga para criar uma melodia sinistra. Cada criatura à sua escolha a até 9 m que ouvir deve ser bem-sucedida em uma salvaguarda de Sabedoria CD 15 ou fica amedrontada por você por 1 minuto. A criatura repete a salvaguarda no fim de cada turno dela, encerrando o efeito com um sucesso. Quem passar na salvaguarda fica imune a esta flauta por 24 horas."
+  },
+  {
+    "nome": "Flauta dos Esgotos",
+    "en": "Pipes of the Sewers",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "É preciso ter proficiência com instrumentos de sopro para usar esta flauta. Enquanto estiver sintonizado com ela, ratos comuns e ratos gigantes ficam indiferentes a você e não o atacam, a menos que você os ameace ou ataque.\n\nA flauta tem 3 cargas e recupera 1d3 cargas gastas ao amanhecer. Se tocar a flauta com uma ação, você pode usar uma ação bônus para gastar de 1 a 3 cargas, chamando um enxame de ratos por carga, desde que haja ratos suficientes a até 800 m (a critério do Mestre); senão, a carga é desperdiçada. Os enxames vêm até a música pelo caminho mais curto, mas não ficam sob seu controle.\n\nSempre que um enxame de ratos que não esteja sob controle de outra criatura chegar a até 9 m de você enquanto toca, você pode fazer um teste de Carisma resistido pelo teste de Sabedoria do enxame. Se perder, o enxame age normalmente e não pode ser influenciado pela flauta por 24 horas. Se vencer, o enxame fica amigável a você e seus companheiros enquanto você continuar tocando com uma ação a cada rodada, e obedece aos seus comandos (sem comandos, apenas se defende). Se um enxame amigável começar o turno sem ouvir a música, o controle termina e ele fica imune à flauta por 24 horas."
+  },
+  {
+    "nome": "Lâmina Solar",
+    "en": "Sun Blade",
+    "tipo": "Arma (espada longa)",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Este item parece só o cabo de uma espada longa. Com uma ação bônus, você faz surgir ou desaparecer uma lâmina de pura luz. Com a lâmina, o item é uma espada longa mágica com a propriedade acuidade; se você tiver proficiência com espadas curtas ou longas, tem proficiência com ela.\n\nVocê recebe +2 nas jogadas de ataque e de dano, e a arma causa dano radiante em vez de cortante. Mortos-vivos atingidos sofrem 1d8 de dano radiante extra.\n\nA lâmina emite luz do sol: luz plena num raio de 4,5 m e penumbra por mais 4,5 m. Com uma ação, você aumenta ou diminui cada raio em 1,5 m, até no máximo 9 m e no mínimo 3 m cada."
+  },
+  {
+    "nome": "Leque do Vento",
+    "en": "Wind Fan",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Enquanto segura este leque, você pode usar uma ação para conjurar **lufada de vento** (CD 13). Depois de usado, o leque deveria esperar até o próximo amanhecer; cada uso extra antes disso tem 20% de chance cumulativa de falhar e rasgar, virando trapos sem magia."
+  },
+  {
+    "nome": "Manto das Cores Cintilantes",
+    "en": "Robe of Scintillating Colors",
+    "tipo": "Item maravilhoso",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "O manto tem 3 cargas e recupera 1d3 cargas gastas ao amanhecer. Usando-o, você pode gastar uma ação e 1 carga para fazê-lo exibir padrões de cores ofuscantes até o fim do seu próximo turno. Nesse período, o manto emite luz plena num raio de 9 m e penumbra por mais 9 m, e criaturas que possam vê-lo têm desvantagem nas jogadas de ataque contra você.\n\nAlém disso, cada criatura na luz plena que puder ver você quando o poder for ativado deve passar em uma salvaguarda de Sabedoria CD 15 ou fica atordoada até o efeito terminar."
+  },
+  {
+    "nome": "Manto das Estrelas",
+    "en": "Robe of Stars",
+    "tipo": "Item maravilhoso",
+    "raridade": "muito raro",
+    "sintonia": true,
+    "descricao": "Usando este manto, você recebe +1 de bônus nas salvaguardas.\n\nSeis estrelas se destacam na frente do manto. Com uma ação, você arranca uma delas para conjurar **mísseis mágicos** como magia de 5º nível. Todo dia ao anoitecer, 1d6 estrelas arrancadas reaparecem.\n\nCom uma ação, você também pode entrar no Plano Astral com tudo o que veste e carrega. Você fica lá até usar uma ação para voltar ao plano de onde veio, reaparecendo no último espaço que ocupou ou no espaço desocupado mais próximo."
+  },
+  {
+    "nome": "Manto de Itens Úteis",
+    "en": "Robe of Useful Items",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "O manto é coberto de remendos de pano com formatos variados. Usando-o, você pode gastar uma ação para destacar um remendo, que vira o objeto real. Quando o último remendo sai, o manto vira uma roupa comum.\n\nO manto sempre tem dois remendos de cada: adaga, lanterna furta-fogo (abastecida e acesa), espelho de aço, vara de 3 m, corda de cânhamo (15 m, enrolada) e saco. Além desses, tem 4d4 remendos rolados na tabela.\n\n| d100 | Remendo |\n|---|---|\n| 01–08 | Bolsa com 100 po |\n| 09–15 | Cofre de prata (30 cm × 15 cm × 15 cm) que vale 500 po |\n| 16–22 | Porta de ferro (até 3 m de largura e altura, trancada por um lado à sua escolha), que se encaixa e se prende em uma abertura ao seu alcance |\n| 23–30 | 10 gemas de 100 po cada |\n| 31–44 | Escada de madeira de 7,2 m |\n| 45–51 | Cavalo de montaria com alforjes |\n| 52–59 | Fosso (cubo de 3 m de lado), colocado no chão a até 3 m de você |\n| 60–68 | 4 poções de cura |\n| 69–75 | Barco a remo de 3,6 m |\n| 76–83 | Pergaminho de magia com uma magia de 1º a 3º nível à sua escolha |\n| 84–90 | 2 mastins |\n| 91–96 | Janela (60 cm × 1,2 m, até 60 cm de profundidade), colocada em uma superfície vertical ao seu alcance |\n| 97–00 | Aríete portátil |"
+  },
+  {
+    "nome": "Manto do Arquimago",
+    "en": "Robe of the Archmagi",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": "por um feiticeiro, bruxo ou mago",
+    "descricao": "A cor deste manto corresponde a uma tendência: branco (bom), cinza (neutro) ou preto (mau). Você não pode se sintonizar a um manto que não corresponda à sua tendência. Usando-o, você recebe:\n\n- se não estiver de armadura, CA base 15 + seu modificador de Destreza;\n- vantagem em salvaguardas contra magias e outros efeitos mágicos;\n- +2 na CD de salvaguarda e no bônus de ataque das suas magias."
+  },
+  {
+    "nome": "Manto dos Olhos",
+    "en": "Robe of Eyes",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "Este manto é coberto de padrões em forma de olhos. Usando-o, você ganha:\n\n- vantagem em testes de Sabedoria (Percepção) que dependam da visão;\n- visão no escuro de 36 m;\n- capacidade de ver criaturas e objetos invisíveis e de enxergar o Plano Etéreo, até 36 m;\n- visão em todas as direções (os olhos do manto nunca se fecham nem se desviam).\n\nSe a magia **luz** for conjurada sobre o manto, ou **luz do dia** a até 1,5 m dele, você fica cego por 1 minuto. No fim de cada turno, você faz uma salvaguarda de Constituição (CD 11 para luz, CD 15 para luz do dia), encerrando a cegueira com um sucesso."
+  },
+  {
+    "nome": "Pedra da Boa Sorte",
+    "en": "Stone of Good Luck (Luckstone)",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Enquanto esta ágata polida estiver com você, você recebe +1 de bônus em testes de atributo e salvaguardas."
+  },
+  {
+    "nome": "Pedra de Controlar Elementais da Terra",
+    "en": "Stone of Controlling Earth Elementals",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Se a pedra estiver tocando o chão, você pode usar uma ação e dizer a palavra de comando para invocar um elemental da terra, como se tivesse conjurado **conjurar elemental**. Depois de usada, a pedra só funciona de novo no próximo amanhecer. Ela pesa 2,5 kg."
+  },
+  {
+    "nome": "Pergaminho de Magia",
+    "en": "Spell Scroll",
+    "tipo": "Pergaminho",
+    "raridade": "varia",
+    "sintonia": false,
+    "descricao": "O pergaminho contém uma única magia. Se ela estiver na lista de magias da sua classe, você pode lê-lo e conjurá-la sem componentes materiais, usando o tempo de conjuração normal; caso contrário, o texto é ininteligível para você. Depois de conjurada, o pergaminho se desfaz.\n\nSe a magia estiver na sua lista, mas for de nível maior do que você consegue conjurar, faça um teste do seu atributo de conjuração (CD 10 + nível da magia); se falhar, a magia some sem efeito.\n\nUm mago pode copiar a magia do pergaminho para o grimório com um teste de Inteligência (Arcanismo) CD 10 + nível da magia. Com ou sem sucesso, o pergaminho é destruído.\n\n| Nível | Raridade | CD | Bônus de ataque |\n|---|---|---|---|\n| Truque | comum | 13 | +5 |\n| 1º | comum | 13 | +5 |\n| 2º | incomum | 13 | +5 |\n| 3º | incomum | 15 | +7 |\n| 4º | raro | 15 | +7 |\n| 5º | raro | 17 | +9 |\n| 6º | muito raro | 17 | +9 |\n| 7º | muito raro | 18 | +10 |\n| 8º | muito raro | 18 | +10 |\n| 9º | lendário | 19 | +11 |"
+  },
+  {
+    "nome": "Periapto da Saúde",
+    "en": "Periapt of Health",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Enquanto usa este pingente, você é imune a contrair qualquer doença. Se já estiver doente, os efeitos da doença ficam suprimidos enquanto você o usar."
+  },
+  {
+    "nome": "Periapto de Fechar Feridas",
+    "en": "Periapt of Wound Closure",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Enquanto usa este pingente, você se estabiliza automaticamente sempre que estiver morrendo no início do seu turno. Além disso, sempre que rolar um Dado de Vida para recuperar PV, você recupera o dobro do resultado."
+  },
+  {
+    "nome": "Periapto de Proteção contra Veneno",
+    "en": "Periapt of Proof against Poison",
+    "tipo": "Item maravilhoso",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Enquanto usa esta corrente com pingente de gema negra, venenos não têm efeito sobre você: você é imune à condição envenenado e a dano de veneno."
+  },
+  {
+    "nome": "Pérola do Poder",
+    "en": "Pearl of Power",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": "por um conjurador",
+    "descricao": "Enquanto segura a pérola, você pode usar uma ação e dizer a palavra de comando para recuperar um espaço de magia gasto de até 3º nível. Depois de usada, a pérola só funciona de novo no próximo amanhecer."
+  },
+  {
+    "nome": "Poção de Amizade Animal",
+    "en": "Potion of Animal Friendship",
+    "tipo": "Poção",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Depois de beber esta poção, você pode conjurar a magia **amizade animal** (CD 13) à vontade durante 1 hora."
+  },
+  {
+    "nome": "Poção de Clarividência",
+    "en": "Potion of Clairvoyance",
+    "tipo": "Poção",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você recebe o efeito da magia **clarividência**."
+  },
+  {
+    "nome": "Poção de Crescimento",
+    "en": "Potion of Growth",
+    "tipo": "Poção",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você recebe o efeito de aumento da magia **aumentar/reduzir** por 1d4 horas, sem precisar de concentração."
+  },
+  {
+    "nome": "Poção de Cura",
+    "en": "Potion of Healing",
+    "tipo": "Poção",
+    "raridade": "varia",
+    "sintonia": false,
+    "descricao": "Você recupera PV ao beber esta poção; a quantidade depende da potência. Beber ou dar a poção a outra criatura exige uma ação.\n\n| Poção | PV recuperados | Raridade |\n|---|---|---|\n| Cura | 2d4 + 2 | comum |\n| Cura maior | 4d4 + 4 | incomum |\n| Cura superior | 8d4 + 8 | raro |\n| Cura suprema | 10d4 + 20 | muito raro |"
+  },
+  {
+    "nome": "Poção de Diminuição",
+    "en": "Potion of Diminution",
+    "tipo": "Poção",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você recebe o efeito de redução da magia **aumentar/reduzir** por 1d4 horas, sem precisar de concentração."
+  },
+  {
+    "nome": "Poção de Escalada",
+    "en": "Potion of Climbing",
+    "tipo": "Poção",
+    "raridade": "comum",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você ganha deslocamento de escalada igual ao seu deslocamento de caminhada por 1 hora. Durante esse tempo, você tem vantagem em testes de Força (Atletismo) para escalar."
+  },
+  {
+    "nome": "Poção de Força do Gigante",
+    "en": "Potion of Giant Strength",
+    "tipo": "Poção",
+    "raridade": "varia",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, seu valor de Força passa a ser o indicado na tabela por 1 hora. Se sua Força já for igual ou maior, a poção não tem efeito.\n\n| Tipo de gigante | Força | Raridade |\n|---|---|---|\n| Gigante da colina | 21 | incomum |\n| Gigante do gelo | 23 | raro |\n| Gigante da pedra | 23 | raro |\n| Gigante do fogo | 25 | raro |\n| Gigante das nuvens | 27 | muito raro |\n| Gigante das tempestades | 29 | lendário |"
+  },
+  {
+    "nome": "Poção de Forma Gasosa",
+    "en": "Potion of Gaseous Form",
+    "tipo": "Poção",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você recebe o efeito da magia **forma gasosa** por 1 hora, sem precisar de concentração, ou até encerrá-lo com uma ação bônus."
+  },
+  {
+    "nome": "Poção de Heroísmo",
+    "en": "Potion of Heroism",
+    "tipo": "Poção",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você ganha 10 PV temporários que duram 1 hora. Pelo mesmo tempo, você fica sob o efeito da magia **bênção**, sem precisar de concentração."
+  },
+  {
+    "nome": "Poção de Invisibilidade",
+    "en": "Potion of Invisibility",
+    "tipo": "Poção",
+    "raridade": "muito raro",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você fica invisível por 1 hora, junto com tudo o que veste ou carrega. O efeito termina mais cedo se você atacar ou conjurar uma magia."
+  },
+  {
+    "nome": "Poção de Leitura da Mente",
+    "en": "Potion of Mind Reading",
+    "tipo": "Poção",
+    "raridade": "raro",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você recebe o efeito da magia **detectar pensamentos** (CD 13 para a salvaguarda)."
+  },
+  {
+    "nome": "Poção de Resistência",
+    "en": "Potion of Resistance",
+    "tipo": "Poção",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você ganha resistência a um tipo de dano por 1 hora. O Mestre escolhe o tipo ou rola na tabela.\n\n| d10 | Tipo de dano |\n|---|---|\n| 1 | ácido |\n| 2 | frio |\n| 3 | fogo |\n| 4 | energia |\n| 5 | elétrico |\n| 6 | necrótico |\n| 7 | veneno |\n| 8 | psíquico |\n| 9 | radiante |\n| 10 | trovejante |"
+  },
+  {
+    "nome": "Poção de Respirar na Água",
+    "en": "Potion of Water Breathing",
+    "tipo": "Poção",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você consegue respirar debaixo d'água por 1 hora."
+  },
+  {
+    "nome": "Poção de Velocidade",
+    "en": "Potion of Speed",
+    "tipo": "Poção",
+    "raridade": "muito raro",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você recebe o efeito da magia **velocidade** por 1 minuto, sem precisar de concentração."
+  },
+  {
+    "nome": "Poção de Veneno",
+    "en": "Potion of Poison",
+    "tipo": "Poção",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Esta mistura parece, cheira e tem gosto de poção de cura ou de outra poção benéfica, mas é veneno disfarçado por magia de ilusão; **identificar** revela sua natureza.\n\nQuem a bebe sofre 3d6 de dano de veneno e deve ser bem-sucedido em uma salvaguarda de Constituição CD 13 ou fica envenenado. No início de cada turno em que estiver envenenado assim, sofre 3d6 de dano de veneno. No fim de cada turno, repete a salvaguarda; a cada sucesso, o dano dos turnos seguintes diminui 1d6. O envenenamento termina quando o dano chega a zero."
+  },
+  {
+    "nome": "Poção de Voo",
+    "en": "Potion of Flying",
+    "tipo": "Poção",
+    "raridade": "muito raro",
+    "sintonia": false,
+    "descricao": "Ao beber esta poção, você ganha deslocamento de voo igual ao seu deslocamento de caminhada por 1 hora e pode pairar. Se estiver no ar quando o efeito acabar, você cai, a menos que tenha outro meio de se manter no alto."
+  },
+  {
+    "nome": "Poço dos Muitos Mundos",
+    "en": "Well of Many Worlds",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": false,
+    "descricao": "Este pano preto e fino, macio como seda, dobra-se até o tamanho de um lenço e, aberto, forma um círculo de 1,8 m de diâmetro.\n\nCom uma ação, você o abre e o coloca sobre uma superfície sólida, criando um portal de mão dupla para outro mundo ou plano de existência; o Mestre decide o destino a cada abertura. Com uma ação, você fecha o portal segurando as bordas e dobrando o pano. Depois de aberto, o poço só pode ser aberto de novo após 1d8 horas."
+  },
+  {
+    "nome": "Sapatilhas de Patas de Aranha",
+    "en": "Slippers of Spider Climbing",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "Enquanto usa estes calçados leves, você pode subir, descer e se mover por superfícies verticais e de cabeça para baixo pelo teto, com as mãos livres. Você tem deslocamento de escalada igual ao de caminhada. As sapatilhas não funcionam em superfícies escorregadias, como gelo ou óleo."
+  },
+  {
+    "nome": "Solvente Universal",
+    "en": "Universal Solvent",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": false,
+    "descricao": "Este tubo contém um líquido leitoso com forte cheiro de álcool. Com uma ação, você derrama o conteúdo sobre uma superfície ao seu alcance; o líquido dissolve na hora até cerca de 30 cm × 30 cm de qualquer adesivo que toque, inclusive Cola Soberana."
+  },
+  {
+    "nome": "Talismã da Esfera",
+    "en": "Talisman of the Sphere",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": true,
+    "descricao": "Enquanto segura este talismã, você dobra seu bônus de proficiência nos testes de Inteligência (Arcanismo) para controlar uma Esfera da Aniquilação. Além disso, se começar o turno controlando uma esfera, você pode usar uma ação para fazê-la levitar 3 m mais 3 m × seu modificador de Inteligência."
+  },
+  {
+    "nome": "Talismã do Bem Puro",
+    "en": "Talisman of Pure Good",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": "por uma criatura de tendência boa",
+    "descricao": "Um clérigo ou paladino de tendência boa pode usar o talismã como símbolo sagrado; enquanto o segura, recebe +2 nas jogadas de ataque com magia.\n\nO talismã tem 7 cargas. Usando-o ou segurando-o, você pode gastar uma ação e 1 carga para escolher uma criatura no chão que possa ver a até 36 m. Se ela for de tendência má, uma fenda flamejante se abre embaixo dela: o alvo deve passar em uma salvaguarda de Destreza CD 20 ou cai na fenda e é destruído, sem deixar restos. A fenda então se fecha sem deixar marcas. Quando a última carga é gasta, o talismã se desfaz em partículas de luz dourada.\n\nUma criatura que não seja de tendência boa sofre 6d6 de dano radiante ao tocar o talismã (8d6 se for de tendência má) e sofre o dano de novo cada vez que terminar o turno segurando-o ou carregando-o."
+  },
+  {
+    "nome": "Talismã do Mal Supremo",
+    "en": "Talisman of Ultimate Evil",
+    "tipo": "Item maravilhoso",
+    "raridade": "lendário",
+    "sintonia": "por uma criatura de tendência má",
+    "descricao": "Um clérigo ou paladino de tendência má pode usar o talismã como símbolo sagrado; enquanto o segura, recebe +2 nas jogadas de ataque com magia.\n\nO talismã tem 6 cargas. Usando-o ou segurando-o, você pode gastar uma ação e 1 carga para escolher uma criatura no chão que possa ver a até 36 m. Se ela for de tendência boa, uma fenda flamejante se abre embaixo dela: o alvo deve passar em uma salvaguarda de Destreza CD 20 ou cai na fenda e é destruído, sem deixar restos. A fenda então se fecha sem deixar marcas. Quando a última carga é gasta, o talismã se dissolve em um lodo fétido.\n\nUma criatura que não seja de tendência má sofre 6d6 de dano necrótico ao tocar o talismã (8d6 se for de tendência boa) e sofre o dano de novo cada vez que terminar o turno segurando-o ou carregando-o."
+  },
+  {
+    "nome": "Tomo da Compreensão",
+    "en": "Tome of Understanding",
+    "tipo": "Item maravilhoso",
+    "raridade": "muito raro",
+    "sintonia": false,
+    "descricao": "Este livro traz exercícios de intuição e percepção. Se você passar 48 horas, ao longo de no máximo 6 dias, estudando-o, sua Sabedoria aumenta em 2, assim como o seu máximo nesse atributo. Depois disso, o tomo perde a magia e só a recupera após um século."
+  },
+  {
+    "nome": "Tomo da Liderança e Influência",
+    "en": "Tome of Leadership and Influence",
+    "tipo": "Item maravilhoso",
+    "raridade": "muito raro",
+    "sintonia": false,
+    "descricao": "Este livro ensina a influenciar e encantar os outros. Se você passar 48 horas, ao longo de no máximo 6 dias, estudando-o, seu Carisma aumenta em 2, assim como o seu máximo nesse atributo. Depois disso, o tomo perde a magia e só a recupera após um século."
+  },
+  {
+    "nome": "Tomo do Pensamento Claro",
+    "en": "Tome of Clear Thought",
+    "tipo": "Item maravilhoso",
+    "raridade": "muito raro",
+    "sintonia": false,
+    "descricao": "Este livro traz exercícios de memória e lógica. Se você passar 48 horas, ao longo de no máximo 6 dias, estudando-o, sua Inteligência aumenta em 2, assim como o seu máximo nesse atributo. Depois disso, o tomo perde a magia e só a recupera após um século."
+  },
+  {
+    "nome": "Tridente de Comandar Peixes",
+    "en": "Trident of Fish Command",
+    "tipo": "Arma (tridente)",
+    "raridade": "incomum",
+    "sintonia": true,
+    "descricao": "O tridente tem 3 cargas e recupera 1d3 cargas gastas ao amanhecer. Enquanto o carrega, você pode usar uma ação e gastar 1 carga para conjurar **dominar fera** (CD 15) em uma fera que tenha deslocamento de natação natural."
+  },
+  {
+    "nome": "Unguento Restaurador",
+    "en": "Restorative Ointment",
+    "tipo": "Item maravilhoso",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "Este pote de vidro contém 1d4 + 1 doses de uma pasta espessa com aroma de babosa. Com uma ação, uma dose pode ser engolida ou passada na pele. A criatura que a recebe recupera 2d8 + 2 PV, deixa de estar envenenada e é curada de qualquer doença."
+  },
+  {
+    "nome": "Varinha da Metamorfose",
+    "en": "Wand of Polymorph",
+    "tipo": "Varinha",
+    "raridade": "muito raro",
+    "sintonia": "por um conjurador",
+    "descricao": "A varinha tem 7 cargas e recupera 1d6 + 1 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, ela vira cinzas.\n\nCom uma ação, você gasta 1 carga para conjurar **metamorfose** (CD 15)."
+  },
+  {
+    "nome": "Varinha da Paralisia",
+    "en": "Wand of Paralysis",
+    "tipo": "Varinha",
+    "raridade": "raro",
+    "sintonia": "por um conjurador",
+    "descricao": "A varinha tem 7 cargas e recupera 1d6 + 1 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, ela vira cinzas.\n\nCom uma ação, você gasta 1 carga para disparar um raio azul fino contra uma criatura que possa ver a até 18 m. O alvo deve passar em uma salvaguarda de Constituição CD 15 ou fica paralisado por 1 minuto, repetindo a salvaguarda no fim de cada turno dele e encerrando o efeito com um sucesso."
+  },
+  {
+    "nome": "Varinha das Maravilhas",
+    "en": "Wand of Wonder",
+    "tipo": "Varinha",
+    "raridade": "raro",
+    "sintonia": "por um conjurador",
+    "descricao": "A varinha tem 7 cargas e recupera 1d6 + 1 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, ela vira pó.\n\nCom uma ação, você gasta 1 carga e escolhe um alvo a até 36 m (criatura, objeto ou ponto no espaço), depois rola d100 na tabela. Magias conjuradas pela varinha têm CD 15; se tiverem alcance, ele passa a 36 m; se tiverem área, ela é centrada no alvo e o inclui.\n\n| d100 | Efeito |\n|---|---|\n| 01–05 | Você conjura **lentidão**. |\n| 06–10 | Você conjura **fogo das fadas**. |\n| 11–15 | Você fica atordoado até o início do seu próximo turno, achando que algo incrível aconteceu. |\n| 16–20 | Você conjura **lufada de vento**. |\n| 21–25 | Você conjura **detectar pensamentos** no alvo; se não for uma criatura, você sofre 1d6 de dano psíquico. |\n| 26–30 | Você conjura **névoa fétida**. |\n| 31–33 | Chuva forte cai num raio de 18 m centrado no alvo, deixando a área com escuridão leve até o início do seu próximo turno. |\n| 34–36 | Um animal surge no espaço desocupado mais próximo do alvo, fora do seu controle (d100: 01–25 rinoceronte, 26–50 elefante, 51–100 rato). |\n| 37–46 | Você conjura **relâmpago**. |\n| 47–49 | Uma nuvem de 600 borboletas enormes enche um raio de 9 m centrado no alvo por 10 minutos, com escuridão densa. |\n| 50–53 | Você aumenta o alvo como em **aumentar/reduzir**; se ele não puder ser afetado ou não for uma criatura, o alvo passa a ser você. |\n| 54–58 | Você conjura **escuridão**. |\n| 59–62 | Grama cresce num raio de 18 m centrado no alvo; se já havia grama, ela fica dez vezes maior por 1 minuto. |\n| 63–65 | Um objeto à escolha do Mestre, não vestido nem carregado, a até 36 m do alvo e com até 3 m em qualquer dimensão, some para o Plano Etéreo. |\n| 66–69 | Você encolhe como se tivesse conjurado **aumentar/reduzir** em si mesmo. |\n| 70–79 | Você conjura **bola de fogo**. |\n| 80–84 | Você conjura **invisibilidade** em si mesmo. |\n| 85–87 | Folhas brotam do alvo (ou da criatura mais próxima do ponto escolhido) e caem secas após 24 horas, se não forem arrancadas. |\n| 88–90 | Um jorro de 1d4 × 10 gemas de 1 po cada sai numa linha de 9 m por 1,5 m; cada gema causa 1 de dano de concussão, e o total é dividido igualmente entre as criaturas na linha. |\n| 91–95 | Um clarão colorido se espalha num raio de 9 m a partir de você; você e cada criatura na área que puder ver fazem uma salvaguarda de Constituição CD 15 ou ficam cegos por 1 minuto, repetindo a salvaguarda no fim de cada turno. |\n| 96–97 | A pele do alvo (ou da criatura mais próxima do ponto escolhido) fica azul-brilhante por 1d10 dias. |\n| 98–00 | O alvo (ou você, se o alvo não for uma criatura) faz uma salvaguarda de Constituição CD 15. Se falhar por 5 ou mais, fica petrificado na hora; em qualquer outra falha, fica contido e começa a virar pedra, repetindo a salvaguarda no fim do próximo turno: falha o petrifica, sucesso encerra o efeito. A petrificação dura até ser desfeita por **restauração maior** ou magia parecida. |"
+  },
+  {
+    "nome": "Varinha de Bolas de Fogo",
+    "en": "Wand of Fireballs",
+    "tipo": "Varinha",
+    "raridade": "raro",
+    "sintonia": "por um conjurador",
+    "descricao": "A varinha tem 7 cargas e recupera 1d6 + 1 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, ela vira cinzas.\n\nCom uma ação, você gasta 1 ou mais cargas para conjurar **bola de fogo** (CD 15). Com 1 carga, a magia é de 3º nível; cada carga extra aumenta o nível em 1."
+  },
+  {
+    "nome": "Varinha de Detectar Inimigos",
+    "en": "Wand of Enemy Detection",
+    "tipo": "Varinha",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "A varinha tem 7 cargas e recupera 1d6 + 1 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, ela vira cinzas.\n\nCom uma ação, você diz a palavra de comando e gasta 1 carga. Pelo próximo minuto, você sabe a direção (mas não a distância) da criatura hostil mais próxima a até 18 m, mesmo que esteja etérea, invisível, disfarçada ou escondida. O efeito termina se você parar de segurar a varinha."
+  },
+  {
+    "nome": "Varinha de Detectar Magia",
+    "en": "Wand of Magic Detection",
+    "tipo": "Varinha",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "A varinha tem 3 cargas e recupera 1d3 cargas gastas ao amanhecer. Com uma ação, você gasta 1 carga para conjurar **detectar magia**."
+  },
+  {
+    "nome": "Varinha de Mísseis Mágicos",
+    "en": "Wand of Magic Missiles",
+    "tipo": "Varinha",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "A varinha tem 7 cargas e recupera 1d6 + 1 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, ela vira cinzas.\n\nCom uma ação, você gasta de 1 a 3 cargas para conjurar **mísseis mágicos**. Com 1 carga, a magia é de 1º nível; cada carga extra aumenta o nível em 1."
+  },
+  {
+    "nome": "Varinha de Relâmpagos",
+    "en": "Wand of Lightning Bolts",
+    "tipo": "Varinha",
+    "raridade": "raro",
+    "sintonia": "por um conjurador",
+    "descricao": "A varinha tem 7 cargas e recupera 1d6 + 1 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, ela vira cinzas.\n\nCom uma ação, você gasta 1 ou mais cargas para conjurar **relâmpago** (CD 15). Com 1 carga, a magia é de 3º nível; cada carga extra aumenta o nível em 1."
+  },
+  {
+    "nome": "Varinha de Teias",
+    "en": "Wand of Web",
+    "tipo": "Varinha",
+    "raridade": "incomum",
+    "sintonia": "por um conjurador",
+    "descricao": "A varinha tem 7 cargas e recupera 1d6 + 1 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, ela vira cinzas.\n\nCom uma ação, você gasta 1 carga para conjurar **teia** (CD 15)."
+  },
+  {
+    "nome": "Varinha do Aprisionamento",
+    "en": "Wand of Binding",
+    "tipo": "Varinha",
+    "raridade": "raro",
+    "sintonia": "por um conjurador",
+    "descricao": "A varinha tem 7 cargas e recupera 1d6 + 1 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, ela vira cinzas.\n\n**Magias.** Com uma ação, você gasta cargas para conjurar, usando sua CD: **imobilizar monstro** (5 cargas) ou **imobilizar pessoa** (2 cargas).\n\n**Fuga assistida.** Enquanto segura a varinha, você pode usar sua reação e gastar 1 carga para ter vantagem em uma salvaguarda para não ficar paralisado ou contido, ou gastar 1 carga para ter vantagem em qualquer teste para escapar de um agarrão."
+  },
+  {
+    "nome": "Varinha do Mago de Guerra +1, +2 ou +3",
+    "en": "Wand of the War Mage, +1, +2, or +3",
+    "tipo": "Varinha",
+    "raridade": "varia",
+    "sintonia": "por um conjurador",
+    "descricao": "Enquanto segura esta varinha, você recebe um bônus nas jogadas de ataque com magia e ignora meia cobertura ao fazer ataques com magia. O bônus depende da raridade:\n\n| Bônus | Raridade |\n|---|---|\n| +1 | incomum |\n| +2 | raro |\n| +3 | muito raro |"
+  },
+  {
+    "nome": "Varinha do Medo",
+    "en": "Wand of Fear",
+    "tipo": "Varinha",
+    "raridade": "raro",
+    "sintonia": true,
+    "descricao": "A varinha tem 7 cargas e recupera 1d6 + 1 cargas gastas ao amanhecer. Se gastar a última carga, role um d20; com 1, ela vira cinzas. As salvaguardas contra ela têm CD 15.\n\n- **Comando.** Ação e 1 carga: conjura **comando**, mas só com as ordens fugir ou rastejar.\n- **Cone de medo.** Ação e 2 cargas: a ponta solta um cone de luz âmbar de 18 m. Cada criatura no cone faz uma salvaguarda de Sabedoria ou fica amedrontada por você por 1 minuto. Enquanto amedrontada assim, ela gasta os turnos tentando se afastar o máximo possível, não se aproxima voluntariamente a menos de 9 m de você e não pode usar reações; como ação, só pode usar Disparada ou tentar escapar do que a impede de se mover (sem para onde ir, pode usar Esquiva). No fim de cada turno, repete a salvaguarda, encerrando o efeito com um sucesso."
+  },
+  {
+    "nome": "Varinha dos Segredos",
+    "en": "Wand of Secrets",
+    "tipo": "Varinha",
+    "raridade": "incomum",
+    "sintonia": false,
+    "descricao": "A varinha tem 3 cargas e recupera 1d3 cargas gastas ao amanhecer. Com uma ação, você gasta 1 carga: se houver portas secretas ou armadilhas a até 9 m, a varinha pulsa e aponta para a mais próxima de você."
+  }
+]

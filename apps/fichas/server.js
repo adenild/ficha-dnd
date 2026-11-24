@@ -11,6 +11,10 @@ const os = require('node:os');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const RAIZ = path.join(__dirname, '..', '..'); // raiz da suíte: data/, compose.yaml, apps/
 const MAX_BODY = 512 * 1024;
+const MAX_IMG = 8 * 1024 * 1024;
+const WIKI_DIR = path.join(__dirname, 'wiki'); // páginas de regras que vêm com a suíte (Markdown)
+const WIKI_MAX = 150000; // caracteres por página da wiki de uma mesa
+const IMG = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' };
 const SESSION_DAYS = 90;
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json' };
@@ -20,8 +24,8 @@ const AUDIT_MAX = 5000; // registros de auditoria guardados no total (os mais an
 const TEMAS = ['auto', 'claro', 'escuro'];
 const ABAS = ['principal', 'combate', 'magias', 'itens', 'notas'];
 
-function createApp({ dataFile, mapasUrl = null }) {
-  let db = { users: {}, sessions: {}, mesas: {}, chars: {}, tokens: {}, audit: [] };
+function createApp({ dataFile, mapasUrl = null, wikiDir = WIKI_DIR }) {
+  let db = { users: {}, sessions: {}, mesas: {}, chars: {}, tokens: {}, audit: [], wiki: {}, wikiImg: {} };
   try {
     db = Object.assign(db, JSON.parse(fs.readFileSync(dataFile, 'utf8')));
   } catch (e) {
@@ -30,6 +34,11 @@ function createApp({ dataFile, mapasUrl = null }) {
   // bancos antigos não têm tokens nem auditoria
   db.tokens = db.tokens || {};
   db.audit = Array.isArray(db.audit) ? db.audit : [];
+  db.wiki = db.wiki || {};
+  db.wikiImg = db.wikiImg || {};
+  const base = carregarWikiBase(wikiDir);
+  const dados = carregarWikiDados(path.join(wikiDir, 'dados')); // listas: magias, itens-magicos, equipamento
+  const imgDir = path.join(path.dirname(dataFile), 'wiki-img');
 
   // ---------- persistência ----------
   let saveTimer = null;
@@ -75,8 +84,8 @@ function createApp({ dataFile, mapasUrl = null }) {
 
   // ---------- eventos ao vivo (SSE) ----------
   const streams = new Map(); // uid -> Set(res)
-  function notify(uids) {
-    for (const u of new Set(uids)) for (const res of streams.get(u) || []) res.write('data: changed\n\n');
+  function notify(uids, tipo = 'changed') { // tipo: changed (fichas e mesas) ou wiki
+    for (const u of new Set(uids)) for (const res of streams.get(u) || []) res.write(`data: ${tipo}\n\n`);
   }
   const mesaPeople = (m) => (m ? [m.mestre, ...m.membros] : []);
   const charPeople = (c, extraMesa) => [c.owner, ...mesaPeople(db.mesas[c.mesa]), ...mesaPeople(db.mesas[extraMesa])];
@@ -133,6 +142,12 @@ function createApp({ dataFile, mapasUrl = null }) {
       if (x[2]) return `${body.lib ? 'Liberou' : 'Ocultou'} a ficha ${ch(x[1])}`;
       return m === 'DELETE' ? `Apagou a ficha ${ch(x[1])}` : `Alterou a ficha ${ch(x[1])}`;
     }
+    const pg = (wid) => (db.wiki[wid] && db.wiki[wid].titulo) || wid;
+    if (p === '/api/wiki' && m === 'GET') return 'Consultou a wiki';
+    if (p === '/api/wiki' && m === 'POST') return `Criou a página ${body.titulo || ''} na wiki`.trim();
+    if (p === '/api/wiki/img') return m === 'POST' ? 'Enviou uma imagem para a wiki' : 'Viu uma imagem da wiki';
+    if (p.startsWith('/api/wiki/img/')) return 'Viu uma imagem da wiki';
+    if ((x = p.match(/^\/api\/wiki\/([\w-]+)$/))) return `${m === 'DELETE' ? 'Apagou' : m === 'GET' ? 'Leu' : 'Alterou'} a página ${pg(x[1])} da wiki`;
     if (p === '/api/mesas' && m === 'POST') return `Criou a mesa ${body.nome || ''}`.trim();
     if (p === '/api/mesas/join') return 'Entrou numa mesa com código';
     if ((x = p.match(/^\/api\/mesas\/([\w-]+)(?:\/(\w+))?$/))) {
@@ -207,11 +222,42 @@ function createApp({ dataFile, mapasUrl = null }) {
     for (const c of Object.values(db.chars)) if (c.mesa === mid && (!uid || c.owner === uid)) { c.mesa = ''; c.lib = false; c.upd = now(); }
   }
 
+  // ---------- wiki da mesa ----------
+  // quem não é o mestre vê só as páginas liberadas, e sem os blocos ":::mestre"
+  function podeLerPagina(w, u) {
+    const mesa = db.mesas[w.mesa];
+    return isMestre(mesa, u) || (!!w.lib && isMember(mesa, u));
+  }
+  function paginaView(w, u) {
+    const mestre = isMestre(db.mesas[w.mesa], u);
+    return { id: w.id, mesa: w.mesa, titulo: w.titulo, cat: w.cat, lib: !!w.lib, upd: w.upd, criado: w.criado, autor: userName(w.autor), texto: mestre ? w.texto : semBlocosDoMestre(w.texto) };
+  }
+  function editarPagina(w, b) {
+    if (b.titulo !== undefined || !w.titulo) {
+      const titulo = String(b.titulo || '').trim().replace(/\s+/g, ' ').slice(0, 80);
+      if (!titulo) fail(400, 'Dê um título para a página.');
+      if (Object.values(db.wiki).some((x) => x.id !== w.id && x.mesa === w.mesa && simples(x.titulo) === simples(titulo))) fail(409, 'Já existe uma página com esse título nesta mesa.');
+      w.titulo = titulo;
+    }
+    if (b.cat !== undefined) w.cat = String(b.cat || '').trim().replace(/\s+/g, ' ').slice(0, 40);
+    if (b.texto !== undefined) {
+      const texto = String(b.texto || '').replace(/\r\n?/g, '\n');
+      if (texto.length > WIKI_MAX) fail(413, `Página grande demais: o limite é ${WIKI_MAX.toLocaleString('pt-BR')} caracteres. Divida em mais de uma página.`);
+      w.texto = texto;
+    }
+    if (b.lib !== undefined) w.lib = !!b.lib;
+  }
+  function apagarWikiDaMesa(mid) {
+    for (const w of Object.values(db.wiki)) if (w.mesa === mid) delete db.wiki[w.id];
+    for (const im of Object.values(db.wikiImg)) if (im.mesa === mid) { delete db.wikiImg[im.id]; fs.rm(path.join(imgDir, im.arq), { force: true }, () => {}); }
+  }
+
   // ---------- rotas ----------
   async function api(req, res, url) {
     const m = req.method;
     const p = url.pathname;
-    const body = m === 'GET' || m === 'DELETE' ? {} : await readJson(req);
+    const raw = p === '/api/wiki/img' && m === 'POST'; // imagem: o corpo é o arquivo, não JSON
+    const body = m === 'GET' || m === 'DELETE' || raw ? {} : await readJson(req);
 
     if (p === '/api/register' && m === 'POST') {
       throttle(req);
@@ -378,6 +424,7 @@ function createApp({ dataFile, mapasUrl = null }) {
       } else if (!act && m === 'DELETE') {
         if (!isMestre(mesa, u)) fail(403, 'Só o mestre apaga a mesa.');
         detachFromMesa(mesa.id);
+        apagarWikiDaMesa(mesa.id);
         delete db.mesas[mesa.id];
       } else if (act === 'leave' && m === 'POST') {
         if (isMestre(mesa, u)) fail(400, 'O mestre não sai da mesa: apague-a se quiser encerrá-la.');
@@ -394,6 +441,62 @@ function createApp({ dataFile, mapasUrl = null }) {
       persist();
       notify(before);
       return stateFor(u);
+    }
+
+    // wiki: as regras que vêm com a suíte e as páginas de cada mesa, escritas pelo mestre
+    let md = p.match(/^\/api\/wiki\/dados\/([\w-]+)$/);
+    if (md && m === 'GET') return dados[md[1]] || fail(404, 'Lista não encontrada.');
+    if (p === '/api/wiki' && m === 'GET') {
+      const paginas = Object.values(db.wiki).filter((w) => podeLerPagina(w, u)).sort((a, b) => a.criado - b.criado).map((w) => paginaView(w, u));
+      return url.searchParams.get('base') === '0' ? { paginas } : { base, paginas };
+    }
+    if (p === '/api/wiki' && m === 'POST') {
+      const mesa = getMesa(String(body.mesa || ''));
+      if (!isMember(mesa, u)) fail(404, 'Mesa não encontrada.');
+      if (!isMestre(mesa, u)) fail(403, 'Só o mestre escreve na wiki da mesa.');
+      const w = { id: id('w'), mesa: mesa.id, titulo: '', cat: '', texto: '', lib: false, autor: u, criado: now(), upd: now() };
+      editarPagina(w, { lib: false, ...body });
+      db.wiki[w.id] = w;
+      persist();
+      notify(mesaPeople(mesa), 'wiki');
+      return paginaView(w, u);
+    }
+    if (p === '/api/wiki/img' && m === 'POST') {
+      const mesa = getMesa(String(url.searchParams.get('mesa') || ''));
+      if (!isMember(mesa, u)) fail(404, 'Mesa não encontrada.');
+      if (!isMestre(mesa, u)) fail(403, 'Só o mestre põe imagens na wiki da mesa.');
+      const buf = await readRaw(req, MAX_IMG, 'Imagem grande demais: o limite é 8 MB.');
+      const tipo = tipoDaImagem(buf);
+      if (!tipo) fail(400, 'Use uma imagem PNG, JPEG, WebP ou GIF.');
+      const iid = id('i');
+      fs.mkdirSync(imgDir, { recursive: true });
+      await fs.promises.writeFile(path.join(imgDir, `${iid}.${IMG[tipo]}`), buf);
+      db.wikiImg[iid] = { id: iid, mesa: mesa.id, arq: `${iid}.${IMG[tipo]}`, tipo, criado: now() };
+      persist();
+      return { id: iid, url: '/api/wiki/img/' + iid };
+    }
+    let mw = p.match(/^\/api\/wiki\/img\/([\w-]+)$/);
+    if (mw && m === 'GET') {
+      const im = db.wikiImg[mw[1]];
+      if (!im || !isMember(db.mesas[im.mesa], u)) fail(404, 'Imagem não encontrada.');
+      const buf = await fs.promises.readFile(path.join(imgDir, im.arq)).catch(() => fail(404, 'Imagem não encontrada.'));
+      res.writeHead(200, { 'Content-Type': im.tipo, 'Content-Length': buf.length, 'Cache-Control': 'private, max-age=31536000, immutable' });
+      res.end(buf);
+      return undefined;
+    }
+    mw = p.match(/^\/api\/wiki\/([\w-]+)$/);
+    if (mw) {
+      const w = db.wiki[mw[1]];
+      if (!w || !podeLerPagina(w, u)) fail(404, 'Página não encontrada.');
+      const mesa = db.mesas[w.mesa];
+      if (m === 'GET') return paginaView(w, u);
+      if (!isMestre(mesa, u)) fail(403, 'Só o mestre muda a wiki da mesa.');
+      if (m === 'PUT' || m === 'PATCH') { editarPagina(w, body); w.upd = now(); }
+      else if (m === 'DELETE') delete db.wiki[w.id];
+      else fail(405, 'Método não permitido.');
+      persist();
+      notify(mesaPeople(mesa), 'wiki');
+      return m === 'DELETE' ? { ok: true } : paginaView(w, u);
     }
 
     // fichas
@@ -435,6 +538,19 @@ function createApp({ dataFile, mapasUrl = null }) {
       return { id: c.id, upd: c.upd, mesa: c.mesa, lib: !!c.lib };
     }
     fail(404, 'Rota desconhecida.');
+  }
+
+  function readRaw(req, max, msg) {
+    return new Promise((resolve, reject) => {
+      let size = 0; const chunks = [];
+      req.on('data', (ch) => {
+        size += ch.length;
+        if (size > max) { reject(new HttpError(413, msg)); req.destroy(); return; }
+        chunks.push(ch);
+      });
+      req.on('end', () => resolve(Buffer.concat(chunks)));
+      req.on('error', reject);
+    });
   }
 
   function readJson(req) {
@@ -496,6 +612,66 @@ function createApp({ dataFile, mapasUrl = null }) {
   return { server, flush, resetPassword, db: () => db };
 }
 
+// ---------- wiki: utilidades sem estado ----------
+const simples = (s) => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+
+// tira os blocos ":::mestre ... :::" (com o que houver dentro) do texto que vai para os jogadores
+function semBlocosDoMestre(texto) {
+  const out = []; let pular = 0;
+  for (const linha of String(texto || '').split('\n')) {
+    const cerca = /^\s*:::\s*(\S*)/.exec(linha);
+    if (cerca && cerca[1]) { if (pular || /^mestre$/i.test(cerca[1])) { pular++; continue; } }
+    else if (cerca && pular) { pular--; continue; }
+    if (!pular) out.push(linha);
+  }
+  return out.join('\n');
+}
+
+// páginas de regras: arquivos .md com um cabeçalho simples (titulo, categoria, ordem, resumo)
+// listas em JSON (magias-0-1.json, magias-2-3.json... viram a lista "magias"); cada entrada ganha um slug para os links
+const slugWiki = (s) => simples(s).replace(/[*_`[\]]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'secao';
+function carregarWikiDados(dir) {
+  const out = {};
+  let nomes = [];
+  try { nomes = fs.readdirSync(dir).filter((n) => n.endsWith('.json')).sort(); } catch { return out; }
+  for (const n of nomes) {
+    const lista = n.slice(0, -5).replace(/-\w-\w$/, '');
+    let itens;
+    try { itens = JSON.parse(fs.readFileSync(path.join(dir, n), 'utf8')); } catch (e) { console.error(`Wiki: não deu para ler ${n}: ${e.message}`); continue; }
+    if (Array.isArray(itens)) (out[lista] = out[lista] || []).push(...itens);
+  }
+  for (const [lista, itens] of Object.entries(out)) {
+    if (lista === 'magias') itens.sort((a, b) => a.nivel - b.nivel || a.nome.localeCompare(b.nome, 'pt-BR'));
+    else if (lista !== 'equipamento') itens.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    const usados = new Set();
+    for (const it of itens) { let s = slugWiki(it.nome), k = 2; while (usados.has(s)) s = `${slugWiki(it.nome)}-${k++}`; usados.add(s); it.slug = s; }
+  }
+  return out;
+}
+
+function carregarWikiBase(dir) {
+  let nomes = [];
+  try { nomes = fs.readdirSync(dir).filter((n) => n.endsWith('.md')); } catch { return []; }
+  return nomes.map((n) => {
+    const src = fs.readFileSync(path.join(dir, n), 'utf8').replace(/\r\n?/g, '\n');
+    const meta = {}; let texto = src;
+    const fm = /^---\n([\s\S]*?)\n---\n?/.exec(src);
+    if (fm) {
+      texto = src.slice(fm[0].length);
+      for (const l of fm[1].split('\n')) { const i = l.indexOf(':'); if (i > 0) meta[l.slice(0, i).trim()] = l.slice(i + 1).trim(); }
+    }
+    return { slug: n.slice(0, -3), titulo: meta.titulo || n.slice(0, -3), cat: meta.categoria || 'Regras', ordem: +meta.ordem || 99, resumo: meta.resumo || '', ...(meta.lista ? { lista: meta.lista } : {}), texto: texto.trim() };
+  }).sort((a, b) => a.ordem - b.ordem || a.titulo.localeCompare(b.titulo, 'pt-BR'));
+}
+
+function tipoDaImagem(buf) {
+  if (buf.length > 8 && buf.readUInt32BE(0) === 0x89504e47) return 'image/png';
+  if (buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'image/jpeg';
+  if (buf.length > 12 && buf.toString('latin1', 0, 4) === 'RIFF' && buf.toString('latin1', 8, 12) === 'WEBP') return 'image/webp';
+  if (buf.length > 6 && buf.toString('latin1', 0, 4) === 'GIF8') return 'image/gif';
+  return null;
+}
+
 function lanAddresses() {
   return Object.values(os.networkInterfaces()).flat().filter((a) => a && a.family === 'IPv4' && !a.internal).map((a) => a.address);
 }
@@ -529,4 +705,4 @@ function main({ sinais = true } = {}) {
 
 if (require.main === module) main();
 
-module.exports = { createApp, main };
+module.exports = { createApp, main, semBlocosDoMestre };

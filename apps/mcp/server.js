@@ -360,7 +360,157 @@ function createTools(call, mcall) {
         return { ok: true, mesas: st2.mesas.map((m) => ({ id: m.id, nome: m.nome, ...(m.code ? { codigo: m.code } : {}), membros: m.membros.map((x) => x.name) })) };
       },
     },
+    {
+      name: 'wiki',
+      description: 'Consulta a wiki da suíte: as regras de D&D 5e que vêm com o app (condições, combate, dano e morte, magia, perícias, descanso, equipamento, classes, raças...) e as páginas que o mestre escreveu para cada mesa (cenário, lugares, personagens do mestre, regras da casa, resumos de sessão). listar mostra o que existe; ler traz uma página inteira, só uma seção (ex.: pagina "condicoes", secao "caido"), ou uma magia ou item pelo nome (ex.: pagina "Bola de Fogo"); buscar procura palavras em todas as páginas, magias e itens; magias filtra a lista de magias por classe, nível e escola; itens filtra itens mágicos (tipo, raridade) e equipamento comum (com preço e peso). Consulte antes de decidir uma regra e para manter a história coerente com o que a mesa já registrou.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          acao: { type: 'string', enum: ['listar', 'ler', 'buscar', 'magias', 'itens'] },
+          pagina: { type: 'string', description: 'ler: endereço da regra (ex.: combate), título ou id da página' },
+          secao: { type: 'string', description: 'ler: título da seção, para trazer só ela' },
+          busca: { type: 'string', description: 'buscar: palavras a procurar' },
+          mesa: { type: 'string', description: 'Restringe às páginas de uma mesa (id ou nome)' },
+          classe: { type: 'string', description: 'magias: Bardo, Bruxo, Clérigo, Druida, Feiticeiro, Mago, Paladino ou Patrulheiro' },
+          nivel: { type: 'integer', description: 'magias: 0 (truques) a 9' },
+          escola: { type: 'string', description: 'magias: escola de magia' },
+          tipo: { type: 'string', description: 'itens: Arma, Armadura, Poção, Anel, Bastão, Cajado, Varinha, Pergaminho, Item maravilhoso, ou "comum" para equipamento comum' },
+          raridade: { type: 'string', description: 'itens: comum, incomum, raro, muito raro, lendário' },
+        },
+        required: ['acao'],
+      },
+      async run({ acao, pagina, secao, busca, mesa, classe, nivel, escola, tipo, raridade }) {
+        const dados = async (n) => call('GET', '/api/wiki/dados/' + n).catch(() => []);
+        if (acao === 'magias') {
+          const a = (await dados('magias')).filter((x) => (nivel === undefined || x.nivel === +nivel) && (!classe || x.classes.some((c) => plain(c) === plain(classe))) && (!escola || plain(x.escola) === plain(escola)) && (!busca || plain(x.nome + ' ' + x.descricao).includes(plain(busca))));
+          return { total: a.length, magias: a.slice(0, 120).map((x) => ({ nome: x.nome, nivel: x.nivel, escola: x.escola, ...(x.conc ? { concentracao: true } : {}), ...(x.ritual ? { ritual: true } : {}), classes: x.classes })), ...(a.length > 120 ? { aviso: 'Mostrando 120; use mais filtros.' } : {}), dica: 'Use ler com pagina = nome da magia para a descrição.' };
+        }
+        if (acao === 'itens') {
+          const comum = tipo && plain(tipo) === 'comum';
+          const mag = comum ? [] : (await dados('itens-magicos')).filter((x) => (!tipo || plain(x.tipo).startsWith(plain(tipo))) && (!raridade || plain(x.raridade) === plain(raridade)) && (!busca || plain(x.nome + ' ' + x.descricao).includes(plain(busca))));
+          const eq = (tipo && !comum) || raridade ? [] : (await dados('equipamento')).filter((x) => !busca || plain(x.nome + ' ' + (x.descricao || '')).includes(plain(busca)));
+          return { itens_magicos: mag.slice(0, 80).map((x) => ({ nome: x.nome, tipo: x.tipo, raridade: x.raridade, sintonia: x.sintonia })), equipamento: eq.slice(0, 80).map((x) => ({ nome: x.nome, categoria: x.cat, preco: x.preco, peso_kg: x.peso })), dica: 'Use ler com pagina = nome do item para a descrição.' };
+        }
+        const [w, st] = await Promise.all([call('GET', '/api/wiki'), state()]);
+        const mid = mesa ? findMesa(st, mesa).id : null;
+        const pags = w.paginas.filter((p) => !mid || p.mesa === mid);
+        const mesaDe = (p) => mesaName(st, p.mesa);
+        if (acao === 'listar') {
+          return {
+            regras: w.base.map((p) => ({ pagina: p.slug, titulo: p.titulo, categoria: p.cat, resumo: p.resumo })),
+            paginas_das_mesas: pags.map((p) => ({ id: p.id, mesa: mesaDe(p), titulo: p.titulo, categoria: p.cat || null, liberada: p.lib })),
+          };
+        }
+        if (acao === 'ler') {
+          let p;
+          try { p = acharPagina(w.base, pags, pagina); } catch (e) {
+            // não é página: procura uma magia, item mágico ou equipamento com esse nome (em português ou inglês)
+            for (const n of ['magias', 'itens-magicos', 'equipamento']) {
+              const x = (await dados(n)).find((y) => plain(y.nome) === plain(pagina) || plain(y.en || '') === plain(pagina));
+              if (x) { const { slug, descricao, ...resto } = x; return { lista: n, ...resto, descricao }; }
+            }
+            throw e;
+          }
+          const texto = secao ? secaoDe(p.texto, secao) : p.texto;
+          if (secao && !texto) fail(`A página "${p.titulo}" não tem a seção "${secao}". Seções: ${titulosDe(p.texto).join(', ')}.`);
+          return { titulo: p.titulo, ...(p.slug ? { origem: 'regras da suíte', pagina: p.slug } : { origem: 'wiki da mesa ' + mesaDe(p), id: p.id, liberada: p.lib, categoria: p.cat || null }), ...(secao ? { secao } : {}), texto };
+        }
+        if (acao === 'buscar') {
+          const termos = plain(busca).split(/\s+/).filter((t) => t.length > 2);
+          if (!termos.length) fail('Informe ao menos uma palavra com três letras ou mais em "busca".');
+          const achados = [];
+          for (const p of [...(mid ? [] : w.base), ...pags]) {
+            for (const s of secoesDe(p.texto)) {
+              const n = plain(s.texto);
+              if (!termos.every((t) => n.includes(t) || plain(s.titulo).includes(t))) continue;
+              achados.push({ titulo: p.titulo, ...(p.slug ? { pagina: p.slug } : { id: p.id, mesa: mesaDe(p) }), secao: s.titulo || null, trecho: s.texto.replace(/\s+/g, ' ').slice(0, 300) });
+            }
+          }
+          if (!mid) {
+            for (const n of ['magias', 'itens-magicos', 'equipamento']) {
+              for (const x of await dados(n)) {
+                if (termos.every((t) => plain(x.nome + ' ' + (x.en || '') + ' ' + (x.descricao || '')).includes(t))) achados.push({ titulo: x.nome, lista: n, trecho: String(x.descricao || x.preco || '').replace(/s+/g, ' ').slice(0, 300) });
+              }
+            }
+          }
+          return { busca, resultados: achados.slice(0, 15), ...(achados.length > 15 ? { mais: achados.length - 15 } : {}) };
+        }
+        fail('Ação desconhecida: use listar, ler, buscar, magias ou itens.');
+      },
+    },
+    {
+      name: 'escrever_wiki',
+      description: 'Mestre da mesa: escreve na wiki da mesa. criar (mesa, titulo, texto, categoria), editar (pagina, e titulo/texto/categoria; "anexar" acrescenta texto ao fim, bom para o diário de sessões), liberar ou ocultar (pagina) para os jogadores, apagar (pagina; não dá para desfazer, confirme antes). Páginas novas nascem ocultas. O texto é Markdown simples: ## seções, **negrito**, listas, tabelas e [[links]] para outras páginas ou regras (ex.: [[condicoes#caido]]). Trechos entre ":::mestre" e ":::" só o mestre vê, mesmo numa página liberada; ":::leitura" marca texto para ler em voz alta.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          acao: { type: 'string', enum: ['criar', 'editar', 'liberar', 'ocultar', 'apagar'] },
+          mesa: { type: 'string', description: 'criar: id ou nome da mesa' },
+          pagina: { type: 'string', description: 'Título ou id da página' },
+          titulo: { type: 'string' },
+          categoria: { type: 'string', description: 'Ex.: Lugares, Personagens, Regras da casa, Sessões' },
+          texto: { type: 'string', description: 'Substitui o texto inteiro' },
+          anexar: { type: 'string', description: 'editar: texto acrescentado ao fim da página' },
+        },
+        required: ['acao'],
+      },
+      async run({ acao, mesa, pagina, titulo, categoria, texto, anexar }) {
+        const st = await state();
+        if (acao === 'criar') {
+          const m = findMesa(st, mesa || (st.mesas.filter((x) => x.mestre === st.me.id).length === 1 ? st.mesas.find((x) => x.mestre === st.me.id).id : ''));
+          const p = await call('POST', '/api/wiki', { mesa: m.id, titulo, cat: categoria || '', texto: texto || anexar || '', lib: false });
+          return { criada: p.titulo, id: p.id, mesa: m.nome, liberada: false };
+        }
+        const w = await call('GET', '/api/wiki?base=0');
+        const mid = mesa ? findMesa(st, mesa).id : null;
+        const p = acharPagina([], w.paginas.filter((x) => !mid || x.mesa === mid), pagina);
+        if (acao === 'apagar') { await call('DELETE', `/api/wiki/${p.id}`); return { apagada: p.titulo }; }
+        const body = {};
+        if (acao === 'liberar' || acao === 'ocultar') body.lib = acao === 'liberar';
+        else if (acao === 'editar') {
+          if (titulo !== undefined) body.titulo = titulo;
+          if (categoria !== undefined) body.cat = categoria;
+          if (texto !== undefined) body.texto = texto;
+          if (anexar) body.texto = `${(texto !== undefined ? texto : p.texto).replace(/\s+$/, '')}\n\n${anexar}`;
+          if (!Object.keys(body).length) fail('Nada para mudar: informe titulo, categoria, texto ou anexar.');
+        } else fail('Ação desconhecida: use criar, editar, liberar, ocultar ou apagar.');
+        const r = await call('PUT', `/api/wiki/${p.id}`, body);
+        return { pagina: r.titulo, id: r.id, liberada: r.lib, caracteres: r.texto.length };
+      },
+    },
   ];
+  // ---------- wiki ----------
+  function acharPagina(base, pags, ref) {
+    if (!ref) fail('Informe a página (endereço da regra, título ou id).');
+    const r = plain(ref).replace(/\s+/g, '-');
+    const hit = pags.find((p) => p.id === ref) || base.find((p) => p.slug === ref || p.slug === r)
+      || pags.find((p) => plain(p.titulo) === plain(ref)) || base.find((p) => plain(p.titulo) === plain(ref));
+    if (hit) return hit;
+    const parte = [...pags, ...base].filter((p) => plain(p.titulo).includes(plain(ref)));
+    if (parte.length === 1) return parte[0];
+    if (parte.length > 1) fail(`Mais de uma página combina com "${ref}": ${parte.map((p) => p.titulo).join('; ')}.`);
+    fail(`Página "${ref}" não encontrada. Use a ação listar para ver as páginas.`);
+  }
+  // divide o texto pelas seções (## e ###); a primeira parte, antes de qualquer título, fica sem título
+  function secoesDe(texto) {
+    const out = [{ titulo: '', nivel: 0, texto: '' }];
+    for (const l of String(texto || '').split('\n')) {
+      const m = /^(#{1,6})\s+(.*?)\s*#*$/.exec(l);
+      if (m) out.push({ titulo: m[2].replace(/[*_`]/g, ''), nivel: m[1].length, texto: '' });
+      else out[out.length - 1].texto += l + '\n';
+    }
+    return out.filter((s) => s.titulo || s.texto.trim());
+  }
+  const titulosDe = (texto) => secoesDe(texto).map((s) => s.titulo).filter(Boolean);
+  function secaoDe(texto, ref) {
+    const ss = secoesDe(texto), alvo = plain(ref).replace(/[^a-z0-9]+/g, '-');
+    const i = ss.findIndex((s) => s.titulo && plain(s.titulo).replace(/[^a-z0-9]+/g, '-') === alvo);
+    if (i < 0) return '';
+    let out = ss[i].texto;
+    for (let j = i + 1; j < ss.length && ss[j].nivel > ss[i].nivel; j++) out += `${'#'.repeat(ss[j].nivel)} ${ss[j].titulo}\n${ss[j].texto}`;
+    return out.trim();
+  }
+
   if (mcall) tools.push(...createMapTools(mcall));
   return tools;
 }
@@ -647,7 +797,7 @@ function createMcp(tools) {
           protocolVersion: PROTOCOLS.includes(params?.protocolVersion) ? params.protocolVersion : PROTOCOLS[0],
           capabilities: { tools: {} },
           serverInfo: { name: 'suite-dnd', version: '1.0.0' },
-          instructions: 'Acesso às fichas de D&D 5e, às mesas e aos mapas do app da rede de casa. Use "estado" para ver mesas e fichas e "ver_mapa" para ver os mapas; fichas, mesas, mapas e tokens podem ser indicados pelo nome, e posições no mapa são coluna e linha (ex.: C7, 1 quadrado = 1,5 m). As regras de acesso do app valem: o assistente só vê e muda o que a conta dele pode.',
+          instructions: 'Acesso às fichas de D&D 5e, às mesas e aos mapas do app da rede de casa. Use "estado" para ver mesas e fichas e "ver_mapa" para ver os mapas; fichas, mesas, mapas e tokens podem ser indicados pelo nome, e posições no mapa são coluna e linha (ex.: C7, 1 quadrado = 1,5 m). Use "wiki" para consultar as regras de D&D 5e e as páginas da mesa (cenário, NPCs, regras da casa) e "escrever_wiki" para registrar o que aconteceu. As regras de acesso do app valem: o assistente só vê e muda o que a conta dele pode.',
         });
       case 'ping': return reply({});
       case 'tools/list': return reply({ tools: tools.map(({ name, description, inputSchema }) => ({ name, description, inputSchema })) });
