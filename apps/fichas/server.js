@@ -22,7 +22,7 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 const TOKEN_PREFIX = 'fdnd_';
 const AUDIT_MAX = 5000; // registros de auditoria guardados no total (os mais antigos saem)
 const TEMAS = ['auto', 'claro', 'escuro'];
-const ABAS = ['principal', 'combate', 'magias', 'itens', 'notas'];
+const ABAS = ['personagem', 'principal', 'combate', 'magias', 'itens', 'notas'];
 
 function createApp({ dataFile, mapasUrl = null, wikiDir = WIKI_DIR }) {
   let db = { users: {}, sessions: {}, mesas: {}, chars: {}, tokens: {}, audit: [], wiki: {}, wikiImg: {} };
@@ -107,7 +107,7 @@ function createApp({ dataFile, mapasUrl = null, wikiDir = WIKI_DIR }) {
   }
   function prefsOf(u) {
     const p = (db.users[u] && db.users[u].prefs) || {};
-    return { tema: TEMAS.includes(p.tema) ? p.tema : 'auto', abrirTravada: p.abrirTravada !== false, abaInicial: ABAS.includes(p.abaInicial) ? p.abaInicial : 'principal' };
+    return { tema: TEMAS.includes(p.tema) ? p.tema : 'auto', abrirTravada: p.abrirTravada !== false, abaInicial: ABAS.includes(p.abaInicial) ? p.abaInicial : 'personagem' };
   }
 
   // ---------- tokens de conta e auditoria ----------

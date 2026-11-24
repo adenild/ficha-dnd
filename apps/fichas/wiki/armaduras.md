@@ -28,7 +28,7 @@ A **CA** sai da armadura. Sem armadura, é 10 + modificador de Destreza.
 - Uma armadura pesada sem a Força pedida reduz o deslocamento em 3 m.
 - Algumas classes têm outra conta de CA sem armadura: o bárbaro soma Destreza e Constituição; o monge, Destreza e Sabedoria.
 
-Lembre de atualizar o campo **CA** na aba Combate quando trocar de armadura ou pegar o escudo.
+Na aba **Herói** da ficha, equipe a armadura e o escudo no boneco e ligue **CA auto**: a CA passa a seguir o equipamento. Com a CA manual, lembre de atualizar o campo **CA** na aba Combate quando trocar de armadura ou pegar o escudo.
 
 ## Vestir e tirar
 

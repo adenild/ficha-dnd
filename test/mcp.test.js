@@ -97,6 +97,49 @@ test('editar mescla objetos e criar usa padrões', async () => {
   assert.ok((await tool('apagar_ficha', { ficha: 'Goblin' })).apagada);
 });
 
+test('subir de nível: nível do mestre, classe, PV e aumento de atributo', async () => {
+  assert.match((await tool('acao_ficha', { ficha: 'Thorin', acao: 'subir_nivel' })).erro, /classe/);
+  assert.equal((await tool('acao_ficha', { ficha: 'Thorin', acao: 'conceder_nivel' })).niveis_concedidos, 1);
+  assert.match((await tool('acao_ficha', { ficha: 'Thorin', acao: 'subir_nivel', classe: 'Guerreiro', pv: 'media' })).erro, /aumento de atributo/, 'nível 4 do guerreiro pede o aumento');
+  const r = await tool('acao_ficha', { ficha: 'Thorin', acao: 'subir_nivel', classe: 'guerreiro', pv: 'media', asi: { forca: 2 } });
+  assert.equal(r.nivel, 4);
+  assert.equal(r.pv_ganhos, 8, 'média do d10 (6) + Con (+2)');
+  const f = await tool('ver_ficha', { ficha: 'Thorin' });
+  assert.equal(f.dados.clsId, 'guerreiro');
+  assert.equal(f.dados.cls, 'Guerreiro');
+  assert.equal(f.dados.hp.max, 33);
+  assert.equal(f.dados.ab.for, 12);
+  assert.equal(f.dados.hd.die, 'd10');
+  assert.equal(f.dados.nivelLib, 0, 'o nível concedido foi usado');
+  assert.equal(f.calculado.pode_subir_de_nivel, false);
+  assert.equal(f.calculado.xp_proximo_nivel, 6500);
+  assert.deepEqual(f.dados.historico.at(-1).asi, { for: 2 });
+
+  const k = await tool('criar_ficha', { dados: { name: 'Kobold', cls: 'Ladino' } });
+  assert.match((await tool('acao_ficha', { ficha: k.id, acao: 'subir_nivel' })).erro, /Faltam 300 XP/, 'fora da mesa do mestre, precisa de XP');
+  assert.match((await tool('acao_ficha', { ficha: k.id, acao: 'conceder_nivel' })).erro, /mestre da mesa/);
+  await tool('editar_ficha', { ficha: k.id, alteracoes: { xp: 300 } });
+  const k2 = await tool('acao_ficha', { ficha: k.id, acao: 'subir_nivel', pv: '3' });
+  assert.equal(k2.nivel, 2);
+  assert.equal(k2.pv_ganhos, 3);
+  assert.ok(k2.habilidades_novas.some((h) => /Ação Ardilosa/.test(h)));
+  await tool('apagar_ficha', { ficha: k.id });
+});
+
+test('equipar muda a CA automática', async () => {
+  await tool('editar_ficha', { ficha: 'Thorin', alteracoes: { ab: { des: 14 }, acAuto: true, items: [{ n: 'Cota de malha', q: 1, w: 27.5 }, { n: 'Escudo', q: 1, w: 3 }, { n: 'Corda', q: 1, w: 5 }] } });
+  assert.equal((await tool('ver_ficha', { ficha: 'Thorin' })).dados.ac, 12, 'sem nada equipado: 10 + Des');
+  assert.equal((await tool('acao_ficha', { ficha: 'Thorin', acao: 'equipar', item: 'cota' })).ca_pelo_equipamento, 16);
+  const e = await tool('acao_ficha', { ficha: 'Thorin', acao: 'equipar', item: 'Escudo' });
+  assert.equal(e.equipado, 'Escudo em Mão secundária');
+  assert.equal(e.ca, 18);
+  const f = await tool('ver_ficha', { ficha: 'Thorin' });
+  assert.equal(f.calculado.equipado.armadura, 'Cota de malha');
+  assert.match((await tool('acao_ficha', { ficha: 'Thorin', acao: 'equipar', item: 'Corda' })).erro, /slot/, 'item sem slot óbvio pede o slot');
+  assert.equal((await tool('acao_ficha', { ficha: 'Thorin', acao: 'desequipar', slot: 'mao2' })).ca, 16);
+  await tool('editar_ficha', { ficha: 'Thorin', alteracoes: { acAuto: false, ac: 16, hp: { max: 25, cur: 20 } } }); // o teste dos mapas lê os PV
+});
+
 test('rolagens', async () => {
   const x = await tool('rolar', { expressao: '2d6+3' });
   assert.ok(x.total >= 5 && x.total <= 15);

@@ -1,0 +1,15 @@
+[
+{"nome":"Acolchoada","tipo":"leve","ca":11,"desMax":null,"forca":0,"furtividade":true,"peso":4},
+{"nome":"Couro","tipo":"leve","ca":11,"desMax":null,"forca":0,"furtividade":false,"peso":5},
+{"nome":"Couro batido","tipo":"leve","ca":12,"desMax":null,"forca":0,"furtividade":false,"peso":6.5},
+{"nome":"Gibão de peles","tipo":"media","ca":12,"desMax":2,"forca":0,"furtividade":false,"peso":6},
+{"nome":"Camisão de malha","tipo":"media","ca":13,"desMax":2,"forca":0,"furtividade":false,"peso":10},
+{"nome":"Brunea","tipo":"media","ca":14,"desMax":2,"forca":0,"furtividade":true,"peso":22.5},
+{"nome":"Peitoral","tipo":"media","ca":14,"desMax":2,"forca":0,"furtividade":false,"peso":10},
+{"nome":"Meia-armadura","tipo":"media","ca":15,"desMax":2,"forca":0,"furtividade":true,"peso":20},
+{"nome":"Cota de anéis","tipo":"pesada","ca":14,"desMax":0,"forca":0,"furtividade":true,"peso":20},
+{"nome":"Cota de malha","tipo":"pesada","ca":16,"desMax":0,"forca":13,"furtividade":true,"peso":27.5},
+{"nome":"Cota de talas","tipo":"pesada","ca":17,"desMax":0,"forca":15,"furtividade":true,"peso":30},
+{"nome":"Placas","tipo":"pesada","ca":18,"desMax":0,"forca":15,"furtividade":true,"peso":32.5},
+{"nome":"Escudo","tipo":"escudo","ca":2,"desMax":null,"forca":0,"furtividade":false,"peso":3}
+]

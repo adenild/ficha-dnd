@@ -101,6 +101,34 @@ O volume antigo fica como cópia de segurança. Quando tiver certeza de que est�
 
 A página **Personagens** lista os seus personagens com PV, CA, a mesa e, se estiverem num mapa, em qual. Abrir um personagem leva à ficha dele dentro da mesa em que ele está (o endereço fica `#mesa/<mesa>/ficha/<ficha>`), e o cabeçalho da ficha tem atalhos para a mesa e para o personagem no mapa.
 
+## Herói: tela de personagem e níveis
+
+A ficha abre na aba **Herói**, uma tela de personagem no estilo dos jogos online. Ela mostra:
+
+- **O personagem:** o medalhão com o nível, a barra de experiência até o próximo nível e o campo **Somar XP**.
+- **Os atributos:** toque num atributo para rolar o teste.
+- **O equipamento:** um boneco com os lugares do corpo (cabeça, pescoço, capa, armadura, luvas, cinto, botas, as duas mãos e dois anéis). Toque num lugar para pôr ou tirar um item da mochila. Armaduras, escudos e armas vão para o lugar certo sozinhos, e a arma na mão mostra o dano.
+- **A CA:** com **CA auto**, ela segue a armadura, o escudo, a Destreza e a defesa sem armadura do bárbaro e do monge. Um bônus no nome (`Escudo +1`) também conta. Com **CA manual**, a ficha mostra quanto seria e você mantém o seu valor.
+- **Combate, magias e habilidades:** os números de combate, os atalhos dos ataques, os espaços de magia com as magias preparadas, e as habilidades da classe nível a nível.
+
+### Subir de nível
+
+O botão **Subir para o nível N** acende quando o XP chega ao próximo nível ou quando o mestre concede um nível. O mestre concede pelo botão **Conceder um nível**, na ficha de um jogador da mesa dele; isso serve para mesas que sobem por marcos. O assistente leva o jogador passo a passo:
+
+1. **Classe:** só aparece se a ficha ainda não tem uma das 12 classes.
+2. **Pontos de vida:** rolar o dado ou usar a média, já com a Constituição.
+3. **Aumento de atributo ou talento:** nos níveis em que a classe ganha um.
+4. **Subclasse:** no nível em que a classe escolhe a dela.
+5. **Habilidades novas:** o que muda no nível, a proficiência e os espaços de magia.
+6. **Magias:** as magias novas da classe, com busca.
+7. **Resumo:** o antes e o depois, para confirmar.
+
+Ao confirmar, a ficha muda de uma vez: o nível, os PV, o dado de vida, os atributos e os espaços de magia. As habilidades vão para Características e talentos, e o nível fica no **Histórico de níveis**. O botão desfazer volta atrás.
+
+Os dados das classes, armas e armaduras estão em `apps/fichas/wiki/dados/` (`classes.json`, `armas.json`, `armaduras.json`). As regras ficam em `apps/fichas/public/regras.js`, que o app e o MCP usam igual.
+
+A trava de nível vale no app e no MCP. O servidor guarda a ficha como ela vier, então o dono ainda pode mudar o nível à mão na aba Principal.
+
 ## Configurações
 
 O botão **Configurações** (ou **Ajustes**, no celular) abre duas abas:
@@ -177,7 +205,7 @@ Na mesma tela você pausa um token (as chamadas passam a ser recusadas até reto
 | `estado` | Mesas, membros, códigos de convite e resumo das fichas visíveis |
 | `ver_ficha` | Ficha completa com os valores calculados (modificadores, perícias, CD de magia...) |
 | `criar_ficha` / `editar_ficha` / `apagar_ficha` | Cria, altera em parte ou apaga uma ficha |
-| `acao_ficha` | Dano, cura, PV temporários, dado de vida, descanso longo, espaços de magia, salvaguarda contra morte, condições e inspiração |
+| `acao_ficha` | Dano, cura, PV temporários, dado de vida, descanso longo, espaços de magia, salvaguarda contra morte, condições e inspiração; subir de nível (com PV, aumento de atributo ou talento, subclasse e magias), conceder um nível (mestre), equipar e desequipar itens |
 | `rolar` | Rola uma expressão (`2d6+3`) ou um teste da ficha (perícia, salvaguarda, ataque com dano...), com vantagem ou desvantagem |
 | `liberar_ficha` | Mestre libera ou oculta uma ficha para os jogadores |
 | `mesa` | Cria, entra, renomeia, troca o código, remove jogador, sai ou apaga uma mesa |
@@ -211,13 +239,13 @@ O token usado pelo MCP precisa ser de uma conta **mestre da mesa**, porque só o
 npm test
 ```
 
-Os testes cobrem as regras de acesso: cadastro, mesas, código de convite, fichas ocultas e liberadas, edição pelo mestre, tokens de conta (pausar, remover e auditoria), preferências da conta, configurações da mesa e persistência. Também cobrem a wiki (páginas ocultas e liberadas, trechos do mestre, imagens e limites), o app de mapas junto com o de fichas (conta, mapas ocultos, quem move qual token, saúde dos monstros, imagem de fundo, localizações e quem pode embutir os mapas) e o servidor MCP de ponta a ponta, inclusive um encontro montado e jogado no mapa.
+Os testes cobrem as regras de acesso: cadastro, mesas, código de convite, fichas ocultas e liberadas, edição pelo mestre, tokens de conta (pausar, remover e auditoria), preferências da conta, configurações da mesa e persistência. Também cobrem a wiki (páginas ocultas e liberadas, trechos do mestre, imagens e limites), o app de mapas junto com o de fichas (conta, mapas ocultos, quem move qual token, saúde dos monstros, imagem de fundo, localizações e quem pode embutir os mapas) e o servidor MCP de ponta a ponta, inclusive um encontro montado e jogado no mapa. As regras de nível e equipamento (experiência, espaços de magia por tipo de conjurador, subir de nível, aumento de atributo e CA pelo equipamento) e os dados das classes, armas e armaduras também têm testes.
 
 ## Estrutura
 
 ```
 suite.js              liga fichas e mapas num processo só (npm start)
-apps/fichas/          app de fichas: server.js (API, regras de acesso, eventos ao vivo) e public/ (página, ficha, mesas, wiki.js)
+apps/fichas/          app de fichas: server.js (API, regras de acesso, eventos ao vivo) e public/ (página, ficha, mesas, wiki.js, regras.js)
 apps/fichas/wiki/     páginas de regras da wiki (Markdown, baseadas no SRD 5.1)
 apps/mapas/           app de mapas: server.js (API, regras de acesso, eventos ao vivo) e public/ (editor em canvas)
 apps/mcp/server.js    servidor MCP para assistentes (fala com as APIs de fichas e mapas)

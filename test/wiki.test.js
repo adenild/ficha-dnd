@@ -143,6 +143,32 @@ test('listas: magias, itens mágicos e equipamento vêm completas e consistentes
   assert.ok(paginas.some((p) => p.slug === 'antecedentes'));
 });
 
+test('listas: classes, armas e armaduras batem com as regras', async () => {
+  const pegar = async (n) => (await ana('GET', '/api/wiki/dados/' + n)).body;
+  const classes = await pegar('classes');
+  const NOMES = ['Bárbaro', 'Bardo', 'Bruxo', 'Clérigo', 'Druida', 'Feiticeiro', 'Guerreiro', 'Ladino', 'Mago', 'Monge', 'Paladino', 'Patrulheiro'];
+  assert.deepEqual(classes.map((c) => c.nome).sort(), [...NOMES].sort());
+  const quadro = (await ana('GET', '/api/wiki')).body.base.find((p) => p.slug === 'classes').texto;
+  const ATR = ['for', 'des', 'con', 'int', 'sab', 'car'];
+  for (const c of classes) {
+    assert.deepEqual(Object.keys(c.niveis).map(Number), Array.from({ length: 20 }, (_, i) => i + 1), `${c.nome}: níveis 1 a 20`);
+    assert.ok(c.niveis[1].length, `${c.nome}: habilidades no 1º nível`);
+    assert.ok(c.niveis[c.subclasseNivel].some((h) => h.sub), `${c.nome}: subclasse no nível ${c.subclasseNivel}`);
+    assert.ok(new RegExp(`\\| ${c.nome} \\| ${c.dado} \\|`).test(quadro), `${c.nome}: dado de vida igual ao quadro da wiki`);
+    assert.ok(c.salvaguardas.length === 2 && c.salvaguardas.every((a) => ATR.includes(a)), `${c.nome}: salvaguardas`);
+    assert.ok([null, 'completo', 'meio', 'pacto'].includes(c.conjuracao), `${c.nome}: conjuração`);
+    assert.ok(!c.conjuracao || ATR.includes(c.atributoMagia), `${c.nome}: atributo de magia`);
+    for (const k of ['truques', 'conhecidas']) if (c[k]) assert.ok(c[k].length === 20 && c[k].every((v, i) => !i || v >= c[k][i - 1]), `${c.nome}: ${k}`);
+    assert.ok(c.asi.every((n) => n >= 1 && n <= 20), `${c.nome}: aumentos de atributo`);
+  }
+  const armaduras = await pegar('armaduras'), armas = await pegar('armas');
+  const tab = (slug) => (paginas) => paginas.find((p) => p.slug === slug).texto;
+  const paginas = (await ana('GET', '/api/wiki')).body.base;
+  for (const a of armaduras) assert.ok(tab('armaduras')(paginas).includes(`| ${a.nome} |`), `armadura ${a.nome} está na tabela`);
+  for (const a of armas) assert.ok(tab('armas')(paginas).includes(`| ${a.nome} |`), `arma ${a.nome} está na tabela`);
+  assert.equal(armaduras.find((a) => a.nome === 'Cota de malha').ca, 16);
+});
+
 test('os links entre as regras apontam para páginas e seções que existem', async () => {
   const paginas = (await ana('GET', '/api/wiki')).body.base;
   const slug = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[*_`[\]]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
