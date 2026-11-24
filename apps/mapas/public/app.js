@@ -100,7 +100,7 @@ function listen() {
   es1.onopen = () => setConn(true);
   es1.onerror = () => setConn(false);
   es2 = new EventSource('/api/fichas/events');
-  es2.onmessage = () => soon(false);
+  es2.onmessage = (e) => { if (e.data !== 'wiki') soon(false); }; // mudanças na wiki não mexem no mapa
 }
 function soon(mapa) {
   soonMapa = soonMapa || mapa;

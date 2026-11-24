@@ -55,7 +55,7 @@ test('handshake e lista de ferramentas', async () => {
   assert.equal(init.result.protocolVersion, '2025-06-18');
   proc.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
   const names = (await rpc('tools/list')).result.tools.map((t) => t.name);
-  for (const n of ['estado', 'ver_ficha', 'criar_ficha', 'editar_ficha', 'acao_ficha', 'rolar', 'liberar_ficha', 'apagar_ficha', 'mesa', 'ver_mapa', 'gerenciar_mapa', 'pintar_mapa', 'colocar_token', 'mover_token', 'editar_token', 'medir']) assert.ok(names.includes(n), n);
+  for (const n of ['estado', 'ver_ficha', 'criar_ficha', 'editar_ficha', 'acao_ficha', 'rolar', 'liberar_ficha', 'apagar_ficha', 'mesa', 'ver_mapa', 'gerenciar_mapa', 'pintar_mapa', 'colocar_token', 'mover_token', 'editar_token', 'medir', 'wiki', 'escrever_wiki']) assert.ok(names.includes(n), n);
   assert.equal((await rpc('metodo/inexistente')).error.code, -32601);
 });
 
@@ -156,3 +156,43 @@ test('mapas: o mestre monta o encontro e move os tokens', async () => {
   assert.equal((await tool('ver_mapa', { mapa: 'Cripta', grade: false })).tokens.length, 2);
 });
 
+
+test('wiki: o assistente consulta as regras e escreve na wiki da mesa', async () => {
+  const lista = await tool('wiki', { acao: 'listar' });
+  assert.ok(lista.regras.some((p) => p.pagina === 'condicoes'));
+  const caido = await tool('wiki', { acao: 'ler', pagina: 'condicoes', secao: 'Caído' });
+  assert.match(caido.texto, /rastejando/);
+  assert.ok(!/## Cego/.test(caido.texto), 'só a seção pedida');
+  assert.match((await tool('wiki', { acao: 'ler', pagina: 'condicoes', secao: 'Voando' })).erro, /Seções: Agarrado/);
+  const busca = await tool('wiki', { acao: 'buscar', busca: 'ataque de oportunidade' });
+  assert.ok(busca.resultados.some((r) => r.pagina === 'combate' && r.secao === 'Ataques de oportunidade'));
+
+  const nova = await tool('escrever_wiki', { acao: 'criar', mesa: 'Mesa de teste', titulo: 'Diário', categoria: 'Sessões', texto: '## Sessão 1\nO grupo chegou à cripta.\n\n:::mestre\nO esqueleto guarda a chave.\n:::' });
+  assert.equal(nova.liberada, false);
+  await tool('escrever_wiki', { acao: 'editar', pagina: 'diário', anexar: '## Sessão 2\nA porta abriu.' });
+  const lida = await tool('wiki', { acao: 'ler', pagina: 'Diário' });
+  assert.match(lida.texto, /Sessão 1[\s\S]*Sessão 2/);
+  assert.match((await tool('escrever_wiki', { acao: 'criar', mesa: 'Mesa de teste', titulo: 'diario' })).erro, /Já existe/);
+
+  const anaWiki = () => fetch(base + '/api/wiki?base=0', { headers: { cookie: ana.cookie } }).then((r) => r.json());
+  assert.deepEqual((await anaWiki()).paginas, [], 'oculta até liberar');
+  await tool('escrever_wiki', { acao: 'liberar', pagina: 'Diário' });
+  const vista = (await anaWiki()).paginas[0];
+  assert.match(vista.texto, /A porta abriu/);
+  assert.ok(!vista.texto.includes('chave'), 'a jogadora não vê o trecho do mestre');
+  assert.equal((await tool('escrever_wiki', { acao: 'apagar', pagina: 'Diário' })).apagada, 'Diário');
+});
+
+test('wiki: magias e itens pelo assistente', async () => {
+  const m = await tool('wiki', { acao: 'magias', classe: 'mago', nivel: 3 });
+  assert.ok(m.magias.some((x) => x.nome === 'Bola de Fogo'));
+  assert.ok(m.magias.every((x) => x.nivel === 3 && x.classes.includes('Mago')));
+  const bola = await tool('wiki', { acao: 'ler', pagina: 'Fireball' });
+  assert.equal(bola.nome, 'Bola de Fogo');
+  assert.equal(bola.lista, 'magias');
+  assert.match(bola.descricao, /8d6/);
+  const it = await tool('wiki', { acao: 'itens', tipo: 'Anel', raridade: 'raro' });
+  assert.ok(it.itens_magicos.length && it.itens_magicos.every((x) => x.tipo.startsWith('Anel') && x.raridade === 'raro'));
+  assert.ok((await tool('wiki', { acao: 'itens', tipo: 'comum', busca: 'corda' })).equipamento.some((x) => x.peso_kg === 5));
+  assert.ok((await tool('wiki', { acao: 'buscar', busca: 'bola de fogo' })).resultados.some((r) => r.lista === 'magias'));
+});

@@ -11,7 +11,7 @@ const COINS=[['pc','PC'],['pp','PP'],['pe','PE'],['po','PO'],['pl','PL']];
 
 /* ---------- estado ---------- */
 const MUT=new Set(['sv','sk','insp','cond','ds','slot','prep','add','rm','dmg','heal','hd','long']);
-const S={me:null,mesas:[],chars:new Map(),view:null,locked:true,mode:0,tab:'principal',page:'inicio',mesaAtual:null,mesaTab:'mesa',alvo:null,loc:new Map(),locOk:false,cfgTab:'conta',cfgMesa:null,online:true,authMode:'login',pending:new Set(),busy:new Set()};
+const S={me:null,mesas:[],chars:new Map(),view:null,locked:true,mode:0,tab:'principal',page:'inicio',mesaAtual:null,mesaTab:'mesa',alvo:null,loc:new Map(),locOk:false,cfgTab:'conta',cfgMesa:null,online:true,authMode:'login',pending:new Set(),busy:new Set(),wikiSel:null,wikiQ:'',wEdit:null};
 let hist=[],lastPush=0,toastT,pendR=false,arm=null,refreshT=null,es=null;
 const saveT={};
 const $=id=>document.getElementById(id);
@@ -36,7 +36,7 @@ function applyState(st){
 async function refresh(){try{applyState(await api('GET','/api/state'));setConn(true);softRender();loadLoc()}catch(e){if(e.status===401)return showAuth();setConn(false)}}
 function refreshSoon(){clearTimeout(refreshT);refreshT=setTimeout(refresh,250)}
 function listen(){if(es)es.close();if(!window.EventSource)return setInterval(refresh,8000);
-  es=new EventSource('/api/events');es.onmessage=refreshSoon;es.onopen=()=>{setConn(true);refreshSoon()};es.onerror=()=>setConn(false)}
+  es=new EventSource('/api/events');es.onmessage=e=>{if(e.data==='wiki'){WK.stale=true;if(naWikiAgora())loadWiki()}else refreshSoon()};es.onopen=()=>{setConn(true);refreshSoon();WK.stale=true;if(naWikiAgora())loadWiki()};es.onerror=()=>setConn(false)}
 function setConn(ok){if(S.online===ok)return;S.online=ok;document.body.classList.toggle('offline',!ok);if(S.me&&S.page==='ficha'&&C())head();status()}
 function statusText(){return S.online?'Conectado ao servidor da mesa':'Sem conexão com o servidor: as mudanças serão enviadas quando ele voltar'}
 function status(){const s=$('st');if(s)s.textContent=statusText()}
@@ -69,11 +69,11 @@ async function flushChar(id){const c=S.chars.get(id);if(!c)return;
   S.busy.delete(id)}
 async function act(method,url,body,okMsg){try{const st=await api(method,url,body);if(st&&st.me)applyState(st);setConn(true);render();if(okMsg)toast(`<div><b>${okMsg}</b></div>`);return true}
   catch(e){if(e.status===401)return showAuth();toast(`<div><b>${esc(e.message)}</b></div>`);return false}}
-window.addEventListener('beforeunload',e=>{if(S.pending.size){e.preventDefault();e.returnValue=''}});
+window.addEventListener('beforeunload',e=>{if(S.pending.size||(S.wEdit&&S.wEdit.dirty)){e.preventDefault();e.returnValue=''}});
 
 /* ---------- campos ---------- */
 function f(p,o={}){const c=C();const v=getP(c,p);const ro=(S.locked&&!o.live)||RO()?' readonly':'';
-  return `<input data-k="${p}"${o.n?' type="number" data-n':''} value="${esc(v)}"${o.ph?` placeholder="${esc(o.ph)}"`:''}${o.al?` aria-label="${esc(o.al)}"`:''}${ro}>`}
+  return `<input data-k="${p}"${o.n?' type="number" data-n':''} value="${esc(v)}"${o.ph?` placeholder="${esc(o.ph)}"`:''}${o.al?` aria-label="${esc(o.al)}"`:''}${o.list&&!ro?` list="${o.list}"`:''}${ro}>`}
 function ta(p,ph){return `<textarea data-k="${p}" placeholder="${esc(ph||'')}"${S.locked||RO()?' readonly':''}>${esc(getP(C(),p))}</textarea>`}
 function sel(p,opts){const v=getP(C(),p);return `<select data-k="${p}">${opts.map(([k,t])=>`<option value="${esc(k)}"${String(k)===String(v)?' selected':''}>${esc(t)}</option>`).join('')}</select>`}
 const mod=s=>Math.floor(((+s||0)-10)/2);
@@ -84,7 +84,7 @@ function blank(n){return{id:'c'+uidGen(),name:n||'Novo personagem',mesa:'',cls:'
 function fix(c){const b=blank();const o=Object.assign(b,c);for(const k of['ab','hp','hd','death','coins','sv','sk'])o[k]=Object.assign({},b[k],c[k]||{});o.slots=Array.from({length:9},(_,i)=>Object.assign({max:0,used:0},(c.slots||[])[i]||{}));for(const k of['atk','spells','items','cond'])if(!Array.isArray(o[k]))o[k]=[];if(typeof o.mesa!=='string')o.mesa='';return o}
 function sample(){const c=blank('Lyra Vento-Frio');Object.assign(c,{cls:'Maga',level:5,race:'Alta elfa',bg:'Sábio',align:'Neutra e boa',xp:6500,ab:{for:8,des:14,con:13,int:18,sab:12,car:10},sv:{int:1,sab:1},sk:{arca:2,hist:1,inve:1,perc:1},ac:12,speed:9,hp:{max:27,cur:21,tmp:0},hd:{die:'d6',used:1},spAb:'int',
 atk:[{n:'Adaga',b:'+5',d:'1d4+2',t:'perfurante'},{n:'Raio de Fogo',b:'+7',d:'2d10',t:'fogo, 36 m'}],
-spells:[['Raio de Fogo',0],['Mãos Mágicas',0],['Luz',0],['Prestidigitação',0],['Escudo',1],['Mísseis Mágicos',1],['Armadura Arcana',1],['Detectar Magia',1],['Passo Nebuloso',2],['Teia',2],['Bola de Fogo',3],['Contramágica',3]].map(([n,l])=>({n,l,p:true})),
+spells:[['Raio de Fogo',0],['Mãos Mágicas',0],['Luz',0],['Prestidigitação',0],['Escudo Arcano',1],['Mísseis Mágicos',1],['Armadura Arcana',1],['Detectar Magia',1],['Passo Nebuloso',2],['Teia',2],['Bola de Fogo',3],['Contramágica',3]].map(([n,l])=>({n,l,p:true})),
 items:[{n:'Grimório',q:1,w:1.5},{n:'Bolsa de componentes',q:1,w:1},{n:'Adaga',q:2,w:.5},{n:'Mochila de estudioso',q:1,w:5},{n:'Poção de cura',q:2,w:.25}],
 coins:{pc:12,pp:15,pe:0,po:42,pl:0},profs:'Idiomas: comum, élfico, dracônico, anão.\nArmas: adagas, dardos, fundas, bordões, bestas leves.',
 feats:'Recuperação Arcana (1/dia): recupera espaços somando até 3 níveis num descanso curto.\nTradição Arcana: Escola de Evocação — Esculpir Magias.\nAncestral feérico, Visão no escuro (18 m), Transe.',
@@ -110,6 +110,8 @@ case'hpt':return (+c.hp.cur||0)+(+c.hp.tmp?'+'+c.hp.tmp:'');case'ac':return c.ac
 const d=k=>`<span data-d="${k}">${calc(k,C())}</span>`;
 const L=(t,inner,cls='')=>`<div class="${cls}"><label>${t}</label>${inner}</div>`;
 const card=(t,inner,extra='')=>`<section class="card"><h2>${t}${extra}</h2>${inner}</section>`;
+// "?" no título de um cartão da ficha: abre a regra na wiki (alvo: página ou página#seção)
+const aj=(alvo,nome)=>` <a class="aj" href="#wiki/${alvo.replace('#','/')}" title="Regras: ${esc(nome)}" aria-label="Regras: ${esc(nome)}">?</a>`;
 
 /* ---------- abas ---------- */
 function mesaField(c){const m=mesaOf(c.mesa);
@@ -118,34 +120,34 @@ function mesaField(c){const m=mesaOf(c.mesa);
   return L('Mesa',sel('mesa',[['','Sem mesa'],...S.mesas.map(m=>[m.id,m.nome])]),'span2')}
 function tPrincipal(c){
   const id=card('Identidade',`<div class="g2">${L('Nome',f('name'),'span2')}${mesaField(c)}${L('Classe',f('cls',{ph:'Ex.: Guerreiro'}))}${L('Nível',f('level',{n:1}))}${L('Raça',f('race'))}${L('Antecedente',f('bg'))}${L('Alinhamento',f('align'))}${L('XP',f('xp',{n:1}))}</div>`);
-  const abs=card('Atributos',`<div class="abs">${AB.map(([k,s,n])=>`<div class="ab"><button data-a="rl" data-v="mod:${k}" aria-label="Rolar ${n}"><span class="n">${s}</span><span class="m" data-d="mod:${k}">${calc('mod:'+k,c)}</span></button>${f('ab.'+k,{n:1,al:n})}</div>`).join('')}</div><p class="foot">Toque no modificador para rolar o teste.</p>`,`<small>Prof. ${d('prof')}</small>`);
-  const sv=card('Salvaguardas',`<div class="rows">${AB.map(([k,s,n])=>`<div class="row"><button class="dot ${c.sv[k]?'p1':''}" data-a="sv" data-v="${k}" aria-label="Proficiência em ${n}"><i></i></button><button class="rl" data-a="rl" data-v="save:${k}">${n}</button><span class="val" data-d="save:${k}">${calc('save:'+k,c)}</span></div>`).join('')}</div>`);
-  const sk=card('Perícias',`<div class="rows">${SK.map(([k,n,a])=>`<div class="row"><button class="dot p${c.sk[k]||0}" data-a="sk" data-v="${k}" aria-label="Proficiência em ${n}"><i></i></button><button class="rl" data-a="rl" data-v="skill:${k}">${n} <em>${ABN[a]}</em></button><span class="val" data-d="skill:${k}">${calc('skill:'+k,c)}</span></div>`).join('')}</div><p class="foot">Percepção passiva ${d('pp')}. Toque no círculo: proficiente, especialista, nenhum.</p>`);
+  const abs=card('Atributos'+aj('atributos','Atributos'),`<div class="abs">${AB.map(([k,s,n])=>`<div class="ab"><button data-a="rl" data-v="mod:${k}" aria-label="Rolar ${n}"><span class="n">${s}</span><span class="m" data-d="mod:${k}">${calc('mod:'+k,c)}</span></button>${f('ab.'+k,{n:1,al:n})}</div>`).join('')}</div><p class="foot">Toque no modificador para rolar o teste.</p>`,`<small>Prof. ${d('prof')}</small>`);
+  const sv=card('Salvaguardas'+aj('salvaguardas','Salvaguardas'),`<div class="rows">${AB.map(([k,s,n])=>`<div class="row"><button class="dot ${c.sv[k]?'p1':''}" data-a="sv" data-v="${k}" aria-label="Proficiência em ${n}"><i></i></button><button class="rl" data-a="rl" data-v="save:${k}">${n}</button><span class="val" data-d="save:${k}">${calc('save:'+k,c)}</span></div>`).join('')}</div>`);
+  const sk=card('Perícias'+aj('pericias','Perícias'),`<div class="rows">${SK.map(([k,n,a])=>`<div class="row"><button class="dot p${c.sk[k]||0}" data-a="sk" data-v="${k}" aria-label="Proficiência em ${n}"><i></i></button><button class="rl" data-a="rl" data-v="skill:${k}">${n} <em>${ABN[a]}</em></button><span class="val" data-d="skill:${k}">${calc('skill:'+k,c)}</span></div>`).join('')}</div><p class="foot">Percepção passiva ${d('pp')}. Toque no círculo: proficiente, especialista, nenhum.</p>`);
   const pr=card('Proficiências e idiomas',ta('profs','Armaduras, armas, ferramentas, idiomas'));
   return `<div class="cols"><div class="stackc">${abs}${sv}${pr}</div><div class="stackc">${sk}</div><div class="stackc">${id}</div></div>`}
 function tCombate(c){const lk=S.locked||RO();
-  const hp=card('Pontos de vida',`<div class="hpbig">${f('hp.cur',{n:1,live:1,al:'PV atuais'})}<span>/ ${lk?esc(c.hp.max):''}</span>${lk?'':f('hp.max',{n:1,al:'PV máximos'})}</div>
+  const hp=card('Pontos de vida'+aj('dano-e-cura','Dano, cura e morte'),`<div class="hpbig">${f('hp.cur',{n:1,live:1,al:'PV atuais'})}<span>/ ${lk?esc(c.hp.max):''}</span>${lk?'':f('hp.max',{n:1,al:'PV máximos'})}</div>
   <div class="g2" style="margin-bottom:10px">${L('PV temporários',f('hp.tmp',{n:1,live:1}))}${L('Dados de vida',`<div style="display:flex;gap:6px;align-items:center"><span class="val" data-d="hd" style="min-width:4ch;text-align:left">${calc('hd',c)}</span>${sel('hd.die',['d6','d8','d10','d12'].map(x=>[x,x]))}</div>`)}</div>
   ${RO()?'':`<div class="amt"><input id="amt" type="number" inputmode="numeric" placeholder="Valor" aria-label="Valor de dano ou cura"><button class="btn warn" data-a="dmg">Dano</button><button class="btn" data-a="heal">Cura</button></div>
   <div class="btns" style="margin-top:10px"><button class="btn sm" data-a="hd">Gastar dado de vida</button><button class="btn sm" data-a="long">Descanso longo</button></div>`}`);
-  const st=card('Defesa e movimento',`<div class="big3"><div><label>CA</label>${f('ac',{n:1})}</div><div><label>Iniciativa</label><button class="roll" style="text-align:center;padding:0" data-a="rl" data-v="init"><b data-d="init">${calc('init',c)}</b></button><div class="ed">${f('initB',{n:1,al:'Bônus extra de iniciativa'})}</div></div><div><label>Desloc. (m)</label>${f('speed',{n:1})}</div></div>
+  const st=card('Defesa e movimento'+aj('combate','Combate'),`<div class="big3"><div><label>CA</label>${f('ac',{n:1})}</div><div><label>Iniciativa</label><button class="roll" style="text-align:center;padding:0" data-a="rl" data-v="init"><b data-d="init">${calc('init',c)}</b></button><div class="ed">${f('initB',{n:1,al:'Bônus extra de iniciativa'})}</div></div><div><label>Desloc. (m)</label>${f('speed',{n:1})}</div></div>
   <div class="row" style="margin-top:8px"><button class="chk ${c.insp?'on':''}" data-a="insp" aria-label="Inspiração"><i></i></button><span style="flex:1">Inspiração</span></div>`);
-  const ds=card('Salvaguardas contra morte',`<div class="g2"><div><label>Sucessos</label><div class="pips">${[0,1,2].map(i=>`<button class="pip g ${c.death.s>i?'on':''}" data-a="ds" data-v="s${i}" aria-label="Sucesso ${i+1}"></button>`).join('')}</div></div><div><label>Falhas</label><div class="pips">${[0,1,2].map(i=>`<button class="pip ${c.death.f>i?'on':''}" data-a="ds" data-v="f${i}" aria-label="Falha ${i+1}"></button>`).join('')}</div></div></div>${RO()?'':'<div class="btns" style="margin-top:10px"><button class="btn sm" data-a="rl" data-v="death">Rolar d20</button></div>'}`);
-  const cd=card('Condições',`<div class="chips">${COND.map(n=>`<button class="chip ${c.cond.includes(n)?'on':''}" data-a="cond" data-v="${n}">${n}</button>`).join('')}</div>${lk&&!c.cond.length?'<p class="foot" style="margin:0">Nenhuma condição ativa.</p>':''}`);
-  const at=card('Ataques',`${c.atk.length?'':'<p class="note">Nenhum ataque cadastrado.</p>'}<div>${c.atk.map((a,i)=>`<div class="item atk"><div class="vw"><button class="roll" data-a="atk" data-v="${i}">${esc(a.n)||'Ataque'}</button></div><div class="ed">${f(`atk.${i}.n`,{ph:'Nome',al:'Nome do ataque'})}</div>${f(`atk.${i}.b`,{ph:'+5',al:'Bônus de ataque'})}${f(`atk.${i}.d`,{ph:'1d8+3',al:'Dano'})}<button class="x ed" data-a="rm" data-v="atk.${i}" aria-label="Remover">×</button><div style="grid-column:1/-1;margin-top:-6px">${lk?`<span class="foot" style="margin:0">${esc(a.t)}</span>`:f(`atk.${i}.t`,{ph:'Tipo, alcance, notas',al:'Notas'})}</div></div>`).join('')}</div><div class="btns ed" style="margin-top:8px"><button class="btn sm" data-a="add" data-v="atk">Adicionar ataque</button></div>${c.atk.length?'<p class="foot vw">Toque no nome para rolar ataque e dano.</p>':''}`);
+  const ds=card('Salvaguardas contra morte'+aj('dano-e-cura#salvaguardas-contra-morte','Salvaguardas contra morte'),`<div class="g2"><div><label>Sucessos</label><div class="pips">${[0,1,2].map(i=>`<button class="pip g ${c.death.s>i?'on':''}" data-a="ds" data-v="s${i}" aria-label="Sucesso ${i+1}"></button>`).join('')}</div></div><div><label>Falhas</label><div class="pips">${[0,1,2].map(i=>`<button class="pip ${c.death.f>i?'on':''}" data-a="ds" data-v="f${i}" aria-label="Falha ${i+1}"></button>`).join('')}</div></div></div>${RO()?'':'<div class="btns" style="margin-top:10px"><button class="btn sm" data-a="rl" data-v="death">Rolar d20</button></div>'}`);
+  const cd=card('Condições'+aj('condicoes','Condições'),`<div class="chips">${COND.map(n=>`<button class="chip ${c.cond.includes(n)?'on':''}" data-a="cond" data-v="${n}">${n}</button>`).join('')}</div>${lk&&!c.cond.length?'<p class="foot" style="margin:0">Nenhuma condição ativa.</p>':''}${condResumo(c)}`);
+  const at=card('Ataques'+aj('combate#fazer-um-ataque','Fazer um ataque'),`${c.atk.length?'':'<p class="note">Nenhum ataque cadastrado.</p>'}<div>${c.atk.map((a,i)=>`<div class="item atk"><div class="vw"><button class="roll" data-a="atk" data-v="${i}">${esc(a.n)||'Ataque'}</button></div><div class="ed">${f(`atk.${i}.n`,{ph:'Nome',al:'Nome do ataque'})}</div>${f(`atk.${i}.b`,{ph:'+5',al:'Bônus de ataque'})}${f(`atk.${i}.d`,{ph:'1d8+3',al:'Dano'})}<button class="x ed" data-a="rm" data-v="atk.${i}" aria-label="Remover">×</button><div style="grid-column:1/-1;margin-top:-6px">${lk?`<span class="foot" style="margin:0">${esc(a.t)}</span>`:f(`atk.${i}.t`,{ph:'Tipo, alcance, notas',al:'Notas'})}</div></div>`).join('')}</div><div class="btns ed" style="margin-top:8px"><button class="btn sm" data-a="add" data-v="atk">Adicionar ataque</button></div>${c.atk.length?'<p class="foot vw">Toque no nome para rolar ataque e dano.</p>':''}`);
   return `<div class="cols"><div class="stackc">${hp}${ds}</div><div class="stackc">${st}${at}</div><div class="stackc">${cd}</div></div>`}
-function tMagias(c){const lk=S.locked||RO();
-  const hdr=card('Conjuração',`<div class="big3"><div><label>Atributo</label>${sel('spAb',AB.map(a=>[a[0],a[1]]))}</div><div><label>CD</label><b data-d="dc">${calc('dc',c)}</b></div><div><label>Ataque</label><button class="roll" style="text-align:center;padding:0" data-a="rl" data-v="satk"><b data-d="satk">${calc('satk',c)}</b></button></div></div>`);
+function tMagias(c){const lk=S.locked||RO();loadDados('magias');
+  const hdr=card('Conjuração'+aj('magia#cd-e-ataque-de-magia','CD e ataque de magia'),`<div class="big3"><div><label>Atributo</label>${sel('spAb',AB.map(a=>[a[0],a[1]]))}</div><div><label>CD</label><b data-d="dc">${calc('dc',c)}</b></div><div><label>Ataque</label><button class="roll" style="text-align:center;padding:0" data-a="rl" data-v="satk"><b data-d="satk">${calc('satk',c)}</b></button></div></div>`);
   const lv=c.slots.map((s,i)=>({...s,i})).filter(s=>!lk||+s.max>0);
-  const sl=card('Espaços de magia',`${lv.length?'':'<p class="note">Sem espaços de magia.</p>'}${lv.map(s=>`<div class="slot"><b>${s.i+1}º nível</b><div class="pips">${Array.from({length:Math.min(+s.max||0,9)},(_,j)=>`<button class="pip ${j<(+s.used||0)?'on':''}" data-a="slot" data-v="${s.i}.${j}" aria-label="Espaço ${j+1} de ${s.i+1}º nível"></button>`).join('')}</div><div class="ed">${f(`slots.${s.i}.max`,{n:1,al:`Máximo de ${s.i+1}º nível`})}</div></div>`).join('')}<p class="foot">Espaço preenchido = gasto. O descanso longo restaura todos.</p>`);
+  const sl=card('Espaços de magia'+aj('magia#espacos-por-nivel','Espaços por nível'),`${lv.length?'':'<p class="note">Sem espaços de magia.</p>'}${lv.map(s=>`<div class="slot"><b>${s.i+1}º nível</b><div class="pips">${Array.from({length:Math.min(+s.max||0,9)},(_,j)=>`<button class="pip ${j<(+s.used||0)?'on':''}" data-a="slot" data-v="${s.i}.${j}" aria-label="Espaço ${j+1} de ${s.i+1}º nível"></button>`).join('')}</div><div class="ed">${f(`slots.${s.i}.max`,{n:1,al:`Máximo de ${s.i+1}º nível`})}</div></div>`).join('')}<p class="foot">Espaço preenchido = gasto. O descanso longo restaura todos.</p>`);
   const by={};c.spells.forEach((s,i)=>{(by[+s.l||0]=by[+s.l||0]||[]).push([s,i])});
   const lvls=Object.keys(by).map(Number).sort((a,b)=>a-b);
-  const lst=card('Magias',`${c.spells.length?'':'<p class="note">Nenhuma magia cadastrada.</p>'}${lvls.map(l=>`<div class="lvh">${l?l+'º nível':'Truques'}</div>${by[l].filter(([s])=>!lk||s.p||!l).map(([s,i])=>`<div class="item sp"><button class="chk ${s.p||!l?'on':''}" data-a="prep" data-v="${i}" aria-label="Preparada"><i></i></button><div style="display:flex;gap:6px">${f(`spells.${i}.n`,{ph:'Nome da magia',al:'Nome da magia'})}<div class="ed" style="width:76px;flex:none">${sel(`spells.${i}.l`,Array.from({length:10},(_,k)=>[k,k?k+'º':'T']))}</div></div><button class="x ed" data-a="rm" data-v="spells.${i}" aria-label="Remover">×</button></div>`).join('')}`).join('')}
-  <div class="btns ed" style="margin-top:8px"><button class="btn sm" data-a="add" data-v="spells">Adicionar magia</button></div><p class="foot">${lk?'Mostrando truques e magias preparadas.':'Marque o quadrado para preparar a magia.'}</p>`);
+  const lst=card('Magias'+aj('magia','Magia'),`${c.spells.length?'':'<p class="note">Nenhuma magia cadastrada.</p>'}${lvls.map(l=>`<div class="lvh">${l?l+'º nível':'Truques'}</div>${by[l].filter(([s])=>!lk||s.p||!l).map(([s,i])=>`<div class="item sp"><button class="chk ${s.p||!l?'on':''}" data-a="prep" data-v="${i}" aria-label="Preparada"><i></i></button><div style="display:flex;gap:6px">${f(`spells.${i}.n`,{ph:'Nome da magia',al:'Nome da magia',list:'dl-magias'})}${ajDado('magias',s.n)}<div class="ed" style="width:76px;flex:none">${sel(`spells.${i}.l`,Array.from({length:10},(_,k)=>[k,k?k+'º':'T']))}</div></div><button class="x ed" data-a="rm" data-v="spells.${i}" aria-label="Remover">×</button></div>`).join('')}`).join('')}
+  <div class="btns ed" style="margin-top:8px"><button class="btn sm" data-a="add" data-v="spells">Adicionar magia</button></div><p class="foot">${lk?'Mostrando truques e magias preparadas. Toque no ? para ler a magia.':'Marque o quadrado para preparar a magia. Ao digitar, a ficha sugere as magias da wiki.'}</p>${lk?'':sugestoes('magias')}`);
   return `<div class="cols"><div class="stackc">${hdr}${sl}</div><div class="stackc">${lst}</div></div>`}
-function tItens(c){
-  const co=card('Moedas',`<div class="g5">${COINS.map(([k,n])=>L(n,f('coins.'+k,{n:1,live:1}))).join('')}</div>`);
-  const it=card('Equipamento',`${c.items.length?'':'<p class="note">Mochila vazia.</p>'}<div class="item inv" style="padding:0 0 4px;border:0"><label>Item</label><label>Qtd.</label><label>Peso (kg)</label></div><div>${c.items.map((x,i)=>`<div class="item inv">${f(`items.${i}.n`,{ph:'Item',al:'Item'})}${f(`items.${i}.q`,{n:1,live:1,al:'Quantidade'})}${f(`items.${i}.w`,{n:1,al:'Peso unitário'})}<button class="x ed" data-a="rm" data-v="items.${i}" aria-label="Remover">×</button></div>`).join('')}</div><div class="btns ed" style="margin-top:8px"><button class="btn sm" data-a="add" data-v="items">Adicionar item</button></div>`,`<small data-d="wt">${calc('wt',c)}</small>`);
+function tItens(c){loadDados('itens-magicos');loadDados('equipamento');
+  const co=card('Moedas'+aj('equipamento#moedas','Moedas'),`<div class="g5">${COINS.map(([k,n])=>L(n,f('coins.'+k,{n:1,live:1}))).join('')}</div>`);
+  const it=card('Equipamento'+aj('equipamento','Equipamento'),`${c.items.length?'':'<p class="note">Mochila vazia.</p>'}<div class="item inv" style="padding:0 0 4px;border:0"><label>Item</label><label>Qtd.</label><label>Peso (kg)</label></div><div>${c.items.map((x,i)=>`<div class="item inv"><div class="nmw">${f(`items.${i}.n`,{ph:'Item',al:'Item',list:'dl-itens'})}${ajDado('itens-magicos',x.n)||ajDado('equipamento',x.n)}</div>${f(`items.${i}.q`,{n:1,live:1,al:'Quantidade'})}${f(`items.${i}.w`,{n:1,al:'Peso unitário'})}<button class="x ed" data-a="rm" data-v="items.${i}" aria-label="Remover">×</button></div>`).join('')}</div><div class="btns ed" style="margin-top:8px"><button class="btn sm" data-a="add" data-v="items">Adicionar item</button></div>${S.locked||RO()?'':sugestoes('itens')}`,`<small data-d="wt">${calc('wt',c)}</small>`);
   return `<div class="cols"><div class="stackc">${it}</div><div class="stackc">${co}</div></div>`}
 function tNotas(){
   return `<div class="cols"><div class="stackc">${card('Características e talentos',ta('feats','Habilidades de classe, raça e talentos'))}${card('História e aparência',ta('story'))}</div><div class="stackc">${card('Personalidade',`${L('Traços',ta('traits'))}${L('Ideais',ta('ideals'))}${L('Vínculos',ta('bonds'))}${L('Defeitos',ta('flaws'))}`)}</div><div class="stackc">${card('Anotações da campanha',ta('notes','NPCs, pistas, missões'))}</div></div>`}
@@ -243,18 +245,23 @@ const mestreNome=m=>(m.membros.find(x=>x.id===m.mestre)||{}).name||'?';
 const ini=n=>{const w=String(n||'?').trim().split(/\s+/);const l=w[w.length-1];return((w.length>1&&/^\d+$/.test(l))?w[0][0]+l:w.length>1?w[0][0]+l[0]:w[0].slice(0,2)).toUpperCase()};
 const IC={home:'<path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>',pers:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><circle cx="18" cy="9" r="3"/><path d="M17 15a5 5 0 0 1 5 5"/>',
   ficha:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/>',mapa:'<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  livro:'<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7h6M9 10.5h6"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',cfg:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>'};
 const ico=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
 const fichaHash=c=>c.mesa?`#mesa/${c.mesa}/ficha/${c.id}`:`#ficha/${c.id}`;
-const mesaHash=()=>'#mesa/'+S.mesaAtual+(S.mesaTab==='mapas'?'/mapas'+(S.alvo?`/${S.alvo.mapa}${S.alvo.tok?'/'+S.alvo.tok:''}`:''):'');
+const mesaHash=()=>'#mesa/'+S.mesaAtual+(S.mesaTab==='mapas'?'/mapas'+(S.alvo?`/${S.alvo.mapa}${S.alvo.tok?'/'+S.alvo.tok:''}`:''):S.mesaTab==='wiki'?'/wiki'+(S.wikiSel&&S.wikiSel.id?'/'+S.wikiSel.id+(S.wikiSel.anc?'/'+S.wikiSel.anc:''):''):'');
+const wikiHash=()=>'#wiki'+(S.wikiSel&&S.wikiSel.slug?'/'+S.wikiSel.slug+(S.wikiSel.anc?'/'+S.wikiSel.anc:''):'');
 // troca de página; ao abrir uma ficha, o endereço já diz em que mesa ela está
 function go(page,arg,push=true){
   if(page==='ficha'){const c=S.chars.get(arg||S.view);if(!c)return go('personagens',null,push);if(S.view!==c.id){S.view=c.id;hist=[];S.locked=S.me.prefs?S.me.prefs.abrirTravada!==false:S.locked}prefs()}
   if(page==='mapas'){const [mid,mapa,tok]=String(arg||'').split('|');const m=mesaOf(mid)||mesaOf(S.mesaAtual)||S.mesas[0];if(!m)return go('inicio',null,push);
     S.mesaAtual=m.id;S.mesaTab='mapas';S.alvo=mapa?{mapa,tok:tok||''}:null;page='mesa'}
+  else if(page==='mwiki'){const [mid,pid]=String(arg||'').split('|');const m=mesaOf(mid)||mesaOf(S.mesaAtual)||S.mesas[0];if(!m)return go('wiki',null,push);
+    S.mesaAtual=m.id;S.mesaTab='wiki';S.wikiSel=pid?{id:pid,anc:''}:null;page='mesa'}
+  else if(page==='wiki'){S.wikiSel=arg?{slug:arg,anc:''}:null}
   else if(page==='mesa'){S.mesaAtual=arg;S.mesaTab='mesa'}
   S.page=page;arm=null;
-  const h=page==='ficha'?fichaHash(C()):page==='mesa'?mesaHash():page==='config'?cfgHash():'#'+page;
+  const h=page==='ficha'?fichaHash(C()):page==='mesa'?mesaHash():page==='config'?cfgHash():page==='wiki'?wikiHash():'#'+page;
   if(location.hash!==h)history[push?'pushState':'replaceState'](null,'',h);
   render();scrollTo(0,0);if(page!=='config')loadLoc()}
 // onde os personagens estão nos mapas (o servidor pergunta ao serviço de mapas, com as regras dele)
@@ -270,10 +277,11 @@ function rail(){const r=$('rail'),c=C(),pg=S.page,ficha=pg==='ficha'&&c;
   let h=it('go','inicio',ico('home'),'Início',pg==='inicio')+it('go','personagens',ico('pers'),'Personagens',pg==='personagens');
   if(c)h+=it('go','ficha',`<i class="rav pc">${esc(ini(c.name))}</i>`,'Ficha: '+(c.name||'sem nome'),pg==='ficha',nome1(c.name));
   h+='<hr>';
-  const naMapas=pg==='mesa'&&S.mesaTab==='mapas';
-  for(const m of S.mesas)h+=it('gomesa',m.id,`<i class="rav${isMestre(m)?' gm':''}">${esc(ini(m.nome))}</i>`,m.nome,(pg==='mesa'&&!naMapas&&S.mesaAtual===m.id)||(ficha&&c.mesa===m.id));
+  const naMapas=pg==='mesa'&&S.mesaTab==='mapas',naWiki=pg==='mesa'&&S.mesaTab==='wiki';
+  for(const m of S.mesas)h+=it('gomesa',m.id,`<i class="rav${isMestre(m)?' gm':''}">${esc(ini(m.nome))}</i>`,m.nome,(pg==='mesa'&&!naMapas&&!naWiki&&S.mesaAtual===m.id)||(ficha&&c.mesa===m.id));
   h+=it('novamesa','',`<i class="rav add">${ico('plus')}</i>`,'Entrar ou criar mesa',false,'Nova mesa')+'<hr>';
   h+=S.mesas.length?it('gomapas','',ico('mapa'),'Mapas da mesa',naMapas,'Mapas'):`<a class="ri" href="${esc(mapasUrl())}/" target="mapas" title="Mapas" aria-label="Mapas">${ico('mapa')}<span>Mapas</span></a>`;
+  h+=it('go','wiki',ico('livro'),'Wiki: regras e páginas das mesas',pg==='wiki'||naWiki,'Wiki');
   h+='<div class="rsp"></div>';
   h+=it('cfg','conta',ico('cfg'),'Configurações',pg==='config','Ajustes');
   r.innerHTML=h}
@@ -281,17 +289,21 @@ function rail(){const r=$('rail'),c=C(),pg=S.page,ficha=pg==='ficha'&&c;
 function renderMenu(){const b=document.body;b.classList.add('menu');b.classList.remove('locked','ro','nochar','cfg');
   let m=mesaOf(S.mesaAtual);
   if(S.page==='mesa'&&!m){S.page='inicio';b.dataset.page='inicio';history.replaceState(null,'','#inicio')}
-  const pg=S.page==='mesa'?'mesa':S.page==='personagens'?'personagens':'inicio';
-  $('nm').textContent=pg==='mesa'?m.nome:pg==='personagens'?'Personagens':'Início';
-  $('sub').textContent=pg==='mesa'?(isMestre(m)?'Você é o mestre desta mesa':'Mestre: '+mestreNome(m)):'Conectado como '+S.me.name;
+  const pg=S.page==='mesa'?'mesa':S.page==='personagens'?'personagens':S.page==='wiki'?'wiki':'inicio';
+  $('nm').textContent=pg==='mesa'?m.nome:pg==='personagens'?'Personagens':pg==='wiki'?'Wiki':'Início';
+  $('sub').textContent=pg==='mesa'?(isMestre(m)?'Você é o mestre desta mesa':'Mestre: '+mestreNome(m)):pg==='wiki'?'Regras do jogo e as páginas das suas mesas':'Conectado como '+S.me.name;
   $('who2').textContent=S.online?'':'Sem conexão com o servidor.';$('vit').innerHTML='';$('seg').innerHTML='';
-  const c=C(),naMapas=pg==='mesa'&&S.mesaTab==='mapas';
+  const c=C(),naMapas=pg==='mesa'&&S.mesaTab==='mapas',naWiki=pg==='mesa'&&S.mesaTab==='wiki';
   $('nav').innerHTML=[['inicio','Início','home'],['personagens','Personagens','pers'],...(c?[['ficha','Ficha','ficha']]:[])].map(([k,t,i])=>`<button class="ni ${pg===k?'on':''}" data-a="go" data-v="${k}">${ico(i)}${t}</button>`).join('')
-    +(S.mesas.length?`<button class="ni ${naMapas?'on':''}" data-a="gomapas" data-v="">${ico('mapa')}Mapas</button>`:`<a class="ni" href="${esc(mapasUrl())}/" target="mapas">${ico('mapa')}Mapas</a>`)+`<button class="ni" data-a="cfg" data-v="conta">${ico('cfg')}Ajustes</button>`;
+    +(S.mesas.length?`<button class="ni ${naMapas?'on':''}" data-a="gomapas" data-v="">${ico('mapa')}Mapas</button>`:`<a class="ni" href="${esc(mapasUrl())}/" target="mapas">${ico('mapa')}Mapas</a>`)
+    +`<button class="ni ${pg==='wiki'||naWiki?'on':''}" data-a="go" data-v="wiki">${ico('livro')}Wiki</button><button class="ni" data-a="cfg" data-v="conta">${ico('cfg')}Ajustes</button>`;
+  if((pg==='wiki'||pg==='mesa')&&(WK.stale||!WK.base))loadWiki();
   if(pg==='mesa'){
-    const abas=`<div class="mtabs" role="tablist" aria-label="Mesa ${esc(m.nome)}"><button role="tab" aria-selected="${!naMapas}" class="${naMapas?'':'on'}" data-a="gomesa" data-v="${esc(m.id)}">Mesa</button><button role="tab" aria-selected="${naMapas}" class="${naMapas?'on':''}" data-a="gomapas" data-v="${esc(m.id)}">Mapas</button>${naMapas?`<a class="btn sm" href="${esc(mapasUrl())}/#mesa/${esc(m.id)}" target="mapas">Abrir em outra aba</a>`:''}</div>`;
-    $('main').innerHTML=abas+(naMapas?'':pMesa(m)+`<p class="status" id="st">${esc(statusText())}</p>`);mapView(naMapas,m);return}
-  $('main').innerHTML=(pg==='personagens'?pPersonagens():pInicio())+`<p class="status" id="st">${esc(statusText())}</p>`}
+    const aba=(k,t,a)=>{const on=S.mesaTab===k||(k==='mesa'&&!naMapas&&!naWiki);return `<button role="tab" aria-selected="${on}" class="${on?'on':''}" data-a="${a}" data-v="${esc(m.id)}">${t}</button>`};
+    const abas=`<div class="mtabs" role="tablist" aria-label="Mesa ${esc(m.nome)}">${aba('mesa','Mesa','gomesa')}${aba('mapas','Mapas','gomapas')}${aba('wiki','Wiki','gomwiki')}${naMapas?`<a class="btn sm" href="${esc(mapasUrl())}/#mesa/${esc(m.id)}" target="mapas">Abrir em outra aba</a>`:''}</div>`;
+    $('main').innerHTML=abas+(naMapas?'':(naWiki?pMesaWiki(m):pMesa(m))+`<p class="status" id="st">${esc(statusText())}</p>`);mapView(naMapas,m);if(naWiki)wikiRolar();return}
+  $('main').innerHTML=(pg==='personagens'?pPersonagens():pg==='wiki'?pWiki():pInicio())+`<p class="status" id="st">${esc(statusText())}</p>`;
+  if(pg==='wiki')wikiRolar()}
 // a aba de mapas embute o app de mapas; o quadro fica fora de #main para não recarregar a cada atualização
 function mapView(on,m){const v=$('mapview');v.hidden=!on;document.body.classList.toggle('mapon',on);if(!on)return;
   const a=S.alvo,src=`${mapasUrl()}/#${a?`mapa/${a.mapa}${a.tok?'/token/'+a.tok:''}`:'mesa/'+m.id}`,f=$('mapif');
@@ -336,12 +348,234 @@ function pMesa(m){const mestre=isMestre(m),all=[...S.chars.values()].filter(c=>c
   const info=card('Na mesa',`${mestre?`<p class="note" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">Código de convite <span class="code" style="font-size:17px;padding:6px 10px">${esc(m.code)}</span></p>`:''}${m.descricao?`<p style="white-space:pre-wrap;margin:0 0 10px">${esc(m.descricao)}</p>`:''}
     <div class="members">${m.membros.map(x=>`<span class="member" style="padding-right:12px">${esc(x.name)}${x.id===m.mestre?' (mestre)':''}</span>`).join('')}</div>
     <div class="btns"><button class="btn sm" data-a="cfg" data-v="mesa|${esc(m.id)}">${mestre?'Configurar mesa':'Detalhes da mesa'}</button></div>`);
-  return `<div class="cols"><div class="stackc">${fichas}${trazer}</div><div class="stackc">${mapa}</div><div class="stackc">${info}</div></div>`}
+  return `<div class="cols"><div class="stackc">${fichas}${trazer}</div><div class="stackc">${mapa}${cardWikiMesa(m)}</div><div class="stackc">${info}</div></div>`}
 function addOwn(c,open=true){c._owner=meId();c._ownerName=S.me.name;c._lib=false;c._new=true;delete c.demo;S.chars.set(c.id,c);if(open){S.view=c.id;hist=[];prefs()}save(c);return c}
 function importTxt(txt){let o;try{o=JSON.parse(txt)}catch(e){$('iomsg').textContent='Texto inválido: não parece uma ficha exportada.';return}
   const arr=(Array.isArray(o)?o:[o]).filter(x=>x&&typeof x==='object'&&x.ab);if(!arr.length){$('iomsg').textContent='Nenhuma ficha encontrada no texto.';return}
   for(const x of arr){const c=fix(x);for(const k of Object.keys(c))if(k.startsWith('_'))delete c[k];c.id='c'+uidGen();c.mesa='';addOwn(c)}
   render();$('iomsg').textContent=arr.length+(arr.length>1?' fichas importadas.':' ficha importada.')}
+
+/* ---------- wiki ---------- */
+// regras que vêm com a suíte (base) e páginas das mesas (pag); o servidor já filtra o que cada um pode ler
+const W=window.Wiki;
+const WK={base:null,pag:[],carregando:null,stale:true,erro:0,idx:null,rolado:null};
+const naWikiAgora=()=>S.page==='wiki'||(S.page==='mesa'&&S.mesaTab!=='mapas');
+function loadWiki(){if(!S.me||WK.carregando||Date.now()-WK.erro<5000)return WK.carregando;
+  WK.carregando=api('GET','/api/wiki'+(WK.base?'?base=0':'')).then(r=>{if(r.base)WK.base=r.base;WK.pag=r.paginas||[];WK.stale=false;WK.idx=null})
+    .catch(e=>{WK.erro=Date.now();if(e.status===401)showAuth()}).finally(()=>{WK.carregando=null;softRender()});
+  return WK.carregando}
+const basePg=s=>(WK.base||[]).find(p=>p.slug===s);
+const mesaPg=id=>WK.pag.find(p=>p.id===id);
+const pgsDaMesa=mid=>WK.pag.filter(p=>p.mesa===mid);
+const pgHref=(p,a)=>(p.slug?`#wiki/${p.slug}`:`#mesa/${p.mesa}/wiki/${p.id}`)+(a?'/'+a:'');
+function upsertPg(p){const i=WK.pag.findIndex(x=>x.id===p.id);if(i<0)WK.pag.push(p);else WK.pag[i]=p;WK.idx=null}
+function tituloSecao(t,a){for(const l of String(t||'').split('\n')){const m=/^#{1,6}\s+(.*?)\s*#*$/.exec(l);if(m&&W.slug(m[1])===a)return m[1].replace(/[*_`]/g,'')}return ''}
+// resolve [[links]]: primeiro as páginas da mesa, depois as regras
+function linker(ctx){return(alvo,txt)=>{
+  const k=alvo.indexOf('#');const nome=(k<0?alvo:alvo.slice(0,k)).trim(),anc=k<0?'':W.slug(alvo.slice(k+1));
+  let p=null;
+  if(!nome)p=ctx.pg;
+  else{if(ctx.mesa)p=pgsDaMesa(ctx.mesa).find(x=>W.simples(x.titulo)===W.simples(nome));
+    if(!p)p=(WK.base||[]).find(x=>x.slug===nome||x.slug===W.slug(nome)||W.simples(x.titulo)===W.simples(nome))}
+  if(!p||!(p.slug||p.id))return{href:null,texto:txt||nome,nova:ctx.mesa&&isMestre(mesaOf(ctx.mesa))&&nome?ctx.mesa+'|'+nome:null};
+  return{href:pgHref(p,anc),texto:txt||(anc?tituloSecao(p.texto,anc)||p.titulo:p.titulo)}}}
+// rola até a seção pedida no endereço (ou para o topo) só quando a página muda
+function wikiRolar(){const sel=S.wikiSel;const key=(S.page==='mesa'?'m'+S.mesaAtual:'w')+'|'+(sel?(sel.slug||sel.id)+'|'+sel.anc:'')+'|'+(S.wEdit?'e':'');
+  if(WK.rolado===key||(sel&&!WK.base))return;
+  if(sel&&sel.anc&&!document.getElementById('w-'+sel.anc)&&listaPendente())return;WK.rolado=key;
+  requestAnimationFrame(()=>{const el=sel&&sel.anc&&document.getElementById('w-'+sel.anc);
+    if(el){el.scrollIntoView({block:'start'});el.classList.add('alvo');setTimeout(()=>el.classList.remove('alvo'),1800)}else scrollTo(0,0)})}
+const carregandoWiki=()=>card('Wiki',`<p class="note">${WK.erro&&!WK.base?'Não deu para carregar a wiki agora.':'Carregando…'}</p>`);
+
+// busca: título, seções e texto, sem acentos; o trecho mostrado sai do texto original
+function wikiIdx(){if(WK.idx)return WK.idx;
+  const todos=[...(WK.base||[]).map(p=>({p,onde:'Regras · '+p.cat})),...Object.entries(WK.dados).flatMap(([l,a])=>a.map(x=>({p:{slug:PAGINA[l],titulo:x.nome,texto:(x.en?x.en+' ':'')+(x.descricao||'')},onde:LISTAS[l].onde(x),ancora:x.slug}))),...WK.pag.map(p=>({p,onde:'Wiki de '+((mesaOf(p.mesa)||{}).nome||'mesa')+(p.cat?' · '+p.cat:'')}))];
+  return WK.idx=todos.map(x=>{const chars=Array.from(W.textoPuro(x.p.texto));
+    const norm=chars.map(ch=>(ch.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()||' ')[0]).join('');
+    const hs=[...String(x.p.texto).matchAll(/^#{1,6}\s+(.*?)\s*#*$/gm)].map(m=>m[1].replace(/[*_`]/g,''));
+    return{...x,chars,norm,hs,nt:W.simples(x.p.titulo)}})}
+const VAZIAS=new Set('de da do das dos em no na nos nas um uma uns umas o a os as e ou com por para pra que se ao aos sem sob'.split(' '));
+function buscaWiki(q){const todos=W.simples(q).split(/\s+/).filter(t=>t.length>1),cheios=todos.filter(t=>!VAZIAS.has(t)),ts=cheios.length?cheios:todos;if(!ts.length)return{ts,res:[]};ts.frase=W.simples(q).replace(/\s+/g,' ');
+  const res=[];for(const x of wikiIdx()){let sc=0;
+    if(ts.every(t=>x.nt.includes(t)))sc+=100;if(x.nt===ts.frase)sc+=300;else if(x.nt.startsWith(ts.frase))sc+=60;
+    const h=x.hs.find(h=>ts.every(t=>W.simples(h).includes(t)));if(h)sc+=50;
+    if(ts.every(t=>x.norm.includes(t)))sc+=10+Math.min(30,ts.reduce((s,t)=>s+x.norm.split(t).length-1,0));
+    if(sc)res.push({...x,sc,h})}
+  return{ts,res:res.sort((a,b)=>b.sc-a.sc).slice(0,40)}}
+function trecho(x,ts){const fr=ts.frase?x.norm.indexOf(ts.frase):-1,longo=ts.slice().sort((a,b)=>b.length-a.length)[0];
+  const ini=fr>=0?fr:(k=>k<0?Infinity:k)(x.norm.indexOf(longo));
+  if(ini===Infinity)return esc(x.p.resumo||x.chars.slice(0,160).join(''));
+  const a=Math.max(0,ini-60),b=Math.min(x.chars.length,ini+160),seg=x.chars.slice(a,b),nseg=x.norm.slice(a,b),marcas=[];
+  for(const t of ts){let k=0;while((k=nseg.indexOf(t,k))>=0){marcas.push([k,k+t.length]);k+=t.length}}
+  marcas.sort((p,q)=>p[0]-q[0]);let h='',pos=0;
+  for(const [s,e] of marcas){if(s<pos)continue;h+=esc(seg.slice(pos,s).join(''))+'<mark>'+esc(seg.slice(s,e).join(''))+'</mark>';pos=e}
+  return (a?'…':'')+h+esc(seg.slice(pos).join(''))+(b<x.chars.length?'…':'')}
+function wikiResultados(q){const {ts,res}=buscaWiki(q);
+  if(!ts.length)return '<p class="note">Digite pelo menos duas letras.</p>';
+  if(!res.length)return card('Nada encontrado',`<p class="note">Nenhuma página fala de “${esc(q)}”. Tente outra palavra.</p>`);
+  return `<p class="note">${res.length===40?'Os 40 primeiros resultados':res.length+(res.length===1?' página encontrada':' páginas encontradas')}</p><div class="wlist card">${res.map(x=>`<a class="wli" href="${esc(pgHref(x.p,x.ancora||(x.h?W.slug(x.h):'')))}"><b>${esc(x.p.titulo)}${x.h&&x.h!==x.p.titulo?` <em>› ${esc(x.h)}</em>`:''}</b><small>${esc(x.onde)}</small><span>${trecho(x,ts)}</span></a>`).join('')}</div>`}
+
+// página aberta: regra da suíte ou página de mesa
+function pPagina(p,ctx){const r=W.render(p.texto,{link:linker(ctx)});const base=!!p.slug,m=!base&&mesaOf(p.mesa),mestre=!!m&&isMestre(m);
+  const crumbs=base?`<a href="#wiki">Wiki</a> › ${esc(p.cat)}`:`<a href="#mesa/${esc(m.id)}/wiki">Wiki de ${esc(m.nome)}</a>${p.cat?' › '+esc(p.cat):''}`;
+  const acoes=mestre?`<div class="btns wacts"><button class="btn sm pri" data-a="wedit" data-v="${esc(p.id)}">Editar</button><button class="tog ${p.lib?'on':''}" data-a="wlib" data-v="${esc(p.id)}" aria-pressed="${p.lib}">${p.lib?'Liberada':'Oculta'}</button>${armBtn('wdel:'+p.id,'Apagar','Toque de novo para apagar')}</div>`:'';
+  const info=base?`Regras da suíte, um resumo baseado no SRD 5.1. <a href="#wiki/sobre-as-regras">Sobre estas regras</a>`:`Atualizada em ${when(p.upd)}${p.autor?' por '+esc(p.autor):''}${mestre?(p.lib?' · liberada para os jogadores':' · oculta dos jogadores'):''}`;
+  const itens=r.toc.map(t=>`<a class="l${t.nivel}" href="${esc(pgHref(p,t.id))}">${esc(t.texto)}</a>`).join('');
+  const toc=r.toc.length>2?`<aside class="wside"><div class="wtoc" role="navigation" aria-label="Nesta página"><b>Nesta página</b>${itens}</div></aside>`:'';
+  const tocm=r.toc.length>2?`<details class="wtocm"><summary>Nesta página</summary><div class="wtoc" role="navigation" aria-label="Nesta página">${itens}</div></details>`:'';
+  return `<div class="wcrumb">${crumbs}</div><div class="wlay${toc?'':' notoc'}"><article class="card wart"><h1 class="wtit">${esc(p.titulo)}</h1>${base&&p.resumo?`<p class="wlead">${esc(p.resumo)}</p>`:''}${acoes}${tocm}${r.html||(p.lista?'':'<p class="note">Página vazia.</p>')}${p.lista?listaHtml(p):''}<p class="foot winfo">${info}</p></article>${toc}</div>`}
+function pWiki(){
+  if(!WK.base)return carregandoWiki();
+  const sel=S.wikiSel;
+  if(sel&&sel.slug){const p=basePg(sel.slug);return p?pPagina(p,{mesa:null,pg:p}):card('Página não encontrada',`<p class="note">Não há uma página de regras com esse endereço.</p><div class="btns"><a class="btn sm" href="#wiki">Voltar para a wiki</a></div>`)}
+  const q=S.wikiQ||'',busca=!!q.trim();
+  const mesas=S.mesas.map(m=>{const ps=pgsDaMesa(m.id).slice().sort((a,b)=>b.upd-a.upd),mestre=isMestre(m);
+    return `<section class="card"><button class="hcard" data-a="gomwiki" data-v="${esc(m.id)}"><span class="mav${mestre?' gm':''}">${esc(ini(m.nome))}</span><span><b>Wiki de ${esc(m.nome)}</b><small>${ps.length?ps.length+(ps.length===1?' página':' páginas'):mestre?'Nenhuma página ainda':'Nenhuma página liberada ainda'}</small></span></button>
+    ${ps.length?`<div class="wlist">${ps.slice(0,5).map(p=>`<a class="wli" href="${esc(pgHref(p))}"><b>${esc(p.titulo)}</b>${p.cat||(mestre&&!p.lib)?`<small>${esc([p.cat,mestre&&!p.lib?'oculta':''].filter(Boolean).join(' · '))}</small>`:''}</a>`).join('')}</div>`:''}
+    <div class="btns" style="margin-top:10px"><button class="btn sm pri" data-a="gomwiki" data-v="${esc(m.id)}">${ps.length>5?`Ver todas (${ps.length})`:'Abrir'}</button>${mestre?`<button class="btn sm" data-a="wnova" data-v="${esc(m.id)}|">Nova página</button>`:''}</div></section>`}).join('');
+  const cats=[];for(const p of WK.base){let c=cats.find(x=>x.cat===p.cat);if(!c)cats.push(c={cat:p.cat,ps:[]});c.ps.push(p)}
+  const regras=cats.map(c=>card(esc(c.cat),`<div class="wlist">${c.ps.map(p=>`<a class="wli" href="${esc(pgHref(p))}"><b>${esc(p.titulo)}</b><span>${esc(p.resumo)}</span></a>`).join('')}</div>`)).join('');
+  return `<div class="wsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="wq" type="search" placeholder="Buscar nas regras e nas wikis das mesas" value="${esc(q)}" aria-label="Buscar na wiki" autocomplete="off" enterkeyhint="search"></div>
+  <div id="wres"${busca?'':' hidden'}>${busca?wikiResultados(q):''}</div>
+  <div id="widx"${busca?' hidden':''}>${mesas?`<h2 class="ph">Wikis das suas mesas</h2><div class="grid">${mesas}</div>`:''}<h2 class="ph">Regras do jogo</h2><div class="grid">${regras}</div></div>`}
+// aba Wiki da mesa: lista, página aberta ou editor
+function pMesaWiki(m){
+  if(S.wEdit&&S.wEdit.mesa===m.id)return pEditor(m);
+  if(!WK.base)return carregandoWiki();
+  const sel=S.wikiSel,mestre=isMestre(m);
+  if(sel&&sel.id){const p=mesaPg(sel.id);if(p&&p.mesa===m.id)return pPagina(p,{mesa:m.id,pg:p});
+    return card('Página não encontrada',`<p class="note">${mestre?'Ela pode ter sido apagada.':'Ela pode ter sido apagada ou ocultada pelo mestre.'}</p><div class="btns"><button class="btn sm" data-a="gomwiki" data-v="${esc(m.id)}">Voltar para a wiki da mesa</button></div>`)}
+  const ps=pgsDaMesa(m.id),grupos=[];
+  for(const p of ps.slice().sort((a,b)=>(a.cat||'~').localeCompare(b.cat||'~','pt-BR')||a.titulo.localeCompare(b.titulo,'pt-BR'))){const c=p.cat||'Sem categoria';let g=grupos.find(x=>x.c===c);if(!g)grupos.push(g={c,ps:[]});g.ps.push(p)}
+  const linha=p=>`<div class="prow"><a class="pick" href="${esc(pgHref(p))}"><div><b>${esc(p.titulo)}</b><span>Atualizada em ${when(p.upd)}</span></div></a>${mestre?`<button class="tog ${p.lib?'on':''}" data-a="wlib" data-v="${esc(p.id)}" aria-pressed="${p.lib}">${p.lib?'Liberada':'Oculta'}</button>`:''}</div>`;
+  const lista=ps.length?grupos.map(g=>card(esc(g.c),g.ps.map(linha).join(''))).join(''):card(mestre?'A wiki da mesa está vazia':'Nada por aqui ainda',`<p class="note">${mestre?'Escreva páginas sobre o cenário, os lugares, os personagens do mestre e as regras da casa, ou importe um documento pronto. As páginas novas começam ocultas: libere quando quiser que os jogadores leiam.':'O mestre ainda não liberou nenhuma página. Enquanto isso, as regras do jogo estão na wiki.'}</p>`);
+  const novo=mestre?card('Escrever',`<div class="btns"><button class="btn pri" data-a="wnova" data-v="${esc(m.id)}|">Nova página</button><label class="btn">Importar documento<input type="file" id="wimp" data-mesa="${esc(m.id)}" accept=".html,.htm,.md,.markdown,.txt,text/html,text/markdown,text/plain,image/png,image/jpeg,image/webp,image/gif" multiple hidden></label></div>
+    <p class="foot">Importar aceita HTML e Markdown. Selecione o documento junto com as imagens que ele usa para trazê-las também.</p>
+    <p class="foot">Trechos entre <code>:::mestre</code> e <code>:::</code> só você vê. <a href="#wiki/escrevendo-na-wiki">Como formatar as páginas</a></p>`):'';
+  const regras=card('Regras do jogo',`<div class="wlist">${['como-jogar','combate','condicoes','magia'].map(basePg).filter(Boolean).map(p=>`<a class="wli" href="${esc(pgHref(p))}"><b>${esc(p.titulo)}</b></a>`).join('')}</div><div class="btns" style="margin-top:10px"><button class="btn sm" data-a="go" data-v="wiki">Todas as regras e a busca</button></div>`);
+  return `<div class="cols wcols"><div class="stackc">${lista}</div><div class="stackc">${novo}${regras}</div></div>`}
+// cartão na aba Mesa
+function cardWikiMesa(m){const ps=pgsDaMesa(m.id).slice().sort((a,b)=>b.upd-a.upd),mestre=isMestre(m);
+  return card('Wiki da mesa',`${!WK.base?'<p class="note">Carregando…</p>':ps.length?`<div class="wlist">${ps.slice(0,5).map(p=>`<a class="wli" href="${esc(pgHref(p))}"><b>${esc(p.titulo)}</b>${mestre&&!p.lib?'<small>oculta</small>':''}</a>`).join('')}</div>`:`<p class="note">${mestre?'Nenhuma página ainda. Escreva sobre o cenário e as regras da casa para os jogadores lerem com calma.':'O mestre ainda não liberou nenhuma página.'}</p>`}
+    <div class="btns" style="margin-top:10px"><button class="btn pri" data-a="gomwiki" data-v="${esc(m.id)}">Abrir a wiki da mesa</button></div>`)}
+// listas de dados da wiki (magias, itens mágicos, equipamento): carregadas só quando alguém precisa
+WK.dados={};WK.dadosIdx={};WK.dadosVindo={};WK.dadosErro={};
+const PAGINA={magias:'lista-de-magias','itens-magicos':'itens-magicos',equipamento:'equipamento-de-aventura'};
+const CLASSES=['Bardo','Bruxo','Clérigo','Druida','Feiticeiro','Mago','Paladino','Patrulheiro'];
+const ESCOLAS=['Abjuração','Adivinhação','Conjuração','Encantamento','Evocação','Ilusão','Necromancia','Transmutação'];
+const RARIDADES=['comum','incomum','raro','muito raro','lendário','artefato','varia'];
+const TIPOS=['Arma','Armadura','Poção','Anel','Bastão','Cajado','Varinha','Pergaminho','Item maravilhoso'];
+const nivelTxt=n=>n?n+'º nível':'Truque';
+const sintTxt=s=>s===true?'requer sintonia':s?'requer sintonia '+s:'';
+const opcoes=(todos,arr)=>[['',todos],...arr.map(x=>Array.isArray(x)?x:[x,x])];
+const LISTAS={
+  magias:{nome:'magias',um:'magia',cat:/^magias?$/,onde:x=>'Lista de magias · '+nivelTxt(x.nivel),
+    filtros:[['nivel','Nível',opcoes('Todos os níveis',[['0','Truques'],...[1,2,3,4,5,6,7,8,9].map(n=>[String(n),n+'º nível'])])],['classe','Classe',opcoes('Todas as classes',CLASSES)],['escola','Escola',opcoes('Todas as escolas',ESCOLAS)],['extra','Outros',opcoes('Qualquer',[['ritual','Ritual'],['conc','Concentração'],['semconc','Sem concentração']])]],
+    passa:(x,f)=>(!f.nivel||String(x.nivel)===f.nivel)&&(!f.classe||(x.classes||[]).includes(f.classe))&&(!f.escola||x.escola===f.escola)&&(!f.extra||(f.extra==='ritual'?x.ritual:f.extra==='conc'?x.conc:!x.conc)),
+    grupo:x=>x.nivel?x.nivel+'º nível':'Truques',
+    linha:x=>[nivelTxt(x.nivel)+' de '+String(x.escola||'').toLowerCase(),x.ritual?'ritual':'',x.conc?'concentração':'',(x.classes||[]).join(', ')].filter(Boolean).join(' · '),
+    corpo:x=>`<dl class="wst"><dt>Tempo</dt><dd>${esc(x.tempo)}</dd><dt>Alcance</dt><dd>${esc(x.alcance)}</dd><dt>Componentes</dt><dd>${esc(x.componentes)}</dd><dt>Duração</dt><dd>${esc(x.duracao)}</dd></dl>${W.render(x.descricao).html}${x.superior?`<p><b>Em níveis superiores.</b> ${W.render(x.superior).html.replace(/^<p>|<\/p>$/g,'')}</p>`:''}<p class="foot">${esc(nivelTxt(x.nivel))} de ${esc(String(x.escola||'').toLowerCase())}${x.ritual?' (ritual)':''} · ${esc((x.classes||[]).join(', '))}${x.en?` · <i>${esc(x.en)}</i>`:''}</p>`},
+  'itens-magicos':{nome:'itens mágicos',um:'item',cat:/^itens? magicos?$/,onde:x=>'Itens mágicos · '+x.raridade,
+    filtros:[['tipo','Tipo',opcoes('Todos os tipos',TIPOS)],['raridade','Raridade',opcoes('Todas as raridades',RARIDADES.map(r=>[r,r[0].toUpperCase()+r.slice(1)]))],['sintonia','Sintonia',opcoes('Com ou sem sintonia',[['sim','Requer sintonia'],['nao','Sem sintonia']])]],
+    passa:(x,f)=>(!f.tipo||String(x.tipo||'').startsWith(f.tipo))&&(!f.raridade||x.raridade===f.raridade)&&(!f.sintonia||(f.sintonia==='sim')===!!x.sintonia),
+    grupo:x=>W.simples(x.nome)[0].toUpperCase(),
+    linha:x=>[x.tipo,x.raridade,sintTxt(x.sintonia)].filter(Boolean).join(' · '),
+    corpo:x=>`<p class="wsub"><i>${esc([x.tipo,x.raridade,sintTxt(x.sintonia)?'('+sintTxt(x.sintonia)+')':''].filter(Boolean).join(', '))}</i></p>${W.render(x.descricao).html}${x.en?`<p class="foot"><i>${esc(x.en)}</i></p>`:''}`},
+  equipamento:{nome:'itens',um:'item',cat:/^(equipamento|itens? comuns?)$/,onde:x=>'Equipamento · '+x.cat,
+    filtros:[['cat','Categoria',opcoes('Todas as categorias',['Equipamento de aventura','Munição','Foco de conjuração','Pacote de equipamento','Ferramentas','Instrumento musical','Montarias e veículos','Comida e hospedagem','Serviços'])]],
+    passa:(x,f)=>!f.cat||x.cat===f.cat,
+    grupo:x=>x.cat,
+    linha:x=>[x.preco,x.peso?String(x.peso).replace('.',',')+' kg':''].filter(Boolean).join(' · '),
+    corpo:x=>`<dl class="wst"><dt>Preço</dt><dd>${esc(x.preco)}</dd><dt>Peso</dt><dd>${x.peso?esc(String(x.peso).replace('.',','))+' kg':'–'}</dd></dl>${x.descricao?W.render(x.descricao,{link:linker({mesa:null,pg:null})}).html:''}`}};
+const MODELO={'Itens mágicos':'**Tipo:** Item maravilhoso · **Raridade:** incomum · **Sintonia:** não\n\nO que o item faz, como se ativa, cargas e como elas voltam.','Magias':'**Nível:** 1º · **Escola:** Evocação · **Tempo:** 1 ação · **Alcance:** 18 metros · **Componentes:** V, S · **Duração:** Instantânea · **Classes:** Mago\n\nO efeito da magia: alvos, salvaguarda, dano.\n\n**Em níveis superiores.** O que muda com espaços maiores.'};
+function loadDados(n){if(WK.dados[n]||WK.dadosVindo[n]||Date.now()-(WK.dadosErro[n]||0)<10000||!S.me)return;
+  WK.dadosVindo[n]=api('GET','/api/wiki/dados/'+n).then(a=>{WK.dados[n]=a;const m=new Map();for(const x of a){m.set(W.simples(x.nome),x);if(x.en&&!m.has(W.simples(x.en)))m.set(W.simples(x.en),x)}WK.dadosIdx[n]=m;WK.idx=null})
+    .catch(()=>{WK.dadosErro[n]=Date.now()}).finally(()=>{delete WK.dadosVindo[n];const q=$('wq');if(q&&q.value.trim()&&$('wres'))$('wres').innerHTML=wikiResultados(q.value);softRender()})}
+const acharDado=(l,nome)=>nome&&WK.dadosIdx[l]?WK.dadosIdx[l].get(W.simples(nome)):null;
+function listaPendente(){const p=S.page==='wiki'&&S.wikiSel&&basePg(S.wikiSel.slug);return !!(p&&p.lista&&!WK.dados[p.lista])}
+// "?" ao lado de uma magia ou item da ficha que existe na wiki
+function ajDado(l,nome){const x=acharDado(l,nome);return x?aj(PAGINA[l]+'#'+x.slug,x.nome):''}
+function sugestoes(tipo){const ls=tipo==='magias'?['magias']:['equipamento','itens-magicos'];if(!ls.every(l=>WK.dados[l]))return '';
+  return `<datalist id="dl-${tipo}">${ls.flatMap(l=>WK.dados[l].map(x=>`<option value="${esc(x.nome)}">`)).join('')}</datalist>`}
+// ao escrever o nome de uma magia ou item conhecido, a ficha completa o nível ou o peso
+function completar(c,k){let m;
+  if((m=/^spells\.(\d+)\.n$/.exec(k))){const s=c.spells[+m[1]],x=acharDado('magias',s&&s.n);if(x&&(+s.l||0)!==x.nivel){s.l=x.nivel;const e=document.querySelector(`[data-k="spells.${m[1]}.l"]`);if(e)e.value=String(x.nivel);softRender()}}
+  else if((m=/^items\.(\d+)\.n$/.exec(k))){const it=c.items[+m[1]],x=acharDado('equipamento',it&&it.n);if(x&&x.peso&&!(+it.w)){it.w=x.peso;const e=document.querySelector(`[data-k="items.${m[1]}.w"]`);if(e)e.value=String(x.peso)}}}
+// página de lista: filtros em cima, resultados embaixo; a descrição só é montada quando a entrada abre
+const filtrosDe=l=>(S.wf=S.wf||{})[l]=(S.wf[l]||{});
+function listaHtml(p){const l=p.lista,cfg=LISTAS[l];if(!cfg)return '';loadDados(l);
+  const sel=S.wikiSel,anc=sel&&sel.anc;
+  if(anc&&WK.ancLista!==l+'/'+anc&&WK.dados[l]&&WK.dados[l].some(x=>x.slug===anc)){WK.ancLista=l+'/'+anc;S.wf[l]={}}
+  const f=filtrosDe(l);
+  const ctl=`<div class="wfil"><div class="wsearch sm"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input type="search" data-wf="q" data-lista="${l}" value="${esc(f.q||'')}" placeholder="Buscar ${cfg.nome}" aria-label="Buscar ${cfg.nome}" autocomplete="off"></div>
+    ${cfg.filtros.map(([k,rot,ops])=>`<select data-wf="${k}" data-lista="${l}" aria-label="${rot}">${ops.map(([v,t])=>`<option value="${esc(v)}"${(f[k]||'')===v?' selected':''}>${esc(t)}</option>`).join('')}</select>`).join('')}</div>`;
+  return `<section class="wlista" data-lista="${l}">${ctl}<div id="wlres">${listaResultados(l)}</div></section>`}
+function listaResultados(l){const cfg=LISTAS[l],f=filtrosDe(l),a=WK.dados[l];
+  if(!a)return `<p class="note">${WK.dadosErro[l]?'Não deu para carregar a lista agora.':'Carregando…'}</p>`;
+  const ts=W.simples(f.q||'').split(/\s+/).filter(Boolean),bate=t=>ts.every(x=>t.includes(x));
+  const proprias=WK.pag.filter(p=>cfg.cat.test(W.simples(p.cat||''))&&bate(W.simples(p.titulo+' '+p.texto)));
+  const mestreDe=S.mesas.filter(isMestre);
+  const criados=(proprias.length||mestreDe.length)&&l!=='equipamento'?`<div class="wcri"><h3>${l==='magias'?'Criadas':'Criados'} nas suas mesas</h3>${proprias.map(p=>`<a class="wli" href="${esc(pgHref(p))}"><b>${esc(p.titulo)}</b><small>Wiki de ${esc((mesaOf(p.mesa)||{}).nome||'mesa')}${isMestre(mesaOf(p.mesa))&&!p.lib?' · oculta':''}</small><span>${esc(W.textoPuro(p.texto).slice(0,140))}</span></a>`).join('')||`<p class="note">Nenhum${l==='magias'?'a magia criada':' item criado'} ainda.</p>`}
+    ${mestreDe.length?`<div class="btns">${mestreDe.map(m=>`<button class="btn sm" data-a="wnova" data-v="${esc(m.id)}||${l==='magias'?'Magias':'Itens mágicos'}">${l==='magias'?'Nova magia':'Novo item'}${S.mesas.length>1?' em '+esc(m.nome):''}</button>`).join('')}</div>`:''}</div>`:'';
+  const res=a.filter(x=>cfg.passa(x,f)&&(!ts.length||bate(W.simples(x.nome+' '+(x.en||'')+' '+(x.descricao||'')))));
+  const anc=S.wikiSel&&S.wikiSel.anc;let h='',g=null;
+  for(const x of res){const gx=cfg.grupo(x);if(gx!==g){g=gx;h+=`<div class="lvh">${esc(g)}</div>`}const aberto=x.slug===anc;
+    h+=`<details class="wsp" id="w-${esc(x.slug)}" data-l="${l}" data-s="${esc(x.slug)}"${aberto?' open':''}><summary><b>${esc(x.nome)}</b><small>${esc(cfg.linha(x))}</small></summary><div class="wsb wart">${aberto?cfg.corpo(x):''}</div></details>`}
+  return `${criados}<p class="note wcount">${res.length===a.length?`${a.length} ${cfg.nome}`:`${res.length} de ${a.length} ${cfg.nome}`}</p>${h||`<p class="note">Nenhum${cfg.um==='magia'?'a magia':' item'} com esses filtros.</p>`}`}
+document.addEventListener('toggle',e=>{const d=e.target;if(!d.classList||!d.classList.contains('wsp')||!d.open)return;const b=d.querySelector('.wsb');if(b&&!b.innerHTML){const x=(WK.dados[d.dataset.l]||[]).find(y=>y.slug===d.dataset.s);if(x)b.innerHTML=LISTAS[d.dataset.l].corpo(x)}},true);
+function filtrar(el){const l=el.dataset.lista;filtrosDe(l)[el.dataset.wf]=el.value;const r=$('wlres');if(r)r.innerHTML=listaResultados(l)}
+
+// condições ativas na ficha, com o texto da regra
+function condResumo(c){if(!c.cond.length)return '';const b=basePg('condicoes');if(!b){if(!WK.base)loadWiki();return ''}
+  return `<div class="csum">${c.cond.map(n=>{const id=W.slug(n),t=W.secao(b.texto,id);return t?`<details class="cs" open><summary>${esc(n)}</summary><div class="wart">${W.render(t,{link:linker({mesa:null,pg:b})}).html}<a class="wl" href="#wiki/condicoes/${id}">Ler na wiki</a></div></details>`:''}).join('')}</div>`}
+
+// editor de página (só o mestre)
+function pEditor(m){const e=S.wEdit,cats=[...new Set(pgsDaMesa(m.id).map(p=>p.cat).filter(Boolean))];
+  const corpo=e.prev?`<div class="wart wprev">${W.render(e.texto,{link:linker({mesa:m.id,pg:{id:e.id||'nova',mesa:m.id,texto:e.texto,titulo:e.titulo}})}).html||'<p class="note">Nada escrito ainda.</p>'}</div>`
+    :`<textarea id="wtxt" data-w="texto" class="wtxt" aria-label="Texto da página" placeholder="Escreva aqui.&#10;&#10;## Seção&#10;Texto com **negrito**, *itálico* e [[links para outras páginas]].&#10;&#10;- listas&#10;&#10;:::mestre&#10;Só o mestre vê este trecho.&#10;:::">${esc(e.texto)}</textarea>`;
+  return `<div class="wcrumb"><a href="#mesa/${esc(m.id)}/wiki">Wiki de ${esc(m.nome)}</a> › ${e.id?'Editar página':'Nova página'}</div>
+  <section class="card wed"><div class="g2"><div class="span2"><label for="wtit">Título</label><input id="wtit" data-w="titulo" value="${esc(e.titulo)}" maxlength="80" placeholder="Ex.: A cidade de Pedravela"></div>
+  <div><label for="wcat">Categoria</label><input id="wcat" data-w="cat" list="wcats" value="${esc(e.cat)}" maxlength="40" placeholder="Ex.: Lugares"><datalist id="wcats">${[...new Set([...cats,'Cenário','Lugares','Personagens','Facções','Regras da casa','Sessões'])].map(c=>`<option value="${esc(c)}">`).join('')}</datalist></div>
+  <div><label>Jogadores</label><button class="tog wlibed ${e.lib?'on':''}" data-a="wlibed" aria-pressed="${e.lib}">${e.lib?'Liberada':'Oculta'}</button></div></div>
+  <div class="wbar">${segl([['0','Escrever'],['1','Ver como fica']],e.prev?'1':'0','wprev')}<label class="btn sm">Imagem<input type="file" id="wimg" accept="image/png,image/jpeg,image/webp,image/gif" hidden></label><a class="btn sm" href="#wiki/escrevendo-na-wiki">Como formatar</a></div>
+  ${corpo}
+  <div class="btns" style="margin-top:12px"><button class="btn pri" data-a="wsalvar">Salvar</button><button class="btn" data-a="wcancelar">${arm==='wcancelar'?'Toque de novo para descartar':e.dirty?'Descartar':'Cancelar'}</button></div>
+  <p class="foot">${e.lib?'Liberada: todos da mesa leem esta página, menos os trechos :::mestre.':'Oculta: só você vê esta página até liberar.'}</p></section>`}
+function wEditar(mid,p,titulo,cat){S.wEdit=p?{id:p.id,mesa:p.mesa,titulo:p.titulo,cat:p.cat||'',texto:p.texto||'',lib:!!p.lib,prev:false,dirty:false}:{id:null,mesa:mid,titulo:titulo||'',cat:cat||'',texto:MODELO[cat]||'',lib:false,prev:false,dirty:false};
+  go('mwiki',(p?p.mesa:mid)+(p?'|'+p.id:''));setTimeout(()=>{const x=$(p||titulo?'wtxt':'wtit');x&&x.focus()},30)}
+async function wSalvar(){const e=S.wEdit;if(!e)return;if(!e.titulo.trim()){toast('<div><b>Dê um título para a página</b></div>');const x=$('wtit');x&&x.focus();return}
+  try{const body={titulo:e.titulo,cat:e.cat,texto:e.texto,lib:e.lib};const p=e.id?await api('PUT','/api/wiki/'+e.id,body):await api('POST','/api/wiki',{...body,mesa:e.mesa});
+    S.wEdit=null;upsertPg(p);go('mwiki',p.mesa+'|'+p.id);toast(`<div><b>Página salva</b><small>${p.lib?'Liberada para os jogadores.':'Oculta dos jogadores.'}</small></div>`)}
+  catch(err){if(err.status===401)return showAuth();toast(`<div><b>Não foi possível salvar</b><small>${esc(err.message)}</small></div>`)}}
+async function enviarImg(file,mid){const r=await fetch('/api/wiki/img?mesa='+encodeURIComponent(mid),{method:'POST',headers:{'Content-Type':file.type||'application/octet-stream'},body:file,credentials:'same-origin'});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Erro '+r.status);return j}
+async function wImagem(file){const e=S.wEdit;if(!e||!file)return;toast('<div><b>Enviando imagem…</b></div>');
+  try{const {url}=await enviarImg(file,e.mesa);const ta=$('wtxt');const pos=ta?ta.selectionStart:e.texto.length;
+    const md=`\n![${file.name.replace(/\.[^.]+$/,'').replace(/[\[\]]/g,'')}](${url})\n`;e.texto=e.texto.slice(0,pos)+md+e.texto.slice(pos);e.dirty=true;e.prev=false;render();
+    const t=$('wtxt');if(t){t.focus();t.selectionStart=t.selectionEnd=pos+md.length}toast('<div><b>Imagem inserida</b></div>')}
+  catch(err){toast(`<div><b>Não foi possível enviar</b><small>${esc(err.message)}</small></div>`)}}
+// importa documentos HTML ou Markdown; as imagens escolhidas junto vão para a wiki e os endereços são trocados
+async function wImportar(files,mid){const arr=[...files],imgs=arr.filter(f=>/^image\//.test(f.type)),docs=arr.filter(f=>!/^image\//.test(f.type));
+  if(!docs.length)return toast('<div><b>Escolha um documento</b><small>Um arquivo .html ou .md, com as imagens dele junto.</small></div>');
+  toast(`<div><b>Importando ${docs.length>1?docs.length+' documentos':'o documento'}…</b></div>`);
+  const enviadas=new Map(),faltam=new Set(),criadas=[],erros=[];
+  for(const f of docs){
+    try{const src=await f.text();let titulo='',texto='',refs=[];
+      if(/\.html?$/i.test(f.name)||/^\s*</.test(src)){const r=W.deHtml(src);titulo=r.titulo;texto=r.texto;refs=r.imagens}
+      else{texto=src.replace(/\r\n?/g,'\n');const h=/^#\s+(.+)$/m.exec(texto);if(h){titulo=h[1].trim();texto=texto.replace(h[0],'').trim()}
+        refs=[...texto.matchAll(/!\[[^\]]*\]\(\s*([^)\s]+)/g)].map(x=>x[1]).filter(u=>!/^(https?:|\/api\/|data:)/i.test(u))}
+      titulo=(titulo||f.name.replace(/\.[^.]+$/,'')).slice(0,80);
+      for(const ref of refs){let nome=ref.split(/[\\/]/).pop().split(/[?#]/)[0];try{nome=decodeURIComponent(nome)}catch(e){}
+        const arq=imgs.find(i=>i.name===nome)||imgs.find(i=>i.name.toLowerCase()===nome.toLowerCase());
+        if(arq&&!enviadas.has(arq.name)){try{enviadas.set(arq.name,(await enviarImg(arq,mid)).url)}catch(e){enviadas.set(arq.name,null)}}
+        const url=arq&&enviadas.get(arq.name);
+        if(url)texto=texto.split(`](${ref.replace(/\s/g,'%20')}`).join(`](${url}`);else faltam.add(nome)}
+      let p=null;
+      for(let n=1;!p&&n<20;n++){try{p=await api('POST','/api/wiki',{mesa:mid,titulo:n>1?`${titulo.slice(0,74)} (${n})`:titulo,cat:'',texto,lib:false})}catch(e){if(e.status!==409)throw e}}
+      if(p){upsertPg(p);criadas.push(p)}}
+    catch(err){erros.push(`${f.name}: ${err.message}`)}}
+  if(criadas.length)go('mwiki',mid+'|'+criadas[0].id);
+  toast(`<div><b>${criadas.length?criadas.length+(criadas.length>1?' páginas importadas, ocultas':' página importada, oculta')+' dos jogadores':'Nada importado'}</b><small>${esc([faltam.size?'Imagens que não vieram: '+[...faltam].join(', ')+'. Selecione-as junto com o documento.':'',...erros].filter(Boolean).join(' '))||'Confira a página e libere quando estiver pronta.'}</small></div>`)}
 
 /* ---------- configurações ---------- */
 const CFG=[['conta','Conta'],['mesa','Mesa']];
@@ -424,8 +658,15 @@ function renderConfig(){
   if(S.cfgTab==='conta'&&K.tokens===null&&!K.loading)loadConta()}
 
 /* ---------- eventos ---------- */
-document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.k2){K[el.dataset.k2]=el.value.trim();saveK();const x=$('mcpcmd');if(x)x.textContent=mcpLine(K.novo&&K.novo.token);return}if(!el.dataset||!el.dataset.k||el.tagName==='SELECT'||RO())return;const c=C();touch();let v=el.value;if('n' in el.dataset){v=v===''?0:+v;if(isNaN(v))return}setP(c,el.dataset.k,v);save();derive()});
+document.addEventListener('input',e=>{const el=e.target;
+  if(el.dataset&&el.dataset.w&&S.wEdit){S.wEdit[el.dataset.w]=el.value;if(!S.wEdit.dirty){S.wEdit.dirty=true;const b=document.querySelector('[data-a=wcancelar]');if(b)b.textContent='Descartar'}return}
+  if(el.dataset&&el.dataset.wf){filtrar(el);return}
+  if(el.id==='wq'){S.wikiQ=el.value;Object.keys(PAGINA).forEach(loadDados);const busca=!!el.value.trim(),r=$('wres'),i=$('widx');if(r){r.hidden=!busca;r.innerHTML=busca?wikiResultados(el.value):''}if(i)i.hidden=busca;return}
+  if(el.dataset&&el.dataset.k2){K[el.dataset.k2]=el.value.trim();saveK();const x=$('mcpcmd');if(x)x.textContent=mcpLine(K.novo&&K.novo.token);return}if(!el.dataset||!el.dataset.k||el.tagName==='SELECT'||RO())return;const c=C();touch();let v=el.value;if('n' in el.dataset){v=v===''?0:+v;if(isNaN(v))return}setP(c,el.dataset.k,v);completar(c,el.dataset.k);save();derive()});
 document.addEventListener('change',e=>{const el=e.target;if(el.id==='file'&&el.files[0]){el.files[0].text().then(importTxt);return}
+  if(el.id==='wimg'&&el.files[0]){wImagem(el.files[0]);el.value='';return}
+  if(el.id==='wimp'&&el.files.length){wImportar(el.files,el.dataset.mesa);el.value='';return}
+  if(el.dataset&&el.dataset.w)return;
   if(el.dataset&&el.dataset.mesa!==undefined){const m=mesaOf(el.dataset.mesa);const k=el.dataset.campo||'nome';if(m&&(k!=='nome'||el.value.trim())&&el.value!==m[k])act('PATCH','/api/mesas/'+m.id,{[k]:k==='nome'?el.value.trim():el.value},k==='nome'?'Nome da mesa salvo.':'Descrição salva.');return}
   if(el.dataset&&el.dataset.pref){setPref(el.dataset.pref,el.value);return}
   if(el.id==='audf'){K.filtro=el.value;K.audit=null;render();loadConta();return}
@@ -464,6 +705,15 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
   case'go':go(v,v==='ficha'?S.view:null);break;
   case'gomesa':go('mesa',v);break;
   case'gomapas':go('mapas',v||S.mesaAtual||'');break;
+  case'gomwiki':go('mwiki',v||S.mesaAtual||'');break;
+  case'wnova':{const [mid,titulo='',cat='']=String(v).split('|');if(mesaOf(mid)&&isMestre(mesaOf(mid)))wEditar(mid,null,titulo,cat);break}
+  case'wedit':{const p=mesaPg(v);if(p)wEditar(p.mesa,p);break}
+  case'wsalvar':wSalvar();break;
+  case'wcancelar':{const e=S.wEdit;if(!e)return;if(e.dirty&&!twoTap('wcancelar'))return;S.wEdit=null;go('mwiki',e.mesa+(e.id?'|'+e.id:''));break}
+  case'wprev':if(S.wEdit){S.wEdit.prev=v==='1';render()}break;
+  case'wlibed':if(S.wEdit){S.wEdit.lib=!S.wEdit.lib;S.wEdit.dirty=true;render()}break;
+  case'wlib':{const p=mesaPg(v);if(!p)return;const want=!p.lib;p.lib=want;render();api('PUT','/api/wiki/'+v,{lib:want}).then(x=>{upsertPg(x);softRender();toast(`<div><b>${esc(x.titulo)}</b><small>${want?'Liberada: todos da mesa podem ler.':'Oculta: só você vê.'}</small></div>`)}).catch(err=>{p.lib=!want;render();toast(`<div><b>${esc(err.message)}</b></div>`)});break}
+  case'wdel':{const p=mesaPg(v);if(!p||!twoTap('wdel:'+v))return;api('DELETE','/api/wiki/'+v).then(()=>{WK.pag=WK.pag.filter(x=>x.id!==v);WK.idx=null;go('mwiki',p.mesa);toast(`<div><b>${esc(p.titulo)} apagada</b></div>`)}).catch(err=>toast(`<div><b>${esc(err.message)}</b></div>`));break}
   case'novamesa':go('inicio');setTimeout(()=>{const x=$('jcode');x&&x.focus()},30);break;
   case'open':go('ficha',v);break;
   case'trazer':{const [cid,mid]=v.split('|');const ch=S.chars.get(cid);if(!ch||!isOwn(ch))return;ch.mesa=mid;ch._lib=false;save(ch);render();toast(`<div><b>${esc(ch.name||'Personagem')} está na mesa ${esc((mesaOf(mid)||{}).nome||'')}</b></div>`);break}
@@ -504,6 +754,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
 function route(){const h=decodeURIComponent(location.hash.slice(1));let m;
   if(h.startsWith('config')){const [,t,id]=h.split('/');S.page='config';S.cfgTab=t==='mesa'?'mesa':'conta';if(id)S.cfgMesa=id;return}
   if(h==='personagens'){S.page='personagens';return}
+  if((m=/^wiki(?:\/([\w-]+)(?:\/([\w-]+))?)?$/.exec(h))){S.page='wiki';S.wikiSel=m[1]?{slug:m[1],anc:m[2]||''}:null;return}
+  if((m=/^mesa\/([\w-]+)\/wiki(?:\/([\w-]+)(?:\/([\w-]+))?)?$/.exec(h))){S.page='mesa';S.mesaAtual=m[1];S.mesaTab='wiki';S.wikiSel=m[2]?{id:m[2],anc:m[3]||''}:null;return}
   if((m=/^mesa\/([\w-]+)\/ficha\/([\w-]+)$/.exec(h))){S.page='ficha';S.mesaAtual=m[1];S.view=m[2];return}
   if((m=/^mesa\/([\w-]+)\/mapas(?:\/([\w-]+)(?:\/([\w-]+))?)?$/.exec(h))){S.page='mesa';S.mesaAtual=m[1];S.mesaTab='mapas';S.alvo=m[2]?{mapa:m[2],tok:m[3]||''}:null;return}
   if((m=/^mesa\/([\w-]+)$/.exec(h))){S.page='mesa';S.mesaAtual=m[1];S.mesaTab='mesa';return}

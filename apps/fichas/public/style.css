@@ -249,3 +249,123 @@ body.cfg .vit,body.cfg .hpb,body.cfg .seg,body.cfg .acts{display:none}
 .log time{font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums;grid-row:span 2;padding-top:2px}
 .log em{font-style:normal;font-size:12px;color:var(--mut)}
 .log li.bad span,.log li.bad em{color:var(--redt)}
+/* wiki: regras da suíte e páginas das mesas */
+.aj{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;font:700 12px/1 Inter,sans-serif;color:var(--mut);text-decoration:none;flex:none;position:relative;vertical-align:1px}
+.aj::after{content:"";position:absolute;inset:-11px}
+h2 .aj{margin-left:2px}
+.wsearch{position:relative;margin:4px 0 16px}
+.wsearch svg{position:absolute;left:14px;top:50%;width:20px;height:20px;transform:translateY(-50%);fill:none;stroke:var(--mut);stroke-width:2;stroke-linecap:round;pointer-events:none}
+.wsearch input{padding-left:44px;min-height:52px;border-radius:14px;background:var(--card);font-size:17px}
+.wlist{display:flex;flex-direction:column}
+.wlist.card{padding:4px 14px}
+.wli{display:block;padding:10px 0;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}
+.wli:first-child{border-top:0}
+.wli b{display:block;font-weight:600}
+.wli b em{font-style:normal;font-weight:500;color:var(--mut)}
+.wli small{display:block;font-size:12px;color:var(--redt);font-weight:600;margin-top:1px}
+.wli span{display:block;font-size:13px;color:var(--mut);margin-top:2px}
+.wli mark{background:light-dark(#f6e2b3,#5a4413);color:inherit;border-radius:3px;padding:0 1px}
+a.pick{color:var(--ink);text-decoration:none}
+.wcrumb{font-size:13px;color:var(--mut);margin:0 2px 10px}
+.wcrumb a{color:var(--redt);font-weight:600;text-decoration:none}
+.wlay{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+.wside{display:none}
+.wtoc{display:flex;flex-direction:column;gap:2px}
+.wtoc b{font:700 14px Cinzel,serif;color:var(--redt);margin-bottom:6px}
+.wtoc a{color:var(--mut);text-decoration:none;font-size:14px;padding:5px 0 5px 10px;border-left:2px solid var(--line);line-height:1.3}
+.wtoc a.l3{padding-left:22px;font-size:13px}
+.wtocm{border:1px solid var(--line);border-radius:12px;padding:0 12px;margin:0 0 14px;background:var(--field)}
+.wtocm summary{min-height:44px;font-size:14px}
+.wtocm .wtoc{padding-bottom:10px}
+.wart{font-size:16px;line-height:1.6;max-width:none}
+.wart>*:first-child{margin-top:0}
+.wtit{font:700 clamp(26px,6vw,36px)/1.1 Cinzel,serif;color:var(--redt);margin:2px 0 8px;text-wrap:balance}
+.wlead{font-size:17px;color:var(--mut);margin:0 0 14px}
+.wacts{margin:6px 0 16px}
+.wacts .tog{min-height:36px}
+.wart .wh{font-family:Cinzel,serif;color:var(--redt);scroll-margin-top:16px;line-height:1.2;border-radius:6px;transition:background .6s}
+.wart h2.wh{font-size:21px;margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);display:block}
+.wart h3.wh{font-size:17px;margin:22px 0 8px}
+.wart h4.wh{font:700 15px Inter,sans-serif;color:var(--ink);margin:18px 0 6px}
+.wart .wh.alvo{background:light-dark(#fbefd2,#3b2f14)}
+.wart p{margin:0 0 12px}
+.wart ul,.wart ol{margin:0 0 12px;padding-left:24px}
+.wart li{margin:3px 0}
+.wart li::marker{color:var(--redt)}
+.wart a{color:var(--redt);text-underline-offset:3px}
+.wart a.wl.falta{color:var(--mut);text-decoration:line-through;cursor:default}
+.wart a.wl.falta[data-a]{cursor:pointer}
+.wart code{font:14px ui-monospace,Menlo,Consolas,monospace;background:var(--field);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+.wpre{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;overflow-x:auto;margin:0 0 12px}
+.wpre code{background:none;border:0;padding:0;font-size:13px}
+.wart blockquote{margin:0 0 12px;padding:4px 0 4px 14px;border-left:3px solid var(--gold);color:var(--mut);font-style:italic}
+.whr{border:0;border-top:1px solid var(--line);margin:20px 0}
+.wtab{overflow-x:auto;margin:0 0 14px;border:1px solid var(--line);border-radius:10px}
+.wtab table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.4}
+.wtab th{background:var(--red);color:#fff;text-align:left;font-weight:600;padding:8px 10px;white-space:nowrap}
+.wtab td{padding:7px 10px;border-top:1px solid var(--line);vertical-align:top}
+.wtab tr:nth-child(even) td{background:var(--field)}
+.wfig{margin:0 0 14px;text-align:center}
+.wart img{max-width:100%;max-height:min(70vh,640px);width:auto;height:auto;object-fit:contain;border-radius:10px;display:inline-block}
+.wfig figcaption{font-size:13px;color:var(--mut);margin-top:6px;font-style:italic}
+.wmiss{font-size:13px;color:var(--mut);font-style:italic}
+.wbox{border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:10px 14px;margin:0 0 14px;background:var(--field)}
+.wbox>*:last-child{margin-bottom:0}
+.wbt{font:700 15px Cinzel,serif;margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.w-leitura{border-left-color:var(--redt);background:light-dark(#faf3e6,#241f18);font-style:italic}
+.w-leitura .wbt{font-style:normal}
+.w-aviso{border-left-color:var(--redt);background:light-dark(#fbeceb,#2a1719)}
+.w-mestre{border:1.5px dashed var(--gold);background:light-dark(#fdf6e7,#2a2417)}
+.wtag{font:700 11px Inter,sans-serif;text-transform:uppercase;letter-spacing:.06em;background:var(--gold);color:#1d1716;border-radius:6px;padding:2px 6px}
+.winfo{border-top:1px solid var(--line);padding-top:10px;margin-top:20px}
+.winfo a{color:var(--redt)}
+.wed .g2{margin-bottom:12px}
+.wbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.wbar .segl{margin:0;flex:1 1 220px}
+.wbar label.btn,.wbar a.btn{display:inline-flex;align-items:center;color:var(--ink);font-size:14px}
+.wtxt{min-height:min(60vh,560px);font:15px/1.55 ui-monospace,Menlo,Consolas,monospace}
+.wprev{border:1px dashed var(--line);border-radius:10px;padding:14px;min-height:200px}
+.wlibed{min-height:44px;width:100%}
+.csum{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.cs{border:1px solid var(--line);border-radius:10px;background:var(--field);padding:0 12px}
+.cs summary{min-height:40px;font-weight:700;color:var(--redt)}
+.cs .wart{font-size:14px;line-height:1.5;padding-bottom:10px}
+.cs .wart ul{padding-left:18px}
+.cs .wtab{font-size:13px}
+@media(hover:hover){.aj:hover{color:var(--redt)}.wli:hover b{color:var(--redt)}.wtoc a:hover{color:var(--ink);border-left-color:var(--redt)}}
+@media(prefers-reduced-motion:reduce){.wart .wh{transition:none}}
+@media(min-width:900px){
+  .wlay{grid-template-columns:minmax(0,1fr) 240px}
+  .wlay.notoc{grid-template-columns:minmax(0,1fr)}
+  .wart{padding:24px 32px}
+  .wside{display:block;position:sticky;top:96px}
+  .wtocm{display:none}
+  .wart .wh{scroll-margin-top:100px}
+  .wcols{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+}
+@media(max-width:420px){nav button,nav a.ni{font-size:11px}}
+/* listas da wiki: magias, itens mágicos, equipamento */
+.wlista{margin-top:8px}
+.wfil{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:8px;margin:0 0 12px;background:var(--card);padding:8px 0}
+.wfil .wsearch{grid-column:1/-1;margin:0}
+.wsearch.sm input{min-height:46px;font-size:16px;background:var(--field)}
+.wfil select{min-height:42px;font-size:15px}
+.wcount{margin:4px 0 6px}
+.wsp{border-top:1px solid var(--line);scroll-margin-top:12px}
+.wsp summary{list-style:none;cursor:pointer;padding:9px 0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:44px}
+.wsp summary::-webkit-details-marker{display:none}
+.wsp summary b{font-weight:600;color:var(--ink)}
+.wsp summary small{font-size:12.5px;color:var(--mut)}
+.wsp[open] summary b{color:var(--redt)}
+.wsp .wsb{padding:2px 0 12px 12px;border-left:3px solid var(--gold);margin-bottom:10px;font-size:15px}
+.wsp .wsb>p:last-child{margin-bottom:0}
+.wst{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;margin:0 0 10px;font-size:14px}
+.wst dt{font-weight:700;color:var(--mut)}
+.wst dd{margin:0}
+.wsub{margin:0 0 8px;color:var(--mut)}
+.wcri{border:1px dashed var(--gold);border-radius:12px;padding:10px 12px;margin-bottom:12px;background:light-dark(#fdf6e7,#2a2417)}
+.wcri h3{font:700 15px Cinzel,serif;margin:0 0 4px;color:var(--redt)}
+.wcri .btns{margin-top:8px}
+.nmw{display:flex;align-items:center;gap:6px}
+.sp .aj,.nmw .aj{flex:none;align-self:center}
+@media(min-width:900px){.wfil{position:sticky;top:88px;z-index:2}.wsp{scroll-margin-top:240px}}
