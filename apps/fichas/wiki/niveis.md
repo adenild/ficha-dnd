@@ -33,6 +33,8 @@ Personagens ganham **pontos de experiência** (XP) vencendo desafios, e sobem de
 
 ## Ao subir de nível
 
+Na aba **Herói** da ficha, o botão **Subir para o nível N** acende quando o XP chega ao próximo nível ou quando o mestre concede um nível. Ele abre um assistente que faz os passos abaixo e atualiza a ficha sozinho. Para fazer à mão:
+
 1. **Nível:** mude o campo Nível na aba Principal. A ficha recalcula a proficiência, as perícias, as salvaguardas, a CD de magia e os dados de vida.
 2. **Pontos de vida:** role o dado de vida da classe, ou use a média (abaixo), e some o modificador de Constituição. Mínimo de 1. Some ao máximo de PV.
 3. **Características novas:** veja o que a classe ganha neste nível e anote em Características e talentos.

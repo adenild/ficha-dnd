@@ -6,12 +6,12 @@ const ABN=Object.fromEntries(AB.map(a=>[a[0],a[1]]));
 const SK=[['acro','Acrobacia','des'],['ades','Adestrar Animais','sab'],['arca','Arcanismo','int'],['atle','Atletismo','for'],['atua','Atuação','car'],['enga','Enganação','car'],['furt','Furtividade','des'],['hist','História','int'],['inti','Intimidação','car'],['intu','Intuição','sab'],['inve','Investigação','int'],['medi','Medicina','sab'],['natu','Natureza','int'],['perc','Percepção','sab'],['pers','Persuasão','car'],['pres','Prestidigitação','des'],['reli','Religião','int'],['sobr','Sobrevivência','sab']];
 const SKM=Object.fromEntries(SK.map(s=>[s[0],s]));
 const COND=['Agarrado','Amedrontado','Atordoado','Caído','Cego','Contido','Enfeitiçado','Envenenado','Exausto','Incapacitado','Inconsciente','Invisível','Paralisado','Petrificado','Surdo'];
-const TABS=[['principal','Principal'],['combate','Combate'],['magias','Magias'],['itens','Itens'],['notas','Notas']];
+const TABS=[['personagem','Herói'],['principal','Principal'],['combate','Combate'],['magias','Magias'],['itens','Itens'],['notas','Notas']];
 const COINS=[['pc','PC'],['pp','PP'],['pe','PE'],['po','PO'],['pl','PL']];
 
 /* ---------- estado ---------- */
-const MUT=new Set(['sv','sk','insp','cond','ds','slot','prep','add','rm','dmg','heal','hd','long']);
-const S={me:null,mesas:[],chars:new Map(),view:null,locked:true,mode:0,tab:'principal',page:'inicio',mesaAtual:null,mesaTab:'mesa',alvo:null,loc:new Map(),locOk:false,cfgTab:'conta',cfgMesa:null,online:true,authMode:'login',pending:new Set(),busy:new Set(),wikiSel:null,wikiQ:'',wEdit:null};
+const MUT=new Set(['sv','sk','insp','cond','ds','slot','prep','add','rm','dmg','heal','hd','long','eq','uneq','acauto','xpadd','lvl','conceder']);
+const S={me:null,mesas:[],chars:new Map(),view:null,locked:true,mode:0,tab:'personagem',eqPick:null,lvl:null,page:'inicio',mesaAtual:null,mesaTab:'mesa',alvo:null,loc:new Map(),locOk:false,cfgTab:'conta',cfgMesa:null,online:true,authMode:'login',pending:new Set(),busy:new Set(),wikiSel:null,wikiQ:'',wEdit:null};
 let hist=[],lastPush=0,toastT,pendR=false,arm=null,refreshT=null,es=null;
 const saveT={};
 const $=id=>document.getElementById(id);
@@ -55,7 +55,7 @@ const myChars=()=>[...S.chars.values()].filter(isOwn);
 const isLib=c=>!!c._lib;
 
 /* ---------- gravação ---------- */
-function save(c){c=c||C();if(!c||!canWrite(c))return;c._edit=Date.now();S.pending.add(c.id);clearTimeout(saveT[c.id]);saveT[c.id]=setTimeout(()=>flushChar(c.id),700)}
+function save(c){c=c||C();if(!c||!canWrite(c))return;if(c.acAuto){const v=caAuto(c);if(v!=null)c.ac=v}c._edit=Date.now();S.pending.add(c.id);clearTimeout(saveT[c.id]);saveT[c.id]=setTimeout(()=>flushChar(c.id),700)}
 async function flushChar(id){const c=S.chars.get(id);if(!c)return;
   if(S.busy.has(id)){saveT[id]=setTimeout(()=>flushChar(id),400);return}
   S.busy.add(id);const edit=c._edit;
@@ -80,8 +80,8 @@ const mod=s=>Math.floor(((+s||0)-10)/2);
 const sg=n=>(n>=0?'+':'')+n;
 const prof=c=>Math.ceil(Math.max(1,+c.level||1)/4)+1;
 const uidGen=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-function blank(n){return{id:'c'+uidGen(),name:n||'Novo personagem',mesa:'',cls:'',level:1,race:'',bg:'',align:'',xp:0,ab:{for:10,des:10,con:10,int:10,sab:10,car:10},sv:{},sk:{},ac:10,initB:0,speed:9,hp:{max:10,cur:10,tmp:0},hd:{die:'d8',used:0},death:{s:0,f:0},cond:[],insp:false,atk:[],spAb:'int',slots:Array.from({length:9},()=>({max:0,used:0})),spells:[],coins:{pc:0,pp:0,pe:0,po:0,pl:0},items:[],profs:'',feats:'',traits:'',ideals:'',bonds:'',flaws:'',story:'',notes:'',upd:Date.now()}}
-function fix(c){const b=blank();const o=Object.assign(b,c);for(const k of['ab','hp','hd','death','coins','sv','sk'])o[k]=Object.assign({},b[k],c[k]||{});o.slots=Array.from({length:9},(_,i)=>Object.assign({max:0,used:0},(c.slots||[])[i]||{}));for(const k of['atk','spells','items','cond'])if(!Array.isArray(o[k]))o[k]=[];if(typeof o.mesa!=='string')o.mesa='';return o}
+function blank(n){return{id:'c'+uidGen(),name:n||'Novo personagem',mesa:'',cls:'',level:1,race:'',bg:'',align:'',xp:0,ab:{for:10,des:10,con:10,int:10,sab:10,car:10},sv:{},sk:{},ac:10,initB:0,speed:9,hp:{max:10,cur:10,tmp:0},hd:{die:'d8',used:0},death:{s:0,f:0},cond:[],insp:false,atk:[],spAb:'int',slots:Array.from({length:9},()=>({max:0,used:0})),spells:[],coins:{pc:0,pp:0,pe:0,po:0,pl:0},items:[],profs:'',feats:'',traits:'',ideals:'',bonds:'',flaws:'',story:'',notes:'',clsId:'',sub:'',nivelLib:0,acAuto:false,historico:[],upd:Date.now()}}
+function fix(c){const b=blank();const o=Object.assign(blank(),c);for(const k of['ab','hp','hd','death','coins','sv','sk'])o[k]=Object.assign({},b[k],c[k]||{});o.slots=Array.from({length:9},(_,i)=>Object.assign({max:0,used:0},(c.slots||[])[i]||{}));for(const k of['atk','spells','items','cond','historico'])if(!Array.isArray(o[k]))o[k]=[];if(typeof o.mesa!=='string')o.mesa='';return o}
 function sample(){const c=blank('Lyra Vento-Frio');Object.assign(c,{cls:'Maga',level:5,race:'Alta elfa',bg:'Sábio',align:'Neutra e boa',xp:6500,ab:{for:8,des:14,con:13,int:18,sab:12,car:10},sv:{int:1,sab:1},sk:{arca:2,hist:1,inve:1,perc:1},ac:12,speed:9,hp:{max:27,cur:21,tmp:0},hd:{die:'d6',used:1},spAb:'int',
 atk:[{n:'Adaga',b:'+5',d:'1d4+2',t:'perfurante'},{n:'Raio de Fogo',b:'+7',d:'2d10',t:'fogo, 36 m'}],
 spells:[['Raio de Fogo',0],['Mãos Mágicas',0],['Luz',0],['Prestidigitação',0],['Escudo Arcano',1],['Mísseis Mágicos',1],['Armadura Arcana',1],['Detectar Magia',1],['Passo Nebuloso',2],['Teia',2],['Bola de Fogo',3],['Contramágica',3]].map(([n,l])=>({n,l,p:true})),
@@ -153,6 +153,139 @@ function tNotas(){
   return `<div class="cols"><div class="stackc">${card('Características e talentos',ta('feats','Habilidades de classe, raça e talentos'))}${card('História e aparência',ta('story'))}</div><div class="stackc">${card('Personalidade',`${L('Traços',ta('traits'))}${L('Ideais',ta('ideals'))}${L('Vínculos',ta('bonds'))}${L('Defeitos',ta('flaws'))}`)}</div><div class="stackc">${card('Anotações da campanha',ta('notes','NPCs, pistas, missões'))}</div></div>`}
 
 
+/* ---------- aba Herói: tela de personagem ---------- */
+// regras de nível e equipamento em regras.js; classes, armaduras e armas vêm das listas da wiki
+const RG=window.Regras;
+const DEQ=()=>({armaduras:WK.dados.armaduras,armas:WK.dados.armas});
+const classeDe=c=>WK.dados.classes?RG.acharClasse(WK.dados.classes,c):null;
+const caAuto=c=>WK.dados.armaduras&&WK.dados.classes?RG.caEquipada(c,DEQ(),classeDe(c)):null;
+const loadHeroi=()=>['classes','armaduras','armas'].forEach(loadDados);
+const fmtN=n=>(+n||0).toLocaleString('pt-BR');
+const SLOTIC={cabeca:'<path d="M4 16a8 8 0 0 1 16 0v3H4z"/><path d="M12 8V5M9 16h6"/>',pescoco:'<path d="M6 3c0 6 3 9 6 9s6-3 6-9"/><circle cx="12" cy="16" r="3"/>',capa:'<path d="M8 3h8l1 4 3 14H4L7 7z"/><path d="M12 3v18"/>',
+  armadura:'<path d="M8 3 4 6v6l2 1v8h12v-8l2-1V6l-4-3-4 3z"/>',luvas:'<path d="M7 21v-6l-2.5-4a1.5 1.5 0 0 1 2.6-1.5L9 12V5a1.5 1.5 0 0 1 3 0v5V4a1.5 1.5 0 0 1 3 0v6V6a1.5 1.5 0 0 1 3 0v9l-2 6z"/>',cinto:'<path d="M2 9h20v6H2z"/><path d="M9 8h6v8H9z"/>',
+  botas:'<path d="M7 3h6v10l6 3v5H5V13z"/>',mao1:'<path d="M20 4 9 15"/><path d="M15 4h5v5"/><path d="M7 13l4 4M5 19l3-3"/>',mao2:'<path d="M12 3 20 6v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/>',anel1:'<circle cx="12" cy="14" r="6"/><path d="M9 5h6l-3 3z"/>'};
+SLOTIC.anel2=SLOTIC.anel1;
+const slotIco=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${SLOTIC[k]}</svg>`;
+function slotBtn(c,k){const i=c.items.findIndex(x=>x.eq===k),it=c.items[i];const on=S.eqPick===k;
+  const a=it&&RG.porNome(WK.dados.armas,it.n),ar=it&&RG.porNome(WK.dados.armaduras,it.n);
+  const det=a?`${a.dano} ${a.tipo}`.trim():ar?(ar.tipo==='escudo'?'+'+ar.ca+' CA':'CA '+ar.ca+(ar.desMax===0?'':ar.desMax?' + Des (máx. '+ar.desMax+')':' + Des')):'';
+  return `<button class="eqs${it?' full':''}${on?' sel':''}" data-a="eqslot" data-v="${k}" aria-label="${esc(RG.SLOT_NOME[k])}: ${esc(it?it.n:'vazio')}" aria-expanded="${on}">${slotIco(k)}<span><small>${esc(RG.SLOT_NOME[k])}</small>${it?`<b>${esc(it.n)}</b>${det?`<em>${esc(det)}</em>`:''}`:''}</span></button>`}
+// lista que abre ao tocar num slot: tirar o que está nele ou pôr um item da mochila
+function eqPicker(c){const k=S.eqPick;if(!k)return '';const ro=RO();
+  const cur=c.items.map((x,i)=>[x,i]).filter(([x])=>x.eq===k),bag=c.items.map((x,i)=>[x,i]).filter(([x])=>!x.eq&&x.n);
+  const sug=bag.filter(([x])=>RG.slotSugerido(x,DEQ()).replace(/\d$/,'')===k.replace(/\d$/,'')),outros=bag.filter(x=>!sug.includes(x));
+  const li=([x,i],btn)=>`<div class="eqli"><span>${esc(x.n)}${+x.q>1?` <small>×${x.q}</small>`:''}</span>${ro?'':btn(i)}</div>`;
+  return `<div class="eqpick"><div class="eqph"><b>${esc(RG.SLOT_NOME[k])}</b><button class="x" data-a="eqslot" data-v="${k}" aria-label="Fechar">×</button></div>
+    ${cur.map(e=>li(e,i=>`<button class="btn sm" data-a="uneq" data-v="${i}">Tirar</button>`)).join('')}
+    ${sug.length?`<label>Da mochila, combina com este lugar</label>${sug.map(e=>li(e,i=>`<button class="btn sm pri" data-a="eq" data-v="${i}|${k}">Equipar</button>`)).join('')}`:''}
+    ${outros.length?`<label>Outros itens da mochila</label>${outros.map(e=>li(e,i=>`<button class="btn sm" data-a="eq" data-v="${i}|${k}">Equipar</button>`)).join('')}`:''}
+    ${!cur.length&&!bag.length?'<p class="note">Mochila vazia. Cadastre os itens na aba Itens.</p>':''}</div>`}
+const DOLL=`<svg class="doll" viewBox="0 0 100 210" aria-hidden="true"><circle cx="50" cy="24" r="15"/><path d="M28 50q22-12 44 0l8 52-10 4-6-38v56l6 72H58l-8-60-8 60H30l6-72V68l-6 38-10-4z"/></svg>`;
+function tHeroi(c){loadHeroi();if(c.spells.length)loadDados('magias');
+  const cl=classeDe(c),lv=Math.max(1,+c.level||1),ro=RO(),mestre=isMestre(mesaOf(c.mesa));
+  const xp=+c.xp||0,a=RG.xpDoNivel(lv),b=lv<20?RG.xpDoNivel(lv+1):null,pct=b?Math.max(0,Math.min(100,(xp-a)/(b-a)*100)):100,pode=RG.podeSubir(c);
+  const hist=(c.historico||[]).slice().reverse();
+  const hero=`<section class="card hero"><div class="htop"><div class="medal"><span aria-hidden="true">${esc(ini(c.name))}</span><b class="hlv" title="Nível ${lv}" aria-label="Nível ${lv}">${lv}</b></div><div class="hid"><h2>${esc(c.name||'Sem nome')}</h2><p>${esc([c.cls||(cl&&cl.nome),c.sub].filter(Boolean).join(' · ')||'Sem classe')}</p><p>${esc([c.race,c.bg].filter(Boolean).join(' · '))}</p></div></div>
+    ${!cl&&WK.dados.classes&&!ro?L('Classe nas regras',sel('clsId',[['','Escolha para usar o assistente de nível'],...WK.dados.classes.map(x=>[x.id,x.nome])])):''}
+    <div class="xp" role="progressbar" aria-label="Experiência" aria-valuemin="${a}" aria-valuemax="${b||a}" aria-valuenow="${xp}"><div class="xpb"><i style="width:${pct}%"></i></div><div class="xpt"><span>${fmtN(xp)} XP</span><span>${b?'nível '+(lv+1)+' com '+fmtN(b):'nível máximo'}</span></div></div>
+    ${ro?'':`<div class="amt xpadd"><input id="xpamt" type="number" inputmode="numeric" placeholder="+ XP" aria-label="XP ganho"><button class="btn" data-a="xpadd">Somar XP</button></div>`}
+    ${pode&&!ro?`<button class="btn lvup" data-a="lvl">${ico('plus')}Subir para o nível ${lv+1}</button>`:''}
+    ${+c.nivelLib?`<p class="foot">O mestre concedeu ${c.nivelLib===1?'um nível':c.nivelLib+' níveis'}${pode?'.':' — '}${pode?'':'falta o XP.'}</p>`:''}
+    ${mestre&&lv<20?`<div class="btns" style="margin-top:8px"><button class="btn sm" data-a="conceder">Conceder um nível</button>${+c.nivelLib?'<button class="btn sm" data-a="conceder" data-v="-1">Retirar</button>':''}</div>`:''}
+    ${hist.length?`<details class="hhist"><summary>Histórico de níveis</summary>${hist.map(h=>`<div><b>Nível ${h.n}</b> <span>+${h.pv} PV${h.asi?' · '+Object.entries(h.asi).map(([k,v])=>ABN[k]+' +'+v).join(', '):''}${h.talento?' · '+esc(h.talento):''}</span></div>`).join('')}</details>`:''}</section>`;
+  const abs=card('Atributos'+aj('atributos','Atributos'),`<div class="habs">${AB.map(([k,s,n])=>`<button data-a="rl" data-v="mod:${k}" aria-label="Rolar ${n}"><small>${s}</small><b data-d="mod:${k}">${calc('mod:'+k,c)}</b><span>${esc(c.ab[k])}</span></button>`).join('')}</div><p class="foot">Toque para rolar o teste. Mude os valores na aba Principal.</p>`);
+  const dollL=['cabeca','pescoco','capa','armadura'],dollR=['luvas','cinto','botas'],dollB=['mao1','mao2','anel1','anel2'];
+  const caE=caAuto(c),caTxt=c.acAuto&&caE!=null?caE:c.ac;
+  const eq=card('Equipamento'+aj('armaduras','Armaduras'),`<div class="eqgrid"><div class="eqc">${dollL.map(k=>slotBtn(c,k)).join('')}</div><div class="eqm">${DOLL}</div><div class="eqc">${dollR.map(k=>slotBtn(c,k)).join('')}
+      <div class="eqca"><div class="shield">${shield()}<b data-d="ac">${esc(caTxt)}</b></div><button class="hchip sm${c.acAuto?' on':''}" data-a="acauto" aria-pressed="${!!c.acAuto}" title="A CA segue o equipamento">${c.acAuto?'CA auto':'CA manual'}</button></div></div>
+    <div class="eqb">${dollB.map(k=>slotBtn(c,k)).join('')}</div></div>${eqPicker(c)}
+    ${!c.acAuto&&caE!=null&&caE!==+c.ac?`<p class="foot">Pelo equipamento a CA seria ${caE}. ${ro?'':'Toque em “CA manual” para seguir o equipamento.'}</p>`:''}`,`<small data-d="wt">${calc('wt',c)}</small>`);
+  const bag=c.items.map((x,i)=>[x,i]).filter(([x])=>!x.eq&&x.n);
+  const mo=card('Mochila'+aj('equipamento','Equipamento'),`${bag.length?`<div class="bag">${bag.map(([x,i])=>{const s=RG.slotSugerido(x,DEQ());return `<div class="eqli"><span>${esc(x.n)}${+x.q>1?` <small>×${x.q}</small>`:''}${ajDado('itens-magicos',x.n)||ajDado('equipamento',x.n)}</span>${s&&!ro?`<button class="btn sm" data-a="eq" data-v="${i}|${s==='anel1'&&c.items.some(y=>y.eq==='anel1')?'anel2':s}">Equipar</button>`:''}</div>`}).join('')}</div>`:'<p class="note">Nada na mochila.</p>'}<div class="btns" style="margin-top:8px"><button class="btn sm" data-a="tab" data-v="itens">Editar itens e moedas</button></div>`);
+  const tile=(t,v,extra='')=>`<div class="stt"><small>${t}</small><b>${v}</b>${extra}</div>`;
+  const conj=c.spells.length||c.slots.some(s=>+s.max>0)||(cl&&cl.conjuracao);
+  const st=card('Combate',`<div class="stg">${tile('PV',`<span data-d="hpt">${calc('hpt',c)}</span><span class="of">/ ${esc(c.hp.max)}</span>`,`<div class="minibar"><i style="width:${Math.max(0,Math.min(100,(+c.hp.cur||0)/Math.max(1,+c.hp.max||1)*100))}%"></i></div>`)}
+    <button class="stt" data-a="rl" data-v="init"><small>Iniciativa</small><b data-d="init">${calc('init',c)}</b></button>${tile('Proficiência',d('prof'))}${tile('Deslocamento',d('spd'))}${tile('Percepção passiva',d('pp'))}${tile('Dados de vida',`<span data-d="hd">${calc('hd',c)}</span>`,`<em>${esc(c.hd.die)}</em>`)}
+    ${conj?`${tile('CD de magia',d('dc'))}<button class="stt" data-a="rl" data-v="satk"><small>Ataque mágico</small><b data-d="satk">${calc('satk',c)}</b></button>`:''}</div>
+    ${c.atk.length?`<div class="hatk">${c.atk.map((x,i)=>`<button class="hchip" data-a="atk" data-v="${i}">${esc(x.n||'Ataque')} <em>${esc(x.b)} · ${esc(x.d)}</em></button>`).join('')}</div>`:''}`);
+  let mg='';
+  if(conj){const sl=c.slots.map((s,i)=>({...s,i})).filter(s=>+s.max>0);
+    const prep=c.spells.map((s,i)=>[s,i]).filter(([s])=>s.n&&(s.p||!+s.l)).sort((x,y)=>(+x[0].l||0)-(+y[0].l||0));
+    mg=card('Magias'+aj('magia','Magia'),`${sl.length?`<div class="hslots">${sl.map(s=>`<div><small>${s.i+1}º</small><div class="pips">${Array.from({length:Math.min(+s.max||0,9)},(_,j)=>`<button class="pip ${j<(+s.used||0)?'on':''}" data-a="slot" data-v="${s.i}.${j}" aria-label="Espaço ${j+1} de ${s.i+1}º nível"></button>`).join('')}</div></div>`).join('')}</div>`:''}
+      ${prep.length?`<div class="hot">${prep.map(([s])=>{const x=acharDado('magias',s.n);const inner=`<i>${+s.l?s.l:'T'}</i><span>${esc(s.n)}</span>`;return x?`<a class="hsp" href="#wiki/lista-de-magias/${esc(x.slug)}" title="${esc(x.escola||'')}">${inner}</a>`:`<span class="hsp">${inner}</span>`}).join('')}</div>`:'<p class="note">Nenhuma magia preparada.</p>'}
+      <p class="foot">Truques e magias preparadas. Toque numa magia para ler a regra.</p>`,`<small>CD ${d('dc')} · ${d('satk')}</small>`)}
+  const habs=cl?RG.habilidades(cl,lv):[];const por={};habs.forEach(h=>(por[h.n]=por[h.n]||[]).push(h));
+  const hb=card('Habilidades de classe'+aj('classes','Classes'),cl?`<div class="habl">${Object.keys(por).map(Number).sort((x,y)=>y-x).map(n=>`<div class="hn"><i>${n}</i><div>${por[n].map(h=>`<p><b>${esc(h.sub&&c.sub?h.nome+' — '+c.sub:h.nome)}</b>${h.resumo?' '+esc(h.resumo):''}</p>`).join('')}</div></div>`).join('')}</div>${lv<20?`<p class="foot">No nível ${lv+1}: ${esc(RG.habilidades(cl,lv+1,lv+1).map(h=>h.nome).join(', ')||'sem habilidades novas')}.</p>`:''}`
+    :`<p class="note">${WK.dados.classes?'Escolha a classe no cartão do personagem para ver as habilidades de cada nível.':'Carregando as classes…'}</p>`);
+  return `<div class="cols heroi"><div class="stackc">${hero}${abs}</div><div class="stackc">${eq}${mo}</div><div class="stackc">${st}${mg}${hb}</div></div>`}
+
+/* ---------- assistente de subir de nível ---------- */
+function lvPassos(c,cl){const n=Math.max(1,+c.level||1)+1,nm=RG.novasMagias(cl,n);
+  return [!classeDe(c)&&'classe','pv',cl&&RG.asiNoNivel(cl,n)&&'asi',cl&&RG.subclasseNoNivel(cl,n)&&'sub','hab',cl&&cl.conjuracao&&(nm.truques||nm.magias||cl.prepara)&&'magias','resumo'].filter(Boolean)}
+const lvClasse=c=>S.lvl&&S.lvl.cls?RG.achar(WK.dados.classes,S.lvl.cls):classeDe(c);
+function lvEscolhas(){const L=S.lvl,asi={};
+  if(L.modo==='2'&&L.a1)asi[L.a1]=2;else if(L.modo==='11'&&L.a1&&L.a2&&L.a1!==L.a2){asi[L.a1]=1;asi[L.a2]=1}
+  return{pv:L.pv,asi:L.modo==='talento'?null:asi,talento:L.modo==='talento'&&L.talento.trim()?{nome:L.talento,desc:L.tdesc}:null,subclasse:L.sub,magias:[...L.mag].map(n=>{const x=acharDado('magias',n);return{n,l:x?x.nivel:0}})}}
+function lvAbrir(){const c=C();if(!c||RO())return;loadHeroi();loadDados('magias');
+  if(!WK.dados.classes)return toast('<div><b>Carregando as regras das classes…</b><small>Tente de novo em instantes.</small></div>');
+  S.lvl={i:0,pv:null,rolou:null,modo:'2',a1:'',a2:'',talento:'',tdesc:'',sub:c.sub||'',mag:new Set(),mq:'',cls:'',erro:''};
+  let dl=$('lvdlg');if(!dl){dl=document.createElement('dialog');dl.id='lvdlg';dl.className='lvd';dl.addEventListener('close',()=>{S.lvl=null});dl.addEventListener('click',e=>{if(e.target===dl)dl.close()});document.body.appendChild(dl)}
+  lvRender();dl.showModal()}
+function lvValida(passo,c,cl){const L=S.lvl;
+  if(passo==='classe'&&!L.cls)return 'Escolha a classe.';
+  if(passo==='pv'&&L.pv==null)return 'Role o dado ou use a média.';
+  if(passo==='asi'){if(L.modo==='talento')return L.talento.trim()?'':'Escreva o nome do talento.';if(L.modo==='2')return !L.a1?'Escolha o atributo.':(+c.ab[L.a1]||0)+2>20?'O atributo passaria de 20.':'';
+    return !L.a1||!L.a2?'Escolha os dois atributos.':L.a1===L.a2?'Escolha dois atributos diferentes.':[L.a1,L.a2].some(k=>(+c.ab[k]||0)+1>20)?'Um atributo passaria de 20.':''}
+  if(passo==='resumo'){try{RG.subirNivel(c,cl,lvEscolhas())}catch(e){return e.message}}
+  return ''}
+function lvRender(){const dl=$('lvdlg'),c=C(),V=S.lvl;if(!dl||!c||!L)return;const cl=lvClasse(c),passos=lvPassos(c,cl),i=Math.min(V.i,passos.length-1),p=passos[i],n=Math.max(1,+c.level||1)+1;
+  const op=(on,a,v,t,sub='')=>`<button class="lvop${on?' on':''}" data-a="${a}" data-v="${esc(v)}" aria-pressed="${!!on}"><b>${t}</b>${sub?`<small>${sub}</small>`:''}</button>`;
+  const abSel=(k,ex)=>`<select data-lv="${k}" aria-label="Atributo"><option value="">Atributo…</option>${AB.map(([a,,nm])=>`<option value="${a}"${V[k]===a?' selected':''}${ex===a?' disabled':''}>${nm} (${c.ab[a]})</option>`).join('')}</select>`;
+  let body='';
+  if(p==='classe')body=`<h3>Qual é a classe?</h3><p class="note">A ficha diz “${esc(c.cls||'sem classe')}”. Escolha a classe das regras para o assistente saber o dado de vida, as habilidades e as magias.</p><div class="lvops">${WK.dados.classes.map(x=>op(V.cls===x.id,'lvcls',x.id,esc(x.nome),x.dado+(x.conjuracao?' · conjurador':''))).join('')}</div>`;
+  else if(p==='pv'){const md=RG.mod(c.ab.con),med=RG.DADO_MEDIO[cl.dado];
+    body=`<h3>Pontos de vida</h3><p class="note">Dado de vida ${cl.dado} ${sg(md)} de Constituição (mínimo 1 por nível).</p><div class="lvops two">${op(V.pv==='media','lvpv','media','Média: '+Math.max(1,med+md),`${med} ${sg(md)}`)}${op(typeof V.pv==='number','lvpv','rolar',typeof V.pv==='number'?'Rolado: '+Math.max(1,V.pv+md):'Rolar '+cl.dado,typeof V.pv==='number'?`tirou ${V.pv} ${sg(md)} · toque para rolar de novo`:'arrisque a sorte')}</div>${V.rolou?`<div class="lvdie" aria-live="polite">${V.pv}</div>`:''}`}
+  else if(p==='asi')body=`<h3>Aumento de atributo</h3><p class="note">No nível ${n}, +2 num atributo ou +1 em dois (máximo 20). Se o mestre usa talentos, dá para trocar por um.</p>
+    <div class="lvops three">${op(V.modo==='2','lvmodo','2','+2 em um')}${op(V.modo==='11','lvmodo','11','+1 em dois')}${op(V.modo==='talento','lvmodo','talento','Talento')}</div>
+    <div class="g2" style="margin-top:12px">${V.modo==='talento'?`${L('Talento',`<input data-lv="talento" value="${esc(V.talento)}" placeholder="Ex.: Sortudo">`,'span2')}${L('O que ele faz (opcional)',`<textarea data-lv="tdesc">${esc(V.tdesc)}</textarea>`,'span2')}`:V.modo==='2'?L('+2 em',abSel('a1'),'span2'):`${L('+1 em',abSel('a1',V.a2))}${L('+1 em',abSel('a2',V.a1))}`}</div>`;
+  else if(p==='sub')body=`<h3>${esc(cl.subclasse)}</h3><p class="note">No nível ${n} a classe escolhe a subclasse. Veja as opções no Livro do Jogador ou combine com o mestre.</p>${L('Nome',`<input data-lv="sub" value="${esc(V.sub)}" placeholder="Ex.: ${esc((cl.niveis[n].find(h=>h.sub)||{}).resumo||'').replace(/^.*\(ex\.: ([^,)]+).*$/,'$1')}">`)}`;
+  else if(p==='hab'){const hs=RG.habilidades(cl,n,n),e0=RG.espacosPara(cl,n-1),e1=RG.espacosPara(cl,n);
+    body=`<h3>O que muda no nível ${n}</h3><div class="habl">${hs.length?hs.map(h=>`<p><b>${esc(h.sub&&(V.sub||c.sub)?h.nome+' — '+(V.sub||c.sub):h.nome)}</b>${h.resumo?' '+esc(h.resumo):''}</p>`).join(''):'<p class="note">Nenhuma habilidade nova neste nível, só os pontos de vida.</p>'}</div>
+    ${RG.prof(n)>RG.prof(n-1)?`<p class="lvup2">Proficiência: ${sg(RG.prof(n-1))} → <b>${sg(RG.prof(n))}</b></p>`:''}
+    ${e1&&e1.join()!==(e0||[]).join()?`<p class="lvup2">Espaços de magia: ${e1.map((v,k)=>v?`${k+1}º ×${v}`:'').filter(Boolean).join(', ')}</p>`:''}`}
+  else if(p==='magias'){const nm=RG.novasMagias(cl,n),mx=RG.nivelMaxMagia(cl,n),todas=WK.dados.magias||[],ja=new Set(c.spells.map(s=>W.simples(s.n)));
+    const ts=W.simples(V.mq).split(/\s+/).filter(Boolean);
+    const ok=todas.filter(x=>(x.classes||[]).includes(cl.nome)&&x.nivel<=mx&&(x.nivel>0||nm.truques)&&!ja.has(W.simples(x.nome))&&ts.every(t=>W.simples(x.nome).includes(t)));
+    const quer=[nm.truques?`${nm.truques} truque${nm.truques>1?'s':''}`:'',nm.magias?`${nm.magias} magia${nm.magias>1?'s':''}${cl.grimorio?' no grimório':''}`:''].filter(Boolean).join(' e ');
+    body=`<h3>Magias</h3><p class="note">${quer?`Neste nível você aprende ${quer}, de até ${mx}º nível.`:`Você prepara magias da lista inteira de ${esc(cl.nome.toLowerCase())}, até ${mx}º nível.`} Marque as que quer pôr na ficha, ou pule.</p>
+      <div class="wsearch sm"><input type="search" data-lv="mq" value="${esc(V.mq)}" placeholder="Buscar magia" aria-label="Buscar magia" autocomplete="off"></div>
+      ${!WK.dados.magias?'<p class="note">Carregando as magias…</p>':`<div class="lvmag">${ok.slice(0,80).map(x=>`<button class="lvop${V.mag.has(x.nome)?' on':''}" data-a="lvmag" data-v="${esc(x.nome)}" aria-pressed="${V.mag.has(x.nome)}"><b>${esc(x.nome)}</b><small>${x.nivel?x.nivel+'º nível':'Truque'} · ${esc(String(x.escola).toLowerCase())}</small></button>`).join('')||'<p class="note">Nenhuma magia encontrada.</p>'}</div>`}
+      ${V.mag.size?`<p class="foot">Escolhidas: ${esc([...V.mag].join(', '))}</p>`:''}`}
+  else if(p==='resumo'){let nova=null,err='';try{nova=RG.subirNivel(c,cl,lvEscolhas())}catch(e){err=e.message}
+    const linha=(t,a,b)=>`<div class="lvdif"><span>${t}</span><span>${a}</span><b>${b}</b></div>`;
+    body=`<h3>Confirmar o nível ${n}</h3>${err?`<p class="err">${esc(err)}</p>`:`<div class="lvdifs">${linha('Nível',c.level,nova.level)}${linha('PV máximos',c.hp.max,nova.hp.max)}${RG.prof(n)>RG.prof(n-1)?linha('Proficiência',sg(RG.prof(n-1)),sg(RG.prof(n))):''}
+      ${AB.filter(([k])=>nova.ab[k]!==c.ab[k]).map(([k,,nm])=>linha(nm,`${c.ab[k]} (${sg(RG.mod(c.ab[k]))})`,`${nova.ab[k]} (${sg(RG.mod(nova.ab[k]))})`)).join('')}
+      ${nova.slots.some((s,k)=>s.max!==+((c.slots[k]||{}).max||0))?linha('Espaços',c.slots.map(s=>+s.max||0).filter(Boolean).join('/')||'–',nova.slots.map(s=>s.max).filter(Boolean).join('/')):''}
+      ${nova.spells.length>c.spells.length?linha('Magias novas','',nova.spells.slice(c.spells.length).map(s=>esc(s.n)).join(', ')):''}
+      ${nova.sub!==c.sub?linha('Subclasse',esc(c.sub||'–'),esc(nova.sub)):''}</div><p class="foot">As habilidades novas vão para Características e talentos, na aba Notas. Dá para desfazer com o botão de desfazer.</p>`}`}
+  dl.innerHTML=`<form method="dialog" class="lvh"><div><small>Subir de nível · ${esc(c.name||'')}</small><b>Nível ${n}${cl?' de '+esc(cl.nome):''}</b></div><button class="x" aria-label="Fechar">×</button></form>
+    <ol class="lvst" aria-label="Passos">${passos.map((x,k)=>`<li class="${k<i?'ok':k===i?'on':''}"${k===i?' aria-current="step"':''}><span>${k+1}</span></li>`).join('')}</ol>
+    <div class="lvb">${body}</div>${V.erro?`<p class="err" role="alert">${esc(V.erro)}</p>`:''}
+    <div class="lvf"><button class="btn" data-a="lvback"${i?'':' disabled'}>Voltar</button>${p==='resumo'?`<button class="btn pri" data-a="lvok">Subir de nível</button>`:`<button class="btn pri" data-a="lvnext">${p==='magias'&&!V.mag.size?'Pular':'Continuar'}</button>`}</div>`;
+  S.lvl.i=i}
+function lvAcao(a,v){const c=C(),L=S.lvl;if(!c||!L)return;const cl=lvClasse(c);L.erro='';
+  switch(a){
+  case'lvcls':L.cls=v;break;
+  case'lvpv':if(v==='media'){L.pv='media';L.rolou=null}else{L.pv=r(RG.lados(cl.dado));L.rolou=Date.now()}break;
+  case'lvmodo':L.modo=v;break;
+  case'lvmag':L.mag.has(v)?L.mag.delete(v):L.mag.add(v);break;
+  case'lvback':L.i=Math.max(0,L.i-1);break;
+  case'lvnext':{const p=lvPassos(c,cl)[L.i];const e=lvValida(p,c,cl);if(e){L.erro=e;break}L.i++;break}
+  case'lvok':{const e=lvValida('resumo',c,cl);if(e){L.erro=e;break}let nova;try{nova=RG.subirNivel(c,cl,lvEscolhas())}catch(err){L.erro=err.message;break}
+    touch();Object.assign(c,nova);save();$('lvdlg').close();render();
+    toast(`<span class="tot crit">${c.level}</span><div><b>Nível ${c.level}!</b><small>+${c.historico.at(-1).pv} PV${RG.podeSubir(c)?' · ainda dá para subir mais um':''}</small></div>`);return}}
+  lvRender();const f=$('lvdlg').querySelector('.lvb');if(a==='lvnext'||a==='lvback')f&&f.scrollTo(0,0)}
+
 /* ---------- render ---------- */
 function shield(){return `<svg viewBox="0 0 60 58" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d="M30 2 56 9v17c0 15-11 26-26 30C15 52 4 41 4 26V9Z" fill="rgba(0,0,0,.22)" stroke="rgba(255,255,255,.55)" stroke-width="2"/><path d="M30 6 52 12v14c0 12-9 21-22 25" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2"/></svg>`}
 function subline(c){return [c.race,[c.cls,c.level?'nível '+c.level:''].filter(Boolean).join(' '),c.bg].filter(Boolean).join(' · ')}
@@ -183,7 +316,7 @@ function render(){
   document.body.classList.toggle('locked',S.locked||RO());document.body.classList.toggle('ro',RO());
   const lk=$('lk');lk.classList.toggle('on',!S.locked);lk.setAttribute('aria-label',S.locked?'Editar ficha':'Concluir edição');
   $('nav').innerHTML=TABS.map(([k,t])=>`<button class="${S.tab===k?'on':''}" data-a="tab" data-v="${k}">${t}</button>`).join('');
-  head();const fn={principal:tPrincipal,combate:tCombate,magias:tMagias,itens:tItens,notas:tNotas}[S.tab]||tPrincipal;
+  head();const fn={personagem:tHeroi,principal:tPrincipal,combate:tCombate,magias:tMagias,itens:tItens,notas:tNotas}[S.tab]||tHeroi;
   $('main').innerHTML=fn(c)+`<p class="status" id="st">${esc(statusText())}</p>`}
 const typing=root=>{const a=document.activeElement;return a&&root.contains(a)&&/INPUT|TEXTAREA/.test(a.tagName)};
 function softRender(){if(!S.me)return;if(typing($('main')))pendR=true;else render()}
@@ -389,7 +522,7 @@ const carregandoWiki=()=>card('Wiki',`<p class="note">${WK.erro&&!WK.base?'Não 
 
 // busca: título, seções e texto, sem acentos; o trecho mostrado sai do texto original
 function wikiIdx(){if(WK.idx)return WK.idx;
-  const todos=[...(WK.base||[]).map(p=>({p,onde:'Regras · '+p.cat})),...Object.entries(WK.dados).flatMap(([l,a])=>a.map(x=>({p:{slug:PAGINA[l],titulo:x.nome,texto:(x.en?x.en+' ':'')+(x.descricao||'')},onde:LISTAS[l].onde(x),ancora:x.slug}))),...WK.pag.map(p=>({p,onde:'Wiki de '+((mesaOf(p.mesa)||{}).nome||'mesa')+(p.cat?' · '+p.cat:'')}))];
+  const todos=[...(WK.base||[]).map(p=>({p,onde:'Regras · '+p.cat})),...Object.entries(WK.dados).filter(([l])=>LISTAS[l]).flatMap(([l,a])=>a.map(x=>({p:{slug:PAGINA[l],titulo:x.nome,texto:(x.en?x.en+' ':'')+(x.descricao||'')},onde:LISTAS[l].onde(x),ancora:x.slug}))),...WK.pag.map(p=>({p,onde:'Wiki de '+((mesaOf(p.mesa)||{}).nome||'mesa')+(p.cat?' · '+p.cat:'')}))];
   return WK.idx=todos.map(x=>{const chars=Array.from(W.textoPuro(x.p.texto));
     const norm=chars.map(ch=>(ch.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()||' ')[0]).join('');
     const hs=[...String(x.p.texto).matchAll(/^#{1,6}\s+(.*?)\s*#*$/gm)].map(m=>m[1].replace(/[*_`]/g,''));
@@ -659,6 +792,7 @@ function renderConfig(){
 
 /* ---------- eventos ---------- */
 document.addEventListener('input',e=>{const el=e.target;
+  if(el.dataset&&el.dataset.lv&&S.lvl){S.lvl[el.dataset.lv]=el.value;if(el.dataset.lv==='mq'){lvRender();const q=document.querySelector('[data-lv=mq]');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}}return}
   if(el.dataset&&el.dataset.w&&S.wEdit){S.wEdit[el.dataset.w]=el.value;if(!S.wEdit.dirty){S.wEdit.dirty=true;const b=document.querySelector('[data-a=wcancelar]');if(b)b.textContent='Descartar'}return}
   if(el.dataset&&el.dataset.wf){filtrar(el);return}
   if(el.id==='wq'){S.wikiQ=el.value;Object.keys(PAGINA).forEach(loadDados);const busca=!!el.value.trim(),r=$('wres'),i=$('widx');if(r){r.hidden=!busca;r.innerHTML=busca?wikiResultados(el.value):''}if(i)i.hidden=busca;return}
@@ -667,10 +801,11 @@ document.addEventListener('change',e=>{const el=e.target;if(el.id==='file'&&el.f
   if(el.id==='wimg'&&el.files[0]){wImagem(el.files[0]);el.value='';return}
   if(el.id==='wimp'&&el.files.length){wImportar(el.files,el.dataset.mesa);el.value='';return}
   if(el.dataset&&el.dataset.w)return;
+  if(el.dataset&&el.dataset.lv&&S.lvl){S.lvl[el.dataset.lv]=el.value;S.lvl.erro='';lvRender();return}
   if(el.dataset&&el.dataset.mesa!==undefined){const m=mesaOf(el.dataset.mesa);const k=el.dataset.campo||'nome';if(m&&(k!=='nome'||el.value.trim())&&el.value!==m[k])act('PATCH','/api/mesas/'+m.id,{[k]:k==='nome'?el.value.trim():el.value},k==='nome'?'Nome da mesa salvo.':'Descrição salva.');return}
   if(el.dataset&&el.dataset.pref){setPref(el.dataset.pref,el.value);return}
   if(el.id==='audf'){K.filtro=el.value;K.audit=null;render();loadConta();return}
-  if(el.tagName==='SELECT'&&el.dataset.k&&!RO()){const c=C();touch();let v=el.value;if(/^\d+$/.test(v)&&el.dataset.k!=='hd.die')v=+v;setP(c,el.dataset.k,v);if(el.dataset.k==='mesa')c._lib=false;save();render()}});
+  if(el.tagName==='SELECT'&&el.dataset.k&&!RO()){const c=C();touch();let v=el.value;if(/^\d+$/.test(v)&&el.dataset.k!=='hd.die')v=+v;setP(c,el.dataset.k,v);if(el.dataset.k==='mesa')c._lib=false;if(el.dataset.k==='clsId'&&!String(c.cls||'').trim()){const x=classeDe(c);if(x)c.cls=x.nome}save();render()}});
 document.addEventListener('keydown',e=>{if(!S.me||S.page!=='ficha'||!C()||e.altKey||/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName))return;
   if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'){e.preventDefault();undo();return}
   if(e.ctrlKey||e.metaKey)return;
@@ -700,6 +835,14 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
   case'rm':edit(()=>{const [k,i]=v.split('.');c[k].splice(+i,1)});break;
   case'dmg':case'heal':{const n=Math.abs(parseInt($('amt').value)||0);if(!n){$('amt').focus();return}edit(()=>{if(a==='heal'){c.hp.cur=Math.min(+c.hp.max||0,(+c.hp.cur||0)+n);if(c.hp.cur>0)c.death={s:0,f:0}}else{let left=n;const t=+c.hp.tmp||0;const u=Math.min(t,left);c.hp.tmp=t-u;left-=u;c.hp.cur=Math.max(0,(+c.hp.cur||0)-left)}});toast(`<span class="tot">${a==='heal'?'+':'−'}${n}</span><div><b>${a==='heal'?'Cura':'Dano'}</b><small>PV agora: ${c.hp.cur}${+c.hp.tmp?' + '+c.hp.tmp+' temp.':''} / ${c.hp.max}${c.hp.cur===0?' · caído!':''}</small></div>`);break}
   case'hd':{const lv=Math.max(1,+c.level||1);if((+c.hd.used||0)>=lv)return toast('<div><b>Sem dados de vida</b><small>Recupere no descanso longo.</small></div>');const s=parseInt(String(c.hd.die).slice(1))||8;const rv=r(s);const h=Math.max(1,rv+mod(c.ab.con));edit(()=>{c.hd.used=(+c.hd.used||0)+1;c.hp.cur=Math.min(+c.hp.max||0,(+c.hp.cur||0)+h)});toast(`<span class="tot">+${h}</span><div><b>Dado de vida</b><small>${c.hd.die}: ${rv} ${sg(mod(c.ab.con))} CON · PV ${c.hp.cur}/${c.hp.max}</small></div>`);break}
+  case'eqslot':S.eqPick=S.eqPick===v?null:v;render();break;
+  case'eq':{const [i,k]=v.split('|');edit(()=>{c.items.forEach((x,j)=>{if(j!==+i&&x.eq===k)x.eq=''});c.items[+i].eq=k});S.eqPick=null;render();break}
+  case'uneq':edit(()=>{c.items[+v].eq=''});break;
+  case'acauto':edit(()=>{c.acAuto=!c.acAuto});toast(`<div><b>${c.acAuto?'CA automática':'CA manual'}</b><small>${c.acAuto?'A CA agora segue a armadura, o escudo e a Destreza: '+c.ac+'.':'Mude a CA à mão na aba Combate.'}</small></div>`);break;
+  case'xpadd':{const n=parseInt($('xpamt').value)||0;if(!n){$('xpamt').focus();return}const antes=RG.podeSubir(c);edit(()=>{c.xp=Math.max(0,(+c.xp||0)+n)});toast(`<span class="tot">${n>0?'+':''}${n}</span><div><b>XP: ${fmtN(c.xp)}</b><small>${!antes&&RG.podeSubir(c)?'Pronto para subir de nível!':RG.nivelPorXp(c.xp)>=20?'Nível máximo de XP':'Faltam '+fmtN(RG.xpDoNivel(Math.min(20,(+c.level||1)+1))-c.xp)+' para o próximo nível'}</small></div>`);break}
+  case'conceder':if(!isMestre(mesaOf(c.mesa)))return;edit(()=>{c.nivelLib=Math.max(0,Math.min(20-(+c.level||1),(+c.nivelLib||0)+(v==='-1'?-1:1)))});toast(`<div><b>${v==='-1'?'Nível retirado':'Nível concedido'}</b><small>${c.nivelLib?esc(c.name||'O personagem')+' pode subir '+(c.nivelLib===1?'um nível':c.nivelLib+' níveis')+'.':'Nenhum nível concedido agora.'}</small></div>`);break;
+  case'lvl':lvAbrir();break;
+  case'lvcls':case'lvpv':case'lvmodo':case'lvmag':case'lvback':case'lvnext':case'lvok':lvAcao(a,v);break;
   case'long':edit(()=>{c.hp.cur=+c.hp.max||0;c.hp.tmp=0;c.death={s:0,f:0};c.slots.forEach(s=>s.used=0);c.hd.used=Math.max(0,(+c.hd.used||0)-Math.max(1,Math.floor((+c.level||1)/2)))});toast('<div><b>Descanso longo</b><small>PV, espaços de magia e metade dos dados de vida recuperados.</small></div>');break;
   case'menu':go('inicio');break;
   case'go':go(v,v==='ficha'?S.view:null);break;
@@ -740,7 +883,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
   case'dmesa':if(twoTap('dmesa:'+v))act('DELETE','/api/mesas/'+v,null,'Mesa apagada.');break;
   case'leave':if(twoTap('leave:'+v))act('POST','/api/mesas/'+v+'/leave',{},'Você saiu da mesa.');break;
   case'new':{const n=blank();if(v&&mesaOf(v))n.mesa=v;addOwn(n);S.locked=false;S.tab='principal';go('ficha',n.id);setTimeout(()=>{const x=document.querySelector('[data-k="name"]');x&&x.select()},30);break}
-  case'sample':{const n=addOwn(sample());S.locked=true;S.tab='principal';go('ficha',n.id);break}
+  case'sample':{const n=addOwn(sample());S.locked=true;S.tab='personagem';go('ficha',n.id);break}
   case'dup':{const o=S.chars.get(v)||c;if(!o)return;const n=fix(JSON.parse(JSON.stringify(pack(o))));n.id='c'+uidGen();n.mesa='';n.name=(o.name||'Personagem')+' (cópia)';addOwn(n,false);render();toast(`<div><b>Cópia criada</b><small>${esc(n.name)}, sem mesa.</small></div>`);break}
   case'del':{const o=S.chars.get(v);if(!o||!isOwn(o)||!twoTap('del:'+v))return;const id=o.id;clearTimeout(saveT[id]);S.pending.delete(id);S.chars.delete(id);if(S.view===id){S.view=(myChars()[0]||{}).id||null;hist=[]}prefs();
     if(!o._new)api('DELETE','/api/chars/'+id).catch(err=>{toast(`<div><b>Não foi possível apagar</b><small>${esc(err.message)}</small></div>`);refreshSoon()});render();toast(`<div><b>${esc(o.name||'Ficha')} apagada</b></div>`);break}

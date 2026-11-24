@@ -12,6 +12,8 @@
 //                  aceita o mesmo token e aplica as mesmas regras de acesso.
 
 const PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
+// regras de nível e equipamento: o mesmo arquivo que o navegador usa
+const Regras = require('../fichas/public/regras.js');
 
 // ---------- regras da ficha (as mesmas de public/app.js) ----------
 const AB = [['for', 'Força'], ['des', 'Destreza'], ['con', 'Constituição'], ['int', 'Inteligência'], ['sab', 'Sabedoria'], ['car', 'Carisma']];
@@ -26,13 +28,13 @@ const saveV = (c, a) => mod(c.ab[a]) + (c.sv[a] ? prof(c) : 0);
 const skillV = (c, s) => mod(c.ab[s[2]]) + prof(c) * (+c.sk[s[0]] || 0);
 
 function blank(n) {
-  return { name: n || 'Novo personagem', cls: '', level: 1, race: '', bg: '', align: '', xp: 0, ab: { for: 10, des: 10, con: 10, int: 10, sab: 10, car: 10 }, sv: {}, sk: {}, ac: 10, initB: 0, speed: 9, hp: { max: 10, cur: 10, tmp: 0 }, hd: { die: 'd8', used: 0 }, death: { s: 0, f: 0 }, cond: [], insp: false, atk: [], spAb: 'int', slots: Array.from({ length: 9 }, () => ({ max: 0, used: 0 })), spells: [], coins: { pc: 0, pp: 0, pe: 0, po: 0, pl: 0 }, items: [], profs: '', feats: '', traits: '', ideals: '', bonds: '', flaws: '', story: '', notes: '' };
+  return { name: n || 'Novo personagem', cls: '', level: 1, race: '', bg: '', align: '', xp: 0, ab: { for: 10, des: 10, con: 10, int: 10, sab: 10, car: 10 }, sv: {}, sk: {}, ac: 10, initB: 0, speed: 9, hp: { max: 10, cur: 10, tmp: 0 }, hd: { die: 'd8', used: 0 }, death: { s: 0, f: 0 }, cond: [], insp: false, atk: [], spAb: 'int', slots: Array.from({ length: 9 }, () => ({ max: 0, used: 0 })), spells: [], coins: { pc: 0, pp: 0, pe: 0, po: 0, pl: 0 }, items: [], profs: '', feats: '', traits: '', ideals: '', bonds: '', flaws: '', story: '', notes: '', clsId: '', sub: '', nivelLib: 0, acAuto: false, historico: [] };
 }
 function fix(c) {
-  const b = blank(); const o = Object.assign(b, c);
+  const b = blank(); const o = Object.assign(blank(), c);
   for (const k of ['ab', 'hp', 'hd', 'death', 'coins', 'sv', 'sk']) o[k] = Object.assign({}, b[k], c[k] || {});
   o.slots = Array.from({ length: 9 }, (_, i) => Object.assign({ max: 0, used: 0 }, (c.slots || [])[i] || {}));
-  for (const k of ['atk', 'spells', 'items', 'cond']) if (!Array.isArray(o[k])) o[k] = [];
+  for (const k of ['atk', 'spells', 'items', 'cond', 'historico']) if (!Array.isArray(o[k])) o[k] = [];
   return o;
 }
 function derived(c) {
@@ -47,6 +49,11 @@ function derived(c) {
     ataque_magico: sg(prof(c) + mod(c.ab[c.spAb])),
     dados_de_vida: `${Math.max(1, +c.level || 1) - (+c.hd.used || 0)}/${Math.max(1, +c.level || 1)} ${c.hd.die}`,
     carga_kg: `${c.items.reduce((s, i) => s + (+i.q || 0) * (+i.w || 0), 0)} / ${(+c.ab.for || 0) * 7.5}`,
+    nivel_pelo_xp: Regras.nivelPorXp(c.xp),
+    ...(+c.level < 20 ? { xp_proximo_nivel: Regras.xpDoNivel((+c.level || 1) + 1) } : {}),
+    pode_subir_de_nivel: Regras.podeSubir(c),
+    ...(+c.nivelLib ? { niveis_concedidos: +c.nivelLib } : {}),
+    equipado: Object.fromEntries(Regras.equipados(c).map((i) => [Regras.SLOT_NOME[i.eq] ? i.eq : 'outro', i.n])),
   };
 }
 
@@ -138,7 +145,17 @@ function createTools(call, mcall) {
     }
     return dst;
   }
+  // listas da wiki (classes, armaduras, armas), buscadas uma vez por processo
+  const cache = {};
+  const dados = (n) => cache[n] || (cache[n] = call('GET', '/api/wiki/dados/' + n).catch((e) => { delete cache[n]; throw e; }));
+  const dadosEquip = async () => ({ armaduras: await dados('armaduras'), armas: await dados('armas') });
+  // com a CA automática, a CA gravada acompanha o equipamento (o app e os mapas leem "ac")
+  async function sincronizar(data) {
+    if (data && data.acAuto) data.ac = Regras.caEquipada(data, await dadosEquip(), Regras.acharClasse(await dados('classes'), data));
+    return data;
+  }
   async function save(c, data, mesa) {
+    await sincronizar(data);
     const body = { data };
     if (mesa !== undefined) body.mesa = mesa;
     await call('PUT', `/api/chars/${c.id}`, body);
@@ -150,7 +167,7 @@ function createTools(call, mcall) {
   const abName = (k) => AB.find((a) => a[0] === k)[1];
   const num = (v, what) => { const n = Math.abs(parseInt(v, 10)); if (!n) fail(`Informe ${what}.`); return n; };
 
-  const DATA_DOC = 'Formato da ficha: name, cls (classe), level, race, bg (antecedente), align, xp, ab {for,des,con,int,sab,car} (valores, não modificadores), sv {atributo: 1 se proficiente}, sk {código: 1 proficiente, 2 especialista} (códigos: ' + SK.map((s) => `${s[0]}=${s[1]}`).join(', ') + '), ac, initB (bônus extra de iniciativa), speed (metros), hp {max,cur,tmp}, hd {die:"d8",used}, death {s,f}, cond [condições], insp (inspiração), atk [{n nome, b "+5" bônus, d "1d8+3" dano, t tipo/alcance}], spAb (atributo de conjuração), slots [9 níveis {max,used}], spells [{n nome, l nível 0-9, p preparada}], coins {pc,pp,pe,po,pl}, items [{n, q quantidade, w peso kg}], profs, feats, traits, ideals, bonds, flaws, story, notes (textos).';
+  const DATA_DOC = 'Formato da ficha: name, cls (classe), level, race, bg (antecedente), align, xp, ab {for,des,con,int,sab,car} (valores, não modificadores), sv {atributo: 1 se proficiente}, sk {código: 1 proficiente, 2 especialista} (códigos: ' + SK.map((s) => `${s[0]}=${s[1]}`).join(', ') + '), ac, initB (bônus extra de iniciativa), speed (metros), hp {max,cur,tmp}, hd {die:"d8",used}, death {s,f}, cond [condições], insp (inspiração), atk [{n nome, b "+5" bônus, d "1d8+3" dano, t tipo/alcance}], spAb (atributo de conjuração), slots [9 níveis {max,used}], spells [{n nome, l nível 0-9, p preparada}], coins {pc,pp,pe,po,pl}, items [{n, q quantidade, w peso kg}], profs, feats, traits, ideals, bonds, flaws, story, notes (textos). Nível e equipamento: clsId (id da classe: ' + 'barbaro, bardo, bruxo, clerigo, druida, feiticeiro, guerreiro, ladino, mago, monge, paladino, patrulheiro), sub (subclasse), nivelLib (níveis concedidos pelo mestre e não usados), acAuto (true: a CA sai do equipamento), historico [{n, pv, asi, talento}], e em cada item eq (slot onde está equipado: ' + Regras.SLOTS.map((x) => x[0]).join(', ') + ') e bonusCa (bônus mágico de CA). Para subir de nível e equipar, prefira acao_ficha.';
 
   const tools = [
     {
@@ -196,18 +213,27 @@ function createTools(call, mcall) {
     },
     {
       name: 'acao_ficha',
-      description: 'Ações de jogo numa ficha, com as regras do app: dano (gasta PV temporários primeiro), cura, pv_temporarios (define o valor), dado_de_vida (rola e cura), descanso_longo (PV cheios, espaços de magia e metade dos dados de vida), usar_espaco e recuperar_espaco (valor = nível da magia), salvaguarda_morte (rola e marca), adicionar_condicao e remover_condicao (condicao = nome), inspiracao (valor 1 dá, 0 tira).',
+      description: 'Ações de jogo numa ficha, com as regras do app: dano (gasta PV temporários primeiro), cura, pv_temporarios (define o valor), dado_de_vida (rola e cura), descanso_longo (PV cheios, espaços de magia e metade dos dados de vida), usar_espaco e recuperar_espaco (valor = nível da magia), salvaguarda_morte (rola e marca), adicionar_condicao e remover_condicao (condicao = nome), inspiracao (valor 1 dá, 0 tira). Níveis: subir_nivel (precisa de XP para o próximo nível ou de um nível concedido; pv = "media", "rolar" ou o valor tirado no dado; nos níveis de aumento de atributo mande asi, ex. {"for":2} ou {"for":1,"con":1}, ou talento; subclasse no nível dela; classe na primeira vez; magias = nomes das magias novas), conceder_nivel (só o mestre da mesa; valor = quantos níveis, padrão 1). As escolhas de nível são do jogador: pergunte antes de subir a ficha de outra pessoa. Equipamento: equipar (item = nome na mochila; slot opcional, o padrão vem do tipo do item) e desequipar (item ou slot).',
       inputSchema: {
         type: 'object',
         properties: {
           ficha: { type: 'string', description: 'Id ou nome do personagem' },
-          acao: { type: 'string', enum: ['dano', 'cura', 'pv_temporarios', 'dado_de_vida', 'descanso_longo', 'usar_espaco', 'recuperar_espaco', 'salvaguarda_morte', 'adicionar_condicao', 'remover_condicao', 'inspiracao'] },
+          acao: { type: 'string', enum: ['dano', 'cura', 'pv_temporarios', 'dado_de_vida', 'descanso_longo', 'usar_espaco', 'recuperar_espaco', 'salvaguarda_morte', 'adicionar_condicao', 'remover_condicao', 'inspiracao', 'subir_nivel', 'conceder_nivel', 'equipar', 'desequipar'] },
           valor: { type: 'number', description: 'Quantidade de PV, nível do espaço ou 1/0 para inspiração' },
           condicao: { type: 'string', description: 'Condição: ' + COND.join(', ') },
+          pv: { type: 'string', description: 'subir_nivel: "media", "rolar" ou o número tirado no dado de vida (ex. "4")' },
+          asi: { type: 'object', description: 'subir_nivel: aumento de atributo, ex. {"for":2} ou {"des":1,"con":1}' },
+          talento: { type: 'string', description: 'subir_nivel: talento no lugar do aumento de atributo' },
+          talento_desc: { type: 'string', description: 'subir_nivel: o que o talento faz (opcional)' },
+          subclasse: { type: 'string', description: 'subir_nivel: nome da subclasse, no nível em que a classe a escolhe' },
+          classe: { type: 'string', description: 'subir_nivel: classe (nome ou id), se a ficha ainda não tem uma' },
+          magias: { type: 'array', items: { type: 'string' }, description: 'subir_nivel: nomes das magias novas' },
+          item: { type: 'string', description: 'equipar/desequipar: nome do item na mochila' },
+          slot: { type: 'string', description: 'equipar/desequipar: ' + Regras.SLOTS.map((x) => x[0]).join(', ') },
         },
         required: ['ficha', 'acao'],
       },
-      async run({ ficha, acao, valor, condicao }) {
+      async run({ ficha, acao, valor, condicao, pv, asi, talento, talento_desc: talentoDesc, subclasse, classe, magias, item, slot }) {
         const st = await state();
         const ch = findChar(st, ficha);
         const c = fix(ch.data);
@@ -254,6 +280,69 @@ function createTools(call, mcall) {
             break;
           }
           case 'inspiracao': c.insp = valor === undefined ? true : !!+valor; break;
+          case 'conceder_nivel': {
+            const m = st.mesas.find((x) => x.id === ch.mesa);
+            if (!m || m.mestre !== st.me.id) fail('Só o mestre da mesa da ficha concede níveis.');
+            if (lv >= 20) fail('O personagem já está no nível 20.');
+            c.nivelLib = Math.min(20 - lv, (+c.nivelLib || 0) + (parseInt(valor, 10) || 1));
+            info.niveis_concedidos = c.nivelLib;
+            break;
+          }
+          case 'subir_nivel': {
+            const classes = await dados('classes');
+            const cl = classe ? Regras.achar(classes, classe) || fail(`Classe "${classe}" desconhecida. Opções: ${classes.map((x) => x.nome).join(', ')}.`)
+              : Regras.acharClasse(classes, c) || fail(`A ficha não tem uma classe reconhecida ("${c.cls || 'vazia'}"). Informe "classe": ${classes.map((x) => x.nome).join(', ')}.`);
+            const mestre = (st.mesas.find((x) => x.id === ch.mesa) || {}).mestre === st.me.id;
+            if (!Regras.podeSubir(c) && mestre && lv < 20) c.nivelLib = (+c.nivelLib || 0) + 1; // o mestre sobe direto
+            let dado = pv ?? 'media';
+            if (dado === 'rolar') { dado = r(Regras.lados(cl.dado)); info.rolagem = `${cl.dado}: ${dado}`; }
+            const ab = asi ? Object.fromEntries(Object.entries(asi).map(([k, v]) => [findAb(k), +v])) : null;
+            let novas = [];
+            if (magias && magias.length) {
+              const lista = await dados('magias');
+              novas = magias.map((n) => { const x = Regras.achar(lista, n); return x ? { n: x.nome, l: x.nivel } : { n, l: 0 }; });
+            }
+            let nova;
+            try {
+              nova = Regras.subirNivel(c, cl, { pv: dado, asi: ab, talento: talento ? { nome: talento, desc: talentoDesc } : null, subclasse, magias: novas });
+            } catch (e) { fail(e.message); }
+            Object.assign(c, nova);
+            const h = Regras.habilidades(cl, c.level, c.level);
+            info.nivel = c.level;
+            info.pv_ganhos = c.historico.at(-1).pv;
+            if (h.length) info.habilidades_novas = h.map((x) => x.nome + (x.resumo ? ': ' + x.resumo : ''));
+            const nm = Regras.novasMagias(cl, c.level);
+            if (nm.truques || nm.magias) info.magias_a_escolher = `${nm.truques} truque(s) e ${nm.magias} magia(s) de até ${Regras.nivelMaxMagia(cl, c.level)}º nível`;
+            if (Regras.subclasseNoNivel(cl, c.level) && !subclasse) info.aviso = `Neste nível a classe escolhe ${cl.subclasse}: use editar_ficha com "sub".`;
+            if (Regras.podeSubir(c)) info.pode_subir_de_novo = true;
+            break;
+          }
+          case 'equipar': case 'desequipar': {
+            const achaItem = () => {
+              if (!item) fail('Informe o item (nome na mochila).');
+              const exatos = c.items.filter((i) => plain(i.n) === plain(item));
+              const parte = exatos.length ? exatos : c.items.filter((i) => plain(i.n).includes(plain(item)));
+              if (!parte.length) fail(`Item "${item}" não está na mochila. Itens: ${c.items.map((i) => i.n).join(', ') || 'nenhum'}.`);
+              return parte[0];
+            };
+            if (acao === 'desequipar') {
+              const alvos = item ? [achaItem()] : c.items.filter((i) => i.eq && i.eq === slot);
+              if (!alvos.length || alvos.every((i) => !i.eq)) fail('Nada equipado aí.');
+              alvos.forEach((i) => { i.eq = ''; });
+              info.desequipado = alvos.map((i) => i.n);
+            } else {
+              const it = achaItem();
+              const sl = slot || Regras.slotSugerido(it, await dadosEquip());
+              if (!Regras.SLOT_NOME[sl]) fail(`Escolha o slot: ${Regras.SLOTS.map((x) => `${x[0]} (${x[1]})`).join(', ')}.`);
+              c.items.forEach((i) => { if (i !== it && i.eq === sl) i.eq = ''; });
+              it.eq = sl;
+              info.equipado = `${it.n} em ${Regras.SLOT_NOME[sl]}`;
+            }
+            const ca = Regras.caEquipada(c, await dadosEquip(), Regras.acharClasse(await dados('classes'), c));
+            info.ca_pelo_equipamento = ca;
+            if (!c.acAuto && ca !== +c.ac) info.dica = `A CA da ficha (${c.ac}) é manual. Para ela seguir o equipamento, use editar_ficha com {"acAuto": true}.`;
+            break;
+          }
           default: fail(`Ação desconhecida: ${acao}`);
         }
         return { ...(await save(ch, c)), ...info };

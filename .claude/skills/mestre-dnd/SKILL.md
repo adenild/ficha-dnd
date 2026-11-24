@@ -85,7 +85,8 @@ O mapa é quadriculado: colunas com letras, linhas com números (C7), e 1 quadra
 ## Recompensas e descanso
 
 - Tesouro e itens: leia a ficha com `ver_ficha` e mande a lista `items` completa com o item novo em `editar_ficha` (listas são substituídas inteiras). Moedas vão em `coins` (`po` para ouro).
-- XP: some em `xp` com `editar_ficha` ao fim do encontro ou da sessão, ou use marcos (subir de nível na história) se o grupo preferir. Ao subir de nível, ajude o jogador a atualizar a ficha, mas deixe as escolhas com ele.
+- XP: some em `xp` com `editar_ficha` ao fim do encontro ou da sessão, ou use marcos se o grupo preferir: `acao_ficha` `conceder_nivel` libera um nível sem XP. Com XP suficiente ou um nível concedido, a aba Herói da ficha mostra ao jogador o botão de subir de nível, com um assistente. Se o jogador pedir para subir pelo chat, pergunte as escolhas dele (PV pela média ou rolando, aumento de atributo ou talento, subclasse, magias) e aplique com `acao_ficha` `subir_nivel`. Nunca escolha por ele.
+- Equipamento: `acao_ficha` `equipar` e `desequipar` põem e tiram itens da mochila no corpo do personagem. Com `acAuto` ligado na ficha, a CA segue a armadura e o escudo.
 - Descanso curto: cada jogador decide quantos dados de vida gastar (`acao_ficha` `dado_de_vida`, uma vez por dado). Descanso longo: `acao_ficha` `descanso_longo` em cada personagem.
 - Inspiração: dê com `acao_ficha` `inspiracao` valor 1 quando alguém interpreta bem o personagem. Ao usar, tire com valor 0 e role com vantagem.
 
